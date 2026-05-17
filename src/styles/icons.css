@@ -1,0 +1,5 @@
+@layer components {
+  .icon-muted {
+    color: var(--color-text-strong);
+  }
+}

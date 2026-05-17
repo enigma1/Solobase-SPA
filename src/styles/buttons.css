@@ -1,0 +1,77 @@
+@layer components {
+  .btn-group {
+    @apply inline-flex gap-2 pt-2;
+  }
+
+  .btn {
+    @apply px-4 py-1 rounded border shadow-sm;
+    background-color: var(--color-action);
+    color: var(--color-text-inverted);
+    border-color: color-mix(in oklch, var(--color-action), white 10%);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--color-action), white 10%);
+      opacity: 0.9;
+    }
+
+    &:active {
+      background-color: color-mix(in oklch, var(--color-action), black 10%);
+      opacity: 0.8;
+    }
+
+    &:disabled {
+      background-color: var(--color-srf-muted);
+      color: var(--color-text-muted);
+      border-color: var(--color-border);
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-secondary {
+    @apply px-4 py-1 rounded border shadow-sm;
+
+    background-color: var(--color-srf-elevated);
+    color: var(--color-text);
+    border-color: color-mix(in oklch, var(--color-srf-elevated), black 10%);
+
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      background-color:
+        color-mix(in oklch, var(--color-srf-elevated), black 3%);
+
+      @apply shadow-md;
+    }
+
+    &:active {
+      background-color:
+        color-mix(in oklch, var(--color-srf-elevated), black 6%);
+    }
+
+    &:disabled {
+      background-color: var(--color-srf-muted);
+      color: var(--color-text-muted);
+      border-color: var(--color-border);
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-host {
+    @apply px-4 py-1 border rounded;
+    background-color: transparent;
+    color: var(--color-action);
+    transition: background-color 0.2s ease;
+
+
+    &:disabled {
+      background-color: var(--color-srf-muted);
+      color: var(--color-text-muted);
+      border-color: var(--color-border);
+      cursor: not-allowed;
+    }
+  }
+}

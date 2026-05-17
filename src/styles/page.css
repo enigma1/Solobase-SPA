@@ -1,0 +1,25 @@
+@layer components {
+  .page-container {
+    @apply flex flex-col h-full;
+    background-color: var(--color-srf);
+  }
+
+  .page-toolbar {
+    @apply flex flex-[0_0_auto] items-center gap-2 px-3 py-2 border-b;
+    background-color: var(--color-srf-elevated);
+    border-color: var(--color-border);
+  }
+
+  .page-content {
+    @apply flex flex-col gap-4 p-4;
+  }
+
+  .page-actions {
+    @apply flex ml-auto items-center gap-2;
+  }
+
+  .page-title {
+    @apply flex items-center gap-1 text-lg font-medium;
+    color: var(--color-text);
+  }
+}

@@ -1,0 +1,88 @@
+@layer components {
+  .table-shell {
+    @apply flex flex-col;
+    background-color: var(--color-srf);
+  }
+
+  .table-toolbar {
+    @apply flex flex-[0_0_auto] items-center gap-2 px-3 py-2 border-b;
+    background-color: var(--color-srf-elevated);
+    border-color: var(--color-border);
+  }
+
+  .table-title {
+    @apply flex items-center gap-1 text-lg font-medium;
+    color: var(--color-text);
+  }
+
+  .table-actions {
+    @apply flex ml-auto items-center gap-2;
+  }
+
+  .table-wrapper {
+    @apply relative flex-1 min-h-0 overflow-auto w-full;
+    /* >div {
+      @apply flex-1 min-w-fit;
+    } */
+  }
+
+  .table {
+    @apply table-fixed border-collapse w-max;
+
+    & tr {
+      &.odd {
+        background-color: var(--color-srf);
+      }
+
+      &.even {
+        background-color: color-mix(in oklch, var(--color-srf), black 2%);
+      }
+    }
+
+    & th {
+      @apply sticky top-0 z-10 text-left px-3 py-2 border-b;
+      box-shadow: inset 0 -1px 0 var(--color-border);
+      background-color: var(--color-srf-strong);
+      color: var(--color-text);
+      font-weight: 500;
+    }
+
+    & td {
+      @apply px-3 py-2 align-top border-b text-sm;
+
+      &.selected {
+        background-color: var(--color-state-selected);
+      }
+    }
+  }
+
+  .col-header {
+    @apply flex items-center gap-2;
+  }
+
+  .col-handle {
+    @apply absolute top-0 right-0 w-2 h-full cursor-col-resize;
+
+    &::after {
+      @apply content-[''] absolute right-0 w-px h-full;
+      background-color: color-mix(in oklch, var(--color-text), white 2%);
+      top: 25%;
+      height: 50%;
+      opacity: 0.3;
+      transition:
+        background-color 120ms ease,
+        opacity 120ms ease;
+    }
+
+    &:hover::after {
+      background-color: var(--color-text);
+      opacity: 1;
+    }
+  }
+
+  .resize-line {
+    @apply absolute top-0 bottom-0 w-px pointer-events-none z-50;
+    background-color: var(--color-text);
+    opacity: 0;
+  }
+}

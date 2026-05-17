@@ -1,0 +1,89 @@
+@layer components {
+  .side-accordion {
+    @apply flex flex-col min-h-0 border-be last:border-0;
+    border-color: var(--color-border);
+  }
+
+  .side-accordion-header {
+    @apply sticky top-0 flex items-center;
+    background-color: var(--color-srf-strong);
+  }
+
+  /* .side-accordion-content {
+    @apply overflow-auto min-h-0;
+    background-color: var(--color-srf);
+        transition:
+      max-height 300ms ease-in-out,
+      opacity 200ms ease-in-out;
+
+  } */
+
+
+  .side-accordion-content {
+    @apply grid grid-rows-[0fr] opacity-0;
+    transition:
+      grid-template-rows 300ms ease,
+      opacity 200ms ease;
+
+    >div {
+      @apply overflow-hidden min-h-0
+    }
+  }
+
+  .side-accordion[data-open='true'] .side-accordion-content {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .side-accordion-trigger {
+    @apply flex-1 flex items-center justify-between px-3 py-2 text-left cursor-pointer;
+
+    color: var(--color-text);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--color-srf-elevated);
+    }
+  }
+
+  .side-accordion-action {
+    @apply inline-flex items-center justify-center p-2;
+  }
+
+  .side-list {
+    @apply flex flex-col;
+  }
+
+  .side-list-empty {
+    @apply px-3 py-2 text-sm;
+
+    color: var(---color-text-muted);
+  }
+
+  .side-list-item {
+    @apply w-full flex items-center px-4 py-1 text-left border-be;
+    color: var(--color-text);
+    border-color: var(--color-border);
+
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-srf-elevated);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow:
+        0 0 0 2px color-mix(in oklch,
+          var(--color-ring),
+          transparent 70%);
+    }
+
+    &[data-active="true"] {
+      background-color: var(--state-selected);
+      color: var(--color-text);
+    }
+  }
+}

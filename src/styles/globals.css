@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "./palettes/index.css";
+@import "./layout.css";
+@import "./page.css";
+@import "./dialogs.css";
+@import "./buttons.css";
+@import "./inputs.css";
+@import "./accordions.css";
+@import "./icons.css";
+@import "./menus.css";
+@import "./tables.css";
+@import "./lists.css";
+@import "./utils.css";
+
+:root {
+  /* layout surfaces */
+  --color-bg: var(--tone-1);
+  --color-srf: var(--tone-0);
+  --color-srf-elevated: var(--tone-2);
+  --color-srf-muted: var(--tone-3);
+  --color-srf-strong: var(--tone-4);
+  --color-srf-accent: var(--tone-6);
+
+  /* text */
+  --color-text: var(--tone-11);
+  --color-text-strong: var(--tone-9);
+  --color-text-muted: var(--tone-7);
+  --color-text-inverted: var(--tone-0);
+
+  /* borders */
+  --color-border: var(--tone-4);
+
+  /* actions */
+  --color-action: oklch(0.5 0.2 257.81);
+  --color-danger: oklch(0.65 0.22 25);
+  --color-ring: color-mix(in oklch, var(--color-action), var(--tone-4) 40%);
+
+  /* interactive states */
+  --state-selected:
+    color-mix(in oklch, var(--color-action), var(--tone-1) 85%);
+  --state-flash:
+    color-mix(i oklch, var(--color-action), var(--tone-1) 90%);
+
+  /* UI surfaces */
+  --color-srf-bar: var(--tone-2);
+  --color-input: var(--tone-1);
+  --color-popover-bg: var(--tone-0);
+  --color-popover-fg: var(--tone-11);
+
+  /* Shadows */
+  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+
+  /* typography */
+  --font-dm-sans: "dmSans", sans-serif;
+  --font-inter: "inter", sans-serif;
+
+  --font-sans: var(--font-dm-sans), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --bp-xs: 640px;
+  --bp-sm: 768px;
+  --bp-md: 1024px;
+  --bp-lg: 1280px;
+  --bp-xl: 1400px;
+  --bp-2xl: 1536px;
+
+}
+
+[data-theme="dark"] {
+  --bg: oklch(0.15 0 0);
+  --fg: oklch(0.98 0 0);
+
+  --srf: oklch(0.20 0 0);
+  --srf-bar: oklch(0.18 0 0);
+  --text: oklch(0.92 0 0);
+
+  --action: oklch(0.65 0.18 250);
+  --danger: oklch(0.65 0.22 25);
+}
+
+
+@layer base {
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: ui-sans-serif, system-ui;
+    background-color: var(--color-bg);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  button {
+    @apply cursor-pointer;
+    font-family: inherit;
+  }
+
+  textarea {
+    resize: both;
+
+    &::placeholder {
+      @apply italic;
+      color: var(--color-text-muted);
+    }
+  }
+
+  input::placeholder {
+    @apply italic;
+    color: var(--color-text-muted);
+  }
+
+  label {
+    @apply block text-sm font-medium mb-1;
+    color: var(--color-text);
+  }
+}

@@ -1,0 +1,59 @@
+@layer components {
+  .menu {
+    @apply flex w-full items-center px-2 h-10 border-b;
+    background-color: var(--srf-bar);
+    border-color: var(--border);
+  }
+
+  .menu-dropdown {
+    @apply relative inline-block;
+    color: var(--text-inverted);
+    border-color: var(--border);
+
+    &:hover {
+      background-color: var(--color-state-selected);
+      color: var(--color-text);
+    }
+  }
+
+  .menu-trigger {
+    @apply px-4 py-2 rounded;
+    color: var(--color-text);
+    transition: background-color 0.15s ease;
+
+  }
+
+  .menu-panel {
+    @apply absolute min-w-48 rounded z-50;
+    color: var(--color-text);
+    background-color: var(--color-srf-bar);
+    box-shadow: var(--shadow-md);
+
+    & a {
+      @apply block px-4 py-2 items-center border-l border-r border-t last:border-b rounded-t-none rounded-b;
+      border-color: var(--text-muted);
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: var(--color-srf-elevated);
+        color: var(--color-text);
+      }
+
+      &[data-disabled] {
+        color: var(--text-muted);
+        cursor: not-allowed;
+
+        &:hover {
+          background-color: transparent;
+        }
+      }
+    }
+  }
+
+  .menu-separator {
+    @apply mx-2 select-none;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+    user-select: none;
+  }
+}

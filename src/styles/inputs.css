@@ -1,0 +1,121 @@
+@layer components {
+  .input {
+    @apply w-full px-3 py-2 rounded-md text-sm;
+    background: var(--color-srf);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-ring);
+      box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-ring), transparent 70%);
+    }
+
+    &:disabled {
+      background: var(--color-srf-muted);
+      color: var(--color-text-muted);
+      cursor: not-allowed;
+    }
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &[data-error] {
+      border-color: var(--color-danger);
+
+      &:focus {
+        box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-danger), transparent 70%);
+      }
+    }
+
+    &[type='password'] {
+      @apply pe-8;
+    }
+  }
+
+  .field {
+    position: relative;
+  }
+
+  .field-action-btn {
+    @apply absolute inline-flex justify-center items-center inset-e-3 inset-bs-1/2;
+    color: var(--color-text-muted);
+
+    &[aria-pressed='true'] {
+      color: var(--color-action);
+    }
+  }
+
+  .check {
+    @apply w-4 h-4 rounded border;
+
+    appearance: none;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+
+    background: var(--color-srf);
+    border-color: var(--color-border);
+
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:checked {
+      background: var(--color-action);
+      border-color: var(--color-action);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow:
+        0 0 0 2px color-mix(in oklch, var(--color-ring), transparent 70%);
+    }
+
+    &:disabled {
+      background: var(--color-srf-muted);
+      border-color: var(--color-border);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+
+  .check-label {
+    @apply flex items-center gap-2 cursor-pointer text-sm;
+    color: var(--color-text);
+  }
+
+  .text-dialog-area {
+    /* @apply min-h-37.5 min-w-full max-w-full p-2 border resize overflow-hidden focus:outline-none focus:ring-2; */
+    @apply p-2 min-h-37.5 border min-w-full focus:ring-2;
+
+    background: var(--color-srf);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-ring);
+      box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-ring), transparent 70%);
+    }
+
+    &:disabled {
+      background: var(--color-srf-muted);
+      color: var(--color-text-muted);
+      cursor: not-allowed;
+    }
+
+    &[data-error] {
+      border-color: var(--color-danger);
+
+      &:focus {
+        box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-danger), transparent 70%);
+      }
+    }
+  }
+}

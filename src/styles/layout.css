@@ -1,0 +1,25 @@
+@layer components {
+  .app {
+    @apply h-screen min-h-screen flex flex-col;
+  }
+
+  .app-header {
+    @apply h-14 flex items-center justify-between border-b px-4;
+  }
+
+  .app-logo {
+    @apply flex items-center px-4;
+  }
+
+  .app-content {
+    @apply flex flex-1 min-h-0 overflow-hidden;
+
+    >aside {
+      @apply w-64 border-r overflow-y-auto;
+    }
+
+    >main {
+      @apply flex flex-col flex-1 min-h-0 overflow-hidden;
+    }
+  }
+}

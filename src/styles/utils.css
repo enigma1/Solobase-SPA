@@ -1,0 +1,15 @@
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@layer utilities {
+  .animate-fade-out {
+    animation: fadeOut 1s ease-out forwards;
+  }
+}
