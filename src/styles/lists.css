@@ -1,62 +1,88 @@
 @layer components {
-  .listbox-button-wrapper {
-    @apply relative w-full;
-  }
-
-  .listbox-button {
-    @apply flex w-full justify-between px-3 py-2 border rounded text-sm text-left items-center gap-2;
-    background-color: var(--color-srf);
+  .combo-shell {
+    @apply relative flex items-stretch h-full rounded-md border;
+    background: var(--color-srf);
     color: var(--color-text);
     border-color: var(--color-border);
+    box-shadow: var(--shadow-xs);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &[data-status="error"] {
+      border-color: var(--color-error);
+      background-color: var(--color-error-bg);
+    }
+
+    &[data-status="warn"] {
+      border-color: var(--color-warn);
+      background-color: var(--color-warn-bg);
+    }
+
+    &[data-status="info"] {
+      border-color: var(--color-info);
+      background-color: var(--color-info-bg);
+    }
+
+    &[data-status="success"] {
+      border-color: var(--color-success);
+      background-color: var(--color-success-bg);
+    }
+  }
+
+  .combo-shell:focus,
+  .combo-shell:focus-within {
+    border-color: var(--color-border-focus);
+    box-shadow: var(--shadow-md);
+  }
+
+  .combo-input {
+    @apply flex-1 min-w-0 h-full w-full px-3 py-2 text-sm rounded-md rounded-r-none border-0 outline-0;
+    background: transparent;
+    color: inherit;
 
     &:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-ring), transparent 60%);
+      @apply border-0 outline-0;
+      box-shadow: 0 0 0 2px var(--shadow-md);
+      background-color: var(--color-srf);
     }
 
-    &[data-error="true"] {
-      border-color: var(--color-danger);
-    }
-
-    &[data-placeholder="true"] {
-      @apply italic;
-      color: var(--color-text-muted);
+    &[data-read-only=true] {
+      @apply cursor-pointer rounded-md;
+      caret-color: transparent;
     }
   }
 
-  .listbox-chevron {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    opacity: 0.7;
-  }
-
-  .listbox-options {
-    @apply absolute mt-1 w-full border rounded shadow-sm z-10 max-h-60 overflow-auto;
-    background-color: var(--color-srf);
+  .combo-button {
+    @apply flex items-center justify-center px-2 rounded-md border-l rounded-l-none;
     border-color: var(--color-border);
-  }
+    background-color: var(--color-srf-muted);
+    cursor: pointer;
 
-  .listbox-option {
-    @apply px-3 py-2 text-sm cursor-pointer;
-    color: var(--color-text);
-
-    &:hover,
-    &[data-focus] {
+    &:hover {
       background-color: var(--color-srf-elevated);
     }
+  }
 
-    &[data-selected] {
-      font-weight: 600;
-    }
+  .combo-menu {
+    @apply absolute left-0 top-full -mt-0.5 w-full rounded-md rounded-t-none z-50 max-h-60 overflow-auto border;
+    background-color: var(--color-srf);
+    border-color: var(--color-border-focus);
+    box-shadow: var(--shadow-md);
 
-    &[data-disabled] {
-      color: var(--color-text-muted);
-      cursor: not-allowed;
-      opacity: 0.6;
+    & li {
+      @apply px-3 py-2 text-sm cursor-pointer border-b;
+      border-color: var(--color-border);
 
-      &:hover {
-        background-color: transparent;
+      &:hover,
+      &[data-focus] {
+        background-color: var(--color-srf-elevated);
+      }
+
+      &[data-disabled] {
+        @apply pointer-events-none;
+        color: var(--color-text-muted);
+        opacity: 0.5;
       }
     }
   }

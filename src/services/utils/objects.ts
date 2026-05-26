@@ -1,4 +1,4 @@
-import { z, ZodTypeAny } from 'zod';
+import { z } from 'zod';
 import isEqual from 'lodash-es/isEqual';
 import cloneDeep from 'lodash-es/cloneDeep';
 import merge from 'lodash-es/merge';
@@ -59,6 +59,18 @@ export const hasObjectProps = <K extends string>(
   }
 
   return props.every((key) => key in obj);
+};
+
+export const hasStringPropValue = <K extends string, V extends string>(
+  obj: unknown,
+  key: K,
+  value: V,
+): obj is Record<K, V> => {
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+    return false;
+  }
+
+  return (obj as Record<K, unknown>)[key] === value;
 };
 
 export const isObjectEmpty = (obj: unknown): boolean =>

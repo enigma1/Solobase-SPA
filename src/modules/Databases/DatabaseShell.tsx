@@ -5,43 +5,47 @@ import {
   CaptionsOffIcon,
   DownloadIcon,
   ShrinkIcon,
+  LayersMinusIcon,
+  RouteOffIcon,
 } from 'lucide-react';
 import { compactTable } from '>/services/utils';
 
-type SqlShellProps = {
-  tableName: string;
-  rowCount?: number;
-  hasEdits: boolean;
+type DatabasesShellProps = {
+  dbCount?: number;
   tableRef: React.RefObject<HTMLTableElement | null>;
-  onDiscard: () => void;
-  onSave: () => void;
-  onDownload: () => void;
+  hasEdits?: boolean;
+  hasSelects?: boolean;
+  onDiscard?: () => void;
+  onSave?: () => void;
+  onDownload?: () => void;
+  onClearSelected?: () => void;
+  onDelete?: () => void;
 };
 
-export const SqlShell = ({
-  tableName,
+export const DatabaseShell = ({
   tableRef,
-  rowCount,
+  dbCount,
   hasEdits,
+  hasSelects,
   onDiscard,
   onSave,
   onDownload,
-}: SqlShellProps) => {
+  onClearSelected,
+  onDelete,
+}: DatabasesShellProps) => {
   const [isPacked, setIsPacked] = useState(false);
   return (
-    <div className='table-shell'>
-      <div className='table-toolbar'>
-        <div className='table-title'>
-          {tableName}
-          {rowCount != null && (
-            <span className='opacity-70'> ({rowCount})</span>
-          )}
+    <div className='page-container'>
+      <div className='page-toolbar'>
+        <div className='page-title'>
+          Databases:
+          {dbCount != null && <span className='opacity-70'> ({dbCount})</span>}
         </div>
-        <div className='table-actions'>
+        <div className='page-actions'>
           <button
             className='btn-secondary'
             onClick={onDownload}
-            title='Download Table'
+            title='Download Databases'
           >
             <DownloadIcon size={24} />
           </button>
@@ -60,6 +64,21 @@ export const SqlShell = ({
               </button>
             </>
           )}
+          {hasSelects && (
+            <>
+              <button
+                className='btn-secondary'
+                onClick={onClearSelected}
+                title='Clear Selected'
+              >
+                <RouteOffIcon size={24} />
+              </button>
+              <button className='btn' onClick={onDelete} title='Delete Entries'>
+                <LayersMinusIcon size={24} />
+              </button>
+            </>
+          )}
+
           <button
             title={isPacked ? 'Columns inline' : 'Pack columns'}
             className='btn-secondary'

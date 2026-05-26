@@ -4,11 +4,14 @@
   }
 
   .btn {
-    @apply px-4 py-1 rounded border shadow-sm;
+    @apply px-4 py-1 rounded border shadow-sm transform-gpu;
     background-color: var(--color-action);
-    color: var(--color-text-inverted);
+    color: var(--color-text-peak);
     border-color: color-mix(in oklch, var(--color-action), white 10%);
-    transition: background-color 0.2s ease;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
 
     &:hover {
       background-color: color-mix(in oklch, var(--color-action), white 10%);
@@ -29,27 +32,24 @@
   }
 
   .btn-secondary {
-    @apply px-4 py-1 rounded border shadow-sm;
+    @apply px-4 py-1 rounded border shadow-sm transform-gpu;
 
     background-color: var(--color-srf-elevated);
     color: var(--color-text);
     border-color: color-mix(in oklch, var(--color-srf-elevated), black 10%);
 
     transition:
-      background-color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
 
     &:hover {
-      background-color:
-        color-mix(in oklch, var(--color-srf-elevated), black 3%);
-
       @apply shadow-md;
+      background-color: var(--color-border);
     }
 
     &:active {
-      background-color:
-        color-mix(in oklch, var(--color-srf-elevated), black 6%);
+      background-color: var(--color-accent);
     }
 
     &:disabled {

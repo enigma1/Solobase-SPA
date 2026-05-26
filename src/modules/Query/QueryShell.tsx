@@ -17,15 +17,15 @@ export const QueryShell = ({
 }: QueryShellProps) => {
   const [isPacked, setIsPacked] = useState(false);
   return (
-    <div className='table-shell'>
-      <div className='table-toolbar'>
-        <div className='table-title'>
+    <div className='page-container'>
+      <div className='page-toolbar'>
+        <div className='page-title'>
           {tableName}
           {rowCount != null && (
             <span className='opacity-70'> ({rowCount})</span>
           )}
         </div>
-        <div className='table-actions'>
+        <div className='page-actions'>
           <button
             className='btn-secondary'
             onClick={onDownload}

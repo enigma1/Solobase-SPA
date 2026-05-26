@@ -4,7 +4,6 @@ import { useForm, Controller, FieldErrors } from 'react-hook-form';
 import { routes } from '>/config';
 import { useMessageStore, useAccountStore } from '>/services/stores';
 import { LoginRequest, LoginResponse } from '>/services/api';
-import { Message, MessageContent } from '>/types';
 import { FormTextField, FormPasswordField, ScreenLoader } from '>/modules';
 import { useLoginMutation } from '</src/services/queryHooks/useWriteHooks';
 
@@ -22,27 +21,22 @@ export const Login = () => {
   const callbacks = {
     onSuccess: (data: LoginResponse) => {
       addMessage({
-        id: crypto.randomUUID(),
         type: 'success',
-        mode: 'header',
         content: {
           text: `Welcome back ${username}`,
           duration: 5000,
         },
-      } satisfies Message<MessageContent>);
+      });
       const from = location.state?.from || routes.front.dbView;
       navigate(from, { replace: true });
     },
     onError: () => {
       addMessage({
-        id: crypto.randomUUID(),
-        type: 'error',
-        mode: 'header',
         content: {
           text: 'Login failed. Please check your credentials and try again.',
           duration: 3000,
         },
-      } satisfies Message<MessageContent>);
+      });
     },
   };
 
@@ -85,6 +79,7 @@ export const Login = () => {
           >
             <div className='space-y-1'>
               <FormTextField
+                id='login-username'
                 name='username'
                 label='Username'
                 control={control}
@@ -99,6 +94,7 @@ export const Login = () => {
             </div>
             <div className='space-y-1'>
               <FormPasswordField
+                id='login-pass'
                 name='password'
                 label='Password'
                 control={control}
@@ -112,7 +108,7 @@ export const Login = () => {
                 }}
               />
             </div>
-            <div className='flex gap-2 pt-2'>
+            <div className='btn-group'>
               <button type='submit' className='btn'>
                 User Login
               </button>

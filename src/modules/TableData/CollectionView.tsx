@@ -1,11 +1,13 @@
+import { useMemo } from 'react';
 import { JSONObject } from 'type-plus';
 import ReactJsonView, { InteractionProps } from '@microlink/react-json-view';
 import { isObjectEmpty } from '>/services/utils';
 import { PrimeObject, CollectionRow } from '>/types';
 import {
   useDialogStore,
-  useTablesStore,
+  useTablesDataStore,
   useMessageStore,
+  createUiTableStore,
 } from '>/services/stores';
 import {
   queryKeys,
@@ -13,11 +15,9 @@ import {
   MutationCallbacks,
 } from '>/services/queryHooks';
 
-import { Message, MessageContent } from '>/types';
-import { useAccountStore } from '>/services/stores';
 import { UpdateRowsRequest, UpdateRowsResponse } from '>/services/api';
-import { DialogRenderer, ScreenLoader } from '>/modules/Common';
-import { tableDialogMap } from './DialogMap';
+import { DialogRenderer, ScreenLoader, PageTableShell } from '>/modules';
+import { tableDataDialogMap } from './DialogMap';
 import { updateRowsCollectionTransformer } from './helpers';
 // Replaced styled-components with Tailwind classes in JSX
 import { queryClient } from '</src/config/reactQuery';
@@ -30,24 +30,19 @@ export type CollectionViewType = CollectionItem[];
 
 type CollectionViewProps = {
   rows: CollectionViewType;
+  dbSelected: string;
+  activeTable: string;
 };
 
 export const CollectionView = (props: CollectionViewProps) => {
-  // const [editedRow, markEditedRow] = useState<PrimeObject<JSONObject>>({});
   const restrictedFields = ['_id'];
-  const { rows } = props;
+  const { rows, activeTable, dbSelected } = props;
+  const tableStore = useMemo(() => createUiTableStore(), []);
 
-  const { dbSelected } = useAccountStore(({ state }) => ({
-    dbSelected: state.dbSelected,
+  const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
+    editedRow: state.editedRow as Record<string, CollectionRow>,
+    markEditedRow: api.markEditedRow,
   }));
-
-  const { activeTable, editedRow, markEditedRow } = useTablesStore(
-    ({ state, api }) => ({
-      activeTable: state.activeTable as string,
-      editedRow: state.editedRow as Record<string, CollectionRow>,
-      markEditedRow: api.markEditedRow,
-    }),
-  );
 
   const { dialog, openDialog, closeDialog } = useDialogStore(
     ({ api, state }) => ({
@@ -59,7 +54,7 @@ export const CollectionView = (props: CollectionViewProps) => {
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
 
-  const callbacks = {
+  const callbacks: MutationCallbacks<UpdateRowsResponse, UpdateRowsRequest> = {
     onSuccess: () => {
       // Remove rows from query cache
       queryClient.removeQueries({
@@ -68,23 +63,17 @@ export const CollectionView = (props: CollectionViewProps) => {
       // reset local edited state if provided
       markEditedRow({});
       addMessage({
-        id: crypto.randomUUID(),
         type: 'success',
-        mode: 'header',
         content: { text: `Rows saved successfully`, duration: 3000 },
-      } satisfies Message<MessageContent>);
+      });
     },
 
     onError: (error) => {
-      console.error('Update rows failed', error);
       addMessage({
-        id: crypto.randomUUID(),
-        type: 'error',
-        mode: 'header',
         content: { text: `Failed to save changes`, duration: 3000 },
-      } satisfies Message<MessageContent>);
+      });
     },
-  } as MutationCallbacks<UpdateRowsResponse, UpdateRowsRequest>;
+  };
 
   // const { mutate, isPending, isError } = useUpdateRowsMutation({
   //   resetEditedRows: () => markEditedRow({}),
@@ -154,31 +143,30 @@ export const CollectionView = (props: CollectionViewProps) => {
     });
   };
 
+  const handleSelectedExports = () => {};
+  const handleSaveRows = () => {};
+  const handleDownloadDatabases = () => {};
+  const handleDeleteRows = () => {};
+
+  const shellHandlers = {
+    onExport: handleSelectedExports,
+    onDiscard: discardChanges,
+    onDelete: handleDeleteRows,
+    onDownload: handleDownloadDatabases,
+    onSave: handleSaveRows,
+  };
+
   return (
     <>
-      {!isObjectEmpty(editedRow) && (
-        <div className='flex gap-2 mb-4'>
-          <button
-            className='px-3 py-1 bg-gray-200 rounded hover:bg-gray-300'
-            onClick={discardChanges}
-          >
-            Discard All
-          </button>
-          <button
-            className='px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700'
-            onClick={saveAll}
-          >
-            Save All
-          </button>
-        </div>
-      )}
+      <PageTableShell
+        title={`Collection: ${activeTable}`}
+        store={tableStore}
+        actions={shellHandlers}
+      />
       {rows.map((row, idx) => {
         const rowKey = `${idx}-${row._id}`;
         return (
-          <div
-            key={rowKey}
-            className='border rounded-md p-3 mb-3 bg-white shadow-sm'
-          >
+          <div key={rowKey} className='border rounded-md p-3 mb-3 shadow-sm'>
             <div
               role='button'
               tabIndex={0}
@@ -218,7 +206,7 @@ export const CollectionView = (props: CollectionViewProps) => {
       <DialogRenderer
         dialog={dialog}
         onClose={closeDialog}
-        map={tableDialogMap}
+        map={tableDataDialogMap}
       />
     </>
   );

@@ -1,39 +1,49 @@
 import { makeStore } from '>/services/utils/emitter';
 import { hasObjectProps, getSchemaFromSample } from '>/services/utils';
-import { ServerSessionType } from '>/services/api';
+import { SessionRestoreResponse } from '>/services/api';
 import { PrimeObject } from '>/types';
 
-export type AccountState = {
+export type AccountStoreState = {
   username: string;
   dbSelected: string | null;
+  activeTable: string | null;
   isAuthenticated: boolean;
+  online: boolean;
   preferences: PrimeObject;
+  theme: string;
 };
 
-export type AccountActions = {
+export type AccountStoreActions = {
   initialize: () => Promise<void>;
-  restoreSession: (data: ServerSessionType) => { username: string } | null;
+  restoreSession: (data: SessionRestoreResponse) => { username: string } | null;
   // logout: () => Promise<unknown>;
-  setDatabaseSelection: (db: string) => void;
+  setActiveDatabase: (db: string) => void;
+  setActiveTable: (table: string) => void;
   setAuthenticated: (value: boolean) => void;
+  getAppStatus: () => boolean;
+  setAppStatus: (value: boolean) => void;
+  setTheme: (value: string) => void;
   setSettings: (settings: PrimeObject) => void;
 };
 
-export type AccountStore = AccountState & AccountActions;
+export type AccountStore = AccountStoreState & AccountStoreActions;
 
-const initialState: AccountState = {
+const initialState: AccountStoreState = {
   username: '',
   dbSelected: null,
+  activeTable: null,
   isAuthenticated: false,
+  online: true,
   preferences: {},
+  theme: 'slate',
 } as const;
 
-const baseStore = makeStore<AccountState>(() => initialState);
+const baseStore = makeStore<AccountStoreState>(() => initialState);
 const { get, set, setAuto } = baseStore;
 
-export const accountActions: AccountActions = {
+export const accountStoreActions: AccountStoreActions = {
   initialize: async () => {
-    set(() => initialState);
+    set(() => ({ ...initialState }));
   },
   restoreSession: (data) => {
     const lastSession = hasObjectProps(data, [
@@ -47,7 +57,10 @@ export const accountActions: AccountActions = {
       setAuto({
         username: data.username,
         dbSelected: data.dbSelected,
+        activeTable: null,
         isAuthenticated: true,
+        online: true,
+        theme: data.preferences?.theme || 'slate',
         preferences: data.preferences || initialState.preferences,
       });
 
@@ -60,10 +73,17 @@ export const accountActions: AccountActions = {
   // logout: async () => {
   //   set(() => initialState);
   // },
-  setDatabaseSelection: (database) => {
-    setAuto({ dbSelected: database });
+  setActiveDatabase: (database) => {
+    setAuto({ dbSelected: database, activeTable: null });
   },
+  setActiveTable: (table) => {
+    setAuto({ activeTable: table });
+  },
+
   setAuthenticated: (value) => setAuto({ isAuthenticated: value }),
+  getAppStatus: () => get().online,
+  setAppStatus: (value) => setAuto({ online: value }),
+  setTheme: (value) => setAuto({ theme: value }),
   setSettings: (settings) => {
     const settingsSchema = getSchemaFromSample(settings);
     if (!settingsSchema.safeParse(settings).success) {
@@ -75,14 +95,14 @@ export const accountActions: AccountActions = {
 };
 
 type SelectorArgsType = {
-  state: AccountState;
-  api: AccountActions;
+  state: AccountStoreState;
+  api: AccountStoreActions;
 };
 
 export const useAccountStore = <T = AccountStore>(
   selector?: (state: SelectorArgsType) => T,
 ): T => {
   const state = baseStore();
-  const api = accountActions;
+  const api = accountStoreActions;
   return selector ? selector({ state, api }) : ({ state, api } as T);
 };

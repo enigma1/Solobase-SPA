@@ -18,37 +18,61 @@
   --color-srf: var(--tone-0);
   --color-srf-elevated: var(--tone-2);
   --color-srf-muted: var(--tone-3);
-  --color-srf-strong: var(--tone-4);
-  --color-srf-accent: var(--tone-6);
+  --color-srf-dim: var(--tone-4);
+  --color-srf-peak: var(--tone-11);
 
   /* text */
   --color-text: var(--tone-11);
-  --color-text-strong: var(--tone-9);
+  --color-text-dim: var(--tone-9);
   --color-text-muted: var(--tone-7);
-  --color-text-inverted: var(--tone-0);
+  --color-text-peak: var(--tone-0);
+
+  /* actions */
+  --color-action: var(--action);
+  /* effects */
+  --color-effect: var(--effect);
+  --color-ring:
+    color-mix(in oklch,
+      var(--color-effect) 60%,
+      var(--tone-5) 40%);
 
   /* borders */
   --color-border: var(--tone-4);
+  --color-border-focus: color-mix(in oklch,
+      var(--color-border) 65%,
+      var(--color-effect));
+  --color-border-separate: var(--separator);
+  --color-accent: var(--tone-6);
 
-  /* actions */
-  --color-action: oklch(0.5 0.2 257.81);
-  --color-danger: oklch(0.65 0.22 25);
-  --color-ring: color-mix(in oklch, var(--color-action), var(--tone-4) 40%);
+  /* types */
+  --color-error: oklch(0.65 0.22 25);
+  --color-warn: oklch(0.78 0.18 85);
+  --color-success: oklch(0.72 0.18 145);
+  --color-info: oklch(0.68 0.16 250);
+
+  --color-error-bg:
+    color-mix(in oklch, var(--color-error), transparent 88%);
+  --color-warn-bg:
+    color-mix(in oklch, var(--color-warn), transparent 88%);
+  --color-success-bg:
+    color-mix(in oklch, var(--color-success), transparent 88%);
+  --color-info-bg:
+    color-mix(in oklch, var(--color-info), transparent 88%);
+
 
   /* interactive states */
   --state-selected:
-    color-mix(in oklch, var(--color-action), var(--tone-1) 85%);
-  --state-flash:
-    color-mix(i oklch, var(--color-action), var(--tone-1) 90%);
+    color-mix(in oklch,
+      var(--color-action) 75%,
+      var(--color-srf-peak) 15%);
 
-  /* UI surfaces */
-  --color-srf-bar: var(--tone-2);
-  --color-input: var(--tone-1);
-  --color-popover-bg: var(--tone-0);
-  --color-popover-fg: var(--tone-11);
+  --state-flash:
+    color-mix(in oklch,
+      var(--color-effect) 40%,
+      var(--color-bg) 60%);
 
   /* Shadows */
-  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.02);
   --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
   --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
   --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -56,6 +80,7 @@
   --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  --shadow-header: 0 6px 10px -8px rgb(0 0 0 / 0.2);
 
   /* typography */
   --font-dm-sans: "dmSans", sans-serif;
@@ -71,21 +96,7 @@
   --bp-lg: 1280px;
   --bp-xl: 1400px;
   --bp-2xl: 1536px;
-
 }
-
-[data-theme="dark"] {
-  --bg: oklch(0.15 0 0);
-  --fg: oklch(0.98 0 0);
-
-  --srf: oklch(0.20 0 0);
-  --srf-bar: oklch(0.18 0 0);
-  --text: oklch(0.92 0 0);
-
-  --action: oklch(0.65 0.18 250);
-  --danger: oklch(0.65 0.22 25);
-}
-
 
 @layer base {
 
@@ -93,6 +104,15 @@
   *::before,
   *::after {
     box-sizing: border-box;
+  }
+
+  *:focus {
+    outline: none;
+  }
+
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-border-focus);
   }
 
   html,
@@ -103,6 +123,7 @@
     overflow: hidden;
     font-family: ui-sans-serif, system-ui;
     background-color: var(--color-bg);
+    color: var(--color-text)
   }
 
   h1,
@@ -134,13 +155,38 @@
     }
   }
 
+  input,
+  textarea,
+  select,
+  button {
+    border-color: var(--color-border);
+    font: inherit;
+    color: inherit;
+  }
+
   input::placeholder {
     @apply italic;
     color: var(--color-text-muted);
   }
 
   label {
-    @apply block text-sm font-medium mb-1;
+    @apply inline-block text-sm font-medium mb-1;
     color: var(--color-text);
+
+    &[data-status="error"] {
+      color: var(--color-error);
+    }
+
+    &[data-status="warn"] {
+      color: var(--color-warn);
+    }
+
+    &[data-status="info"] {
+      color: var(--color-info);
+    }
+
+    &[data-status="success"] {
+      color: var(--color-success);
+    }
   }
 }

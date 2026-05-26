@@ -1,19 +1,16 @@
-import { useState, useEffect } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  CircleChevronUpIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
+  CircleChevronLeftIcon,
   DatabaseIcon,
   FileStackIcon,
   ChevronsLeftRightEllipsisIcon,
 } from 'lucide-react';
 import { routes } from '>/config';
-import { DatabasesList, TablesList } from '>/modules';
+import { DatabasesSideList, TablesSideList } from '>/modules';
 import { useHistoryStore, useAccountStore } from '>/services/stores';
 import { QueryList } from '>/modules/Query';
 import { useTablesHook } from '>/services/queryHooks';
-import { SettingsIcon } from '>/modules/Common/Icons';
 
 export const Sidebar = () => {
   const [expandedSection, setExpandedSection] = useState<string | null>(
@@ -22,35 +19,64 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { dbSelected } = useAccountStore(({ state, api }) => ({
+  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
+    activeTable: state.activeTable,
     dbSelected: state.dbSelected,
   }));
 
-  const { getTablesCount } = useTablesHook(({ api, state }) => ({
+  const { getTablesCount } = useTablesHook(({ api }) => ({
     getTablesCount: () => api.getTablesCount(),
-    tables: state.tables,
   }));
 
   const { queryIds } = useHistoryStore(({ state }) => ({
     queryIds: state.queryIds,
   }));
 
-  const sideSections = [
+  type SideSectionItem = {
+    id: string;
+    getTitle: () => string;
+    getRoute: () => string;
+    component: ReactNode;
+    icon: ReactNode;
+  };
+  const sideSections: SideSectionItem[] = [
     {
-      id: routes.front.dbView,
+      id: 'sideDatabases',
       getTitle: () => (dbSelected ? dbSelected : 'Databases'),
-      component: <DatabasesList />,
-      icon: <DatabaseIcon size={20} />,
+      getRoute: () => routes.front.dbView,
+      component: <DatabasesSideList />,
+      icon: (
+        <DatabaseIcon
+          size={20}
+          onClick={() => {
+            if (location.pathname !== routes.front.newDatabase) {
+              navigate(routes.front.newDatabase);
+            }
+          }}
+        />
+      ),
     },
     {
-      id: routes.front.tableView,
+      id: 'sideTables',
       getTitle: () => `Tables: ${getTablesCount()}`,
-      component: <TablesList />,
-      icon: <FileStackIcon size={20} />,
+      getRoute: () =>
+        activeTable ? routes.front.tableView : routes.front.listTables,
+      component: <TablesSideList />,
+      icon: (
+        <FileStackIcon
+          size={20}
+          onClick={() => {
+            if (location.pathname !== routes.front.newTable) {
+              navigate(routes.front.newTable);
+            }
+          }}
+        />
+      ),
     },
     {
-      id: routes.front.queryView,
+      id: 'sideQueries',
       getTitle: () => `Queries: ${queryIds.length}`,
+      getRoute: () => routes.front.queryView,
       component: <QueryList />,
       icon: <ChevronsLeftRightEllipsisIcon size={20} />,
     },
@@ -69,10 +95,12 @@ export const Sidebar = () => {
     // { id: 'privileges', title: 'Privileges', component: <PrivilegesList /> },
   ];
 
-  const toggleSection = (id: string) => {
-    setExpandedSection(id);
-    if (location.pathname !== id) {
-      navigate(id);
+  const toggleSection = (section: SideSectionItem) => {
+    setExpandedSection(section.id);
+    const route = section.getRoute();
+    console.log('routing', route);
+    if (route && location.pathname !== route) {
+      navigate(route);
     }
   };
 
@@ -100,7 +128,7 @@ export const Sidebar = () => {
           >
             <div className='side-accordion-header'>
               <button
-                onClick={() => toggleSection(section.id)}
+                onClick={() => toggleSection(section)}
                 className='side-accordion-trigger'
               >
                 <span className='flex items-center gap-2'>
@@ -108,10 +136,10 @@ export const Sidebar = () => {
                   <span>{section.getTitle()}</span>
                 </span>
 
-                <CircleChevronUpIcon
+                <CircleChevronLeftIcon
                   size={20}
                   className={`icon-muted transition-transform duration-300 ${
-                    isActive ? 'rotate-180' : ''
+                    isActive ? '-rotate-90' : ''
                   }`}
                 />
               </button>

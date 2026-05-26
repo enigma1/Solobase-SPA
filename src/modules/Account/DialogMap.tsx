@@ -173,20 +173,14 @@ export const accountDialogMap = ({
         caption='Confirm Logout'
         content='Are you sure you want to logout?'
         controls={
-          <>
-            <button
-              onClick={onCancelLogout}
-              className='px-4 py-2 rounded border opacity-80'
-            >
+          <div className='btn-group'>
+            <button onClick={onCancelLogout} className='btn-secondary'>
               Cancel
             </button>
-            <button
-              onClick={onConfirm}
-              className='px-4 py-2 rounded border font-medium'
-            >
+            <button onClick={onConfirm} className='btn'>
               Confirm
             </button>
-          </>
+          </div>
         }
       />
     );

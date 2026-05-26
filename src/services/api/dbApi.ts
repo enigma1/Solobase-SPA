@@ -1,11 +1,13 @@
 import { apiClient } from './client';
 import { handleApiAxios } from './apiHelpers';
+import { routes } from '>/config/routes';
+
 import {
+  SessionRestoreResponse,
   LoginRequest,
   LoginResponse,
   RunQueryRequest,
   RunQueryResponse,
-  ServerSessionType,
   FetchDatabasesResponse,
   FetchTablesRequest,
   FetchTablesResponse,
@@ -14,10 +16,14 @@ import {
   FetchDatabaseInfoResponse,
   UpdateRowsRequest,
   UpdateRowsResponse,
+  SelectDatabaseRequest,
+  SelectDatabaseResponse,
   CreateDatabaseRequest,
   CreateDatabaseResponse,
-  DeleteDatabaseRequest,
-  DeleteDatabaseResponse,
+  DeleteDatabasesRequest,
+  DeleteDatabasesResponse,
+  DeleteTablesRequest,
+  DeleteTablesResponse,
 } from './dbApiTypes';
 import { DbTable, PrimeObject } from '>/types';
 
@@ -39,8 +45,10 @@ const apiCall = <T>(fn: () => Promise<{ data: T }>) =>
     return res.data;
   });
 
-const sessionRestore = (): Promise<ServerSessionType> =>
-  apiCall(() => apiClient.get('/auth/presence'));
+const ping = () => apiCall<{ ok: true }>(() => apiClient.get('/api/active'));
+
+const sessionRestore = () =>
+  apiCall<SessionRestoreResponse>(() => apiClient.get('/auth/presence'));
 
 const login = (data: LoginRequest) =>
   apiCall<LoginResponse>(() => apiClient.post('/auth/login', data));
@@ -69,13 +77,23 @@ const fetchDatabaseInfo = () =>
     apiClient.get('/db/fetch-database-info'),
   );
 
+const selectDatabase = (data: SelectDatabaseRequest) =>
+  apiCall<SelectDatabaseResponse>(() =>
+    apiClient.post('/db/select-database', data),
+  );
+
 const createDatabase = (data: CreateDatabaseRequest) =>
   apiCall<CreateDatabaseResponse>(() =>
     apiClient.post('/db/create-database', data),
   );
 
-const deleteDatabase = (data: DeleteDatabaseRequest) =>
-  apiCall<DeleteDatabaseResponse>(() =>
+const deleteDatabases = (data: DeleteDatabasesRequest) =>
+  apiCall<DeleteDatabasesResponse>(() =>
+    apiClient.post('/db/delete-database', data),
+  );
+
+const deleteTables = (data: DeleteTablesRequest) =>
+  apiCall<DeleteTablesResponse>(() =>
     apiClient.post('/db/delete-database', data),
   );
 
@@ -85,6 +103,7 @@ const loadSettings = () =>
   apiCall<PrimeObject>(() => apiClient.get('/db/load-settings'));
 
 export const dbApi = {
+  ping,
   fetchDatabaseInfo,
   sessionRestore,
   login,
@@ -93,12 +112,14 @@ export const dbApi = {
     apiCall(() => apiClient.post('/db/create-user', data)),
   fetchDatabases,
   fetchTables,
-  runQuery,
   fetchRows,
+  runQuery,
   updateRows,
+  selectDatabase,
   exportDatabase,
   createDatabase,
-  deleteDatabase,
+  deleteDatabases,
+  deleteTables,
   saveSettings,
   loadSettings,
 };

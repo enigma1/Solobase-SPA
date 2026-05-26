@@ -1,12 +1,19 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { dbApi, FetchDatabaseInfoResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
 import { queryKeys, STALE_TIME } from './defs';
-import { FetchDatabasesResponse } from '>/services/api';
-import { DataHookProps } from './defs';
+import {
+  FetchDatabasesResponse,
+  SessionRestoreResponse,
+  InfoSchema,
+} from '>/services/api';
+import { DataHookProps, HookStore } from './defs';
+import { DbQueryData } from '>/types';
 
-export const useSessionRestore = <TSelected = DataHookProps>(
-  selector?: (args: DataHookProps) => TSelected,
+type RestoreHookProps = DataHookProps<SessionRestoreResponse>;
+export const useSessionRestore = <TSelected = RestoreHookProps>(
+  selector?: (args: RestoreHookProps) => TSelected,
 ) => {
   const { restoreSession, isAuthenticated } = useAccountStore(
     ({ api, state }) => ({
@@ -15,17 +22,24 @@ export const useSessionRestore = <TSelected = DataHookProps>(
     }),
   );
 
-  const initialData = {
+  const initialData: SessionRestoreResponse = {
+    sessionId: '',
     username: '',
-    // dbSelected: null,
-    // preferences: {},
+    schemas: {
+      rows: [],
+      cols: {},
+      columnsOrder: [],
+    },
+    dbSelected: null,
+    preferences: {},
   };
 
-  const q = useQuery<{ username: string } | null, Error>({
+  const q = useQuery<SessionRestoreResponse, Error>({
     queryKey: queryKeys.session(),
-    queryFn: async (): Promise<{ username: string } | null> => {
+    queryFn: async (): Promise<SessionRestoreResponse> => {
       const session = await dbApi.sessionRestore();
-      return restoreSession(session); // will return null or { username }
+      const result = restoreSession(session);
+      return result ? session : initialData;
     },
     staleTime: STALE_TIME,
     retry: false,
@@ -34,7 +48,20 @@ export const useSessionRestore = <TSelected = DataHookProps>(
   });
 
   const data = q.data ?? initialData;
+
+  const api = useMemo(() => {
+    const nameIndex = data.schemas.columnsOrder.indexOf('SCHEMA_NAME');
+
+    return {
+      getDbNames: () => {
+        if (nameIndex === -1) return [];
+        return data.schemas.rows.map((row) => row[nameIndex]);
+      },
+    };
+  }, [data.schemas.rows, data.schemas.columnsOrder]);
+
   const args = {
+    api,
     state: data,
     query: q,
   };
@@ -45,8 +72,14 @@ type DatabaseHookProps = DataHookProps<FetchDatabasesResponse>;
 export const useDatabases = <TSelected = DatabaseHookProps>(
   selector?: (args: DatabaseHookProps) => TSelected,
 ) => {
+  const initialData = {
+    rows: [],
+    cols: {},
+    columnsOrder: [],
+  } satisfies DbQueryData;
+
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
-  const initialData = { databases: [] };
+
   // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
   const q = useQuery<FetchDatabasesResponse, Error>({
     queryKey: queryKeys.databases(),
@@ -63,10 +96,24 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
     initialData,
   });
   const data = q.data ?? initialData;
+
+  const api = useMemo(() => {
+    const nameIndex = data.columnsOrder.indexOf('SCHEMA_NAME');
+
+    return {
+      getDbNames: () => {
+        if (nameIndex === -1) return [];
+        return data.rows.map((row) => row[nameIndex]);
+      },
+    };
+  }, [data.rows, data.columnsOrder]);
+
   const args = {
+    api,
     state: data,
     query: q,
-  };
+  } satisfies DataHookProps<FetchDatabasesResponse, typeof api>;
+
   return selector ? selector(args) : (args as TSelected);
 };
 
@@ -86,9 +133,7 @@ export const useDatabaseServerInfo = <TSelected = DatabaseServerInfoHookProps>(
     queryKey: queryKeys.databaseServerInfo(),
     // select: (data) => data.databases, // transform to string[] for easier usage
     queryFn: async () => {
-      console.log('Fetching database server info...');
       const data = await dbApi.fetchDatabaseInfo();
-      console.log('Fetched database server info:', data);
       return data;
     },
     staleTime: STALE_TIME,
@@ -101,6 +146,7 @@ export const useDatabaseServerInfo = <TSelected = DatabaseServerInfoHookProps>(
 
   const data = q.data ?? initialData;
   const args = {
+    api: {} as {},
     state: data,
     query: q,
   };

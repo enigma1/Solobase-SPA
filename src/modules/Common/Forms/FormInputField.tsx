@@ -1,4 +1,5 @@
 import { InputHTMLAttributes, useState } from 'react';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { FormFieldWrapper } from './FormCommon';
 import {
   FieldValues,
@@ -7,22 +8,27 @@ import {
   Control,
   Controller,
 } from 'react-hook-form';
+import { StatusType } from '>/types';
 
 type FormInputFieldProps<T extends FieldValues> = {
+  id?: string;
   name: Path<T>;
   control: Control<T>;
   label: string;
   type?: 'text' | 'password' | 'email';
+  $status?: StatusType;
   rules?: RegisterOptions<T, Path<T>>;
   endAdornment?: React.ReactNode;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'name'>;
 
 export const FormInputField = <T extends FieldValues>({
+  id,
   name,
   control,
   label,
   rules,
   type = 'text',
+  $status,
   endAdornment,
   ...rest
 }: FormInputFieldProps<T> & { type?: string }) => {
@@ -34,17 +40,22 @@ export const FormInputField = <T extends FieldValues>({
       render={({ field, fieldState }) => (
         <FormFieldWrapper
           label={label}
-          htmlFor={name}
-          error={fieldState.error?.message}
+          htmlFor={id}
+          $notice={fieldState.error?.message}
+          $status={fieldState.error?.message ? 'error' : undefined}
         >
-          <input
-            {...field}
-            {...rest}
-            type={type}
-            // className='w-full px-3 py-2 border rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-            className='w-full input'
-          />
-          {endAdornment && endAdornment}
+          <div className='field-control'>
+            <input
+              {...field}
+              {...rest}
+              id={id}
+              type={type}
+              className='w-full input'
+              data-status={!!fieldState.error ? 'error' : undefined}
+            />
+
+            {endAdornment && endAdornment}
+          </div>
         </FormFieldWrapper>
       )}
     />
@@ -72,7 +83,7 @@ export const FormPasswordField = <T extends FieldValues>(
           aria-label={visible ? 'Hide password' : 'Show password'}
           className='field-action-btn'
         >
-          👁
+          {visible ? <EyeIcon size={18} /> : <EyeOffIcon size={18} />}
         </button>
       }
     />

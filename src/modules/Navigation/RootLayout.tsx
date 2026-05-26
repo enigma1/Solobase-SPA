@@ -1,38 +1,21 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, Navigate, useLocation } from 'react-router-dom';
 import { useAccountStore } from '>/services/stores';
-import { QueryInput } from '>/modules/Query';
 import { routes } from '>/config';
-import { Sidebar, MessageList, Auth, Guest, DropdownMenu } from '>/modules/.';
+import {
+  HeartbeatMonitor,
+  Sidebar,
+  MessageList,
+  Auth,
+  Guest,
+  DropdownMenu,
+} from '>/modules';
 // For testing purposes only, remove in production
 import { NavigationDebugger } from '>/modules/Debug/NavigationDebugger';
+import { useDebouncer } from '>/services/hooks/common';
+import { AuthNavigationLinks } from './NavigationLinks';
 
-const AuthNavigationLinks = () => (
-  <Auth>
-    <div className='flex items-center gap-4 w-full'>
-      <div className='flex-1'>
-        <QueryInput />
-      </div>
-      <nav className='flex items-center gap-4'>
-        <Link className='hover:underline' to={routes.front.settings}>
-          Settings
-        </Link>
-        <Link className='hover:underline' to={routes.front.logout}>
-          Logout
-        </Link>
-      </nav>
-    </div>
-  </Auth>
-);
-
-const GuestNavigationLinks = () => (
-  <Guest>
-    <nav className='flex items-center gap-4'>
-      <Link className='hover:underline' to={routes.front.login}>
-        Login
-      </Link>
-    </nav>
-  </Guest>
-);
+const GuestNavigationLinks = () => null;
+const GuestMenu = () => null;
 
 const AuthMenu = () => (
   <Auth>
@@ -40,34 +23,24 @@ const AuthMenu = () => (
       <DropdownMenu label='Account'>
         <Link to={routes.front.newUser}>User Privileges</Link>
         <Link to={routes.front.editUser}>Create User</Link>
+        <Link to={routes.front.settings}>Settings</Link>
         <Link to={routes.front.logout}>Logout</Link>
       </DropdownMenu>
-
       <div className='menu-separator'>|</div>
-
       <DropdownMenu label='Database'>
         <Link to={routes.front.newDatabase}>New Database</Link>
-        <Link to={routes.front.exportDatabase}>Export Database</Link>
-        <Link to={routes.front.createTable}>Create Table</Link>
+        <Link to={routes.front.listDatabases}>Show Databases</Link>
+      </DropdownMenu>
+      <div className='menu-separator'>|</div>
+      <DropdownMenu label='Tables'>
+        <Link to={routes.front.newDatabase}>New Table</Link>
+        <Link to={routes.front.listTables}>Show Tables</Link>
       </DropdownMenu>
     </div>
   </Auth>
 );
 
-const GuestMenu = () => (
-  <Guest>
-    <DropdownMenu label='User'>
-      <Link
-        className='block px-4 py-2 hover:bg-gray-100'
-        to={routes.front.login}
-      >
-        Login
-      </Link>
-    </DropdownMenu>
-  </Guest>
-);
-
-const AuthMainContent = () => (
+const AuthSideContent = () => (
   <Auth>
     <aside>
       <Sidebar />
@@ -76,29 +49,52 @@ const AuthMainContent = () => (
 );
 
 export const RootLayout = () => {
+  const online = useAccountStore(({ state }) => state.online);
+  const location = useLocation();
+
+  // const [stableOnline, setStableOnline] = useState(online);
+
+  // const { debounce } = useDebouncer<[boolean]>({
+  //   delay: 300,
+  //   callback: setStableOnline,
+  // });
+
+  // useEffect(() => {
+  //   debounce(online);
+  // }, [online, debounce]);
+
+  if (!online && location.pathname !== routes.front.networkDown) {
+    return <Navigate to={routes.front.networkDown} replace />;
+  }
   return (
     <div className='app'>
+      <HeartbeatMonitor />
       <NavigationDebugger />
-      <header className='app-header'>
-        <div className='app-logo'>
-          <Link to={routes.front.home} className='font-semibold'>
-            Home
-          </Link>
-        </div>
-        <nav className='w-full flex items-center gap-4'>
-          <AuthNavigationLinks />
-          <GuestNavigationLinks />
-        </nav>
-      </header>
-      <div className='flex items-center border-b'>
-        <AuthMenu />
-        <GuestMenu />
-      </div>
+      {online && (
+        <>
+          <header className='app-header'>
+            <div className='app-logo'>
+              <Link to={routes.front.home} className='font-semibold'>
+                Home
+              </Link>
+            </div>
+            <nav className='w-full flex items-center gap-4'>
+              <AuthNavigationLinks />
+              <GuestNavigationLinks />
+            </nav>
+          </header>
+
+          <div className='menu-container'>
+            <AuthMenu />
+            <GuestMenu />
+          </div>
+        </>
+      )}
       <div>
         <MessageList mode='header' />
       </div>
       <div className='app-content'>
-        <AuthMainContent />
+        {online && <AuthSideContent />}
         <main>
           <Outlet />
         </main>

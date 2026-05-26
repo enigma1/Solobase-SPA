@@ -12,7 +12,6 @@ export const AuthGuard = () => {
       <Navigate to={routes.front.home} replace state={{ from: location }} />
     );
   }
-
   return <Outlet />;
 };
 

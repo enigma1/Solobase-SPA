@@ -5,6 +5,7 @@
 
   .app-header {
     @apply h-14 flex items-center justify-between border-b px-4;
+    border-color: var(--color-border-separate)
   }
 
   .app-logo {
@@ -16,10 +17,22 @@
 
     >aside {
       @apply w-64 border-r overflow-y-auto;
+      border-color: var(--color-border-separate)
     }
 
     >main {
       @apply flex flex-col flex-1 min-h-0 overflow-hidden;
+    }
+  }
+
+  .overlay-container {
+    @apply fixed inset-0 z-50 flex items-center justify-center;
+    background-color: var(--color-overlay-bg);
+
+    &>div {
+      @apply w-9 h-9 border-4 rounded-full animate-spin;
+      border-color: var(--color-srf);
+      border-top-color: var(--color-text);
     }
   }
 }

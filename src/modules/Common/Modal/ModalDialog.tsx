@@ -4,7 +4,7 @@ import { ModalBox } from './ModalBox';
 export type ModalDialogProps = {
   isOpen: boolean;
   onClose: () => void;
-  caption: string | ReactNode;
+  caption?: string | ReactNode;
   content: string | ReactNode;
   controls: ReactNode;
   loading?: boolean;

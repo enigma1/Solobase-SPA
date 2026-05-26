@@ -6,27 +6,24 @@ import {
   Await,
   RouterProvider,
 } from 'react-router-dom';
-import { useMessageStore } from '>/services/stores';
+import { messageStoreActions } from '>/services/stores';
 import { useSessionRestore } from '>/services/queryHooks';
 import {
   RootLayout,
   AuthGuard,
   QueryView,
-  DatabaseView,
+  DatabasesMainView,
+  DatabaseNew,
   SettingsView,
-  TableView,
+  TableDataView,
+  TablesMainView,
   GuestGuard,
   HomeRedirect,
   Login,
   Logout,
+  NetworkDown,
 } from '>/modules';
 import { routes } from '>/config';
-
-import { Message, MessageContent } from '>/types';
-
-// import { useMessageStore } from '>/services/hooks';
-// import { MessageContent } from '>/modules/Common';
-// import { Message } from '>/types';
 
 const defaultThemeProps = {
   colors: 'default', // semantic theme
@@ -37,21 +34,18 @@ const defaultThemeProps = {
 export const App = () => {
   const { session, isSuccess } = useSessionRestore(({ query, state }) => ({
     isSuccess: query.isSuccess,
-    session: state.session,
+    session: state,
   }));
-  const addMessage = useMessageStore(({ api }) => api.addMessage);
 
   useEffect(() => {
     if (isSuccess && session) {
-      addMessage({
-        id: crypto.randomUUID(),
+      messageStoreActions.addMessage({
         type: 'success',
-        mode: 'header',
         content: {
           text: `Session restored - welcome back ${session.username}`,
           duration: 3000,
         },
-      } satisfies Message<MessageContent>);
+      });
     }
   }, [isSuccess]);
 
@@ -63,6 +57,10 @@ export const App = () => {
         {
           index: true, // this is "/"
           element: <HomeRedirect />,
+        },
+        {
+          path: routes.front.networkDown,
+          element: <NetworkDown />,
         },
         // {
         //   path: routes.front.login,
@@ -85,13 +83,23 @@ export const App = () => {
               element: <Logout />,
             },
             {
+              path: routes.front.newDatabase,
+              element: <DatabaseNew />,
+            },
+
+            {
               path: routes.front.dbView,
-              element: <DatabaseView />,
+              element: <DatabasesMainView />,
             },
             {
               path: routes.front.tableView,
-              element: <TableView />,
+              element: <TableDataView />,
             },
+            {
+              path: routes.front.listTables,
+              element: <TablesMainView />,
+            },
+
             {
               path: routes.front.queryView,
               element: <QueryView />,

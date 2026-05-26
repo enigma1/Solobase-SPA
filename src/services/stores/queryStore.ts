@@ -25,7 +25,7 @@ const initialState: QueryState = {
 const baseStore = makeStore<QueryState>(() => initialState);
 const { get, set, setAuto } = baseStore;
 
-export const queryStoreActions = {
+export const queryStoreActions: QueryActions = {
   initialize: () => {
     set(() => ({ ...initialState }));
   },

@@ -25,12 +25,9 @@ export const errorDialogMap = ({
         isOpen
         onClose={onClose}
         caption={error.title}
-        content={<ErrorItem error={error} />}
+        content={error.msg}
         controls={
-          <button
-            onClick={onClear}
-            className='px-4 py-2 rounded border font-medium'
-          >
+          <button onClick={onClear} className='btn'>
             OK
           </button>
         }

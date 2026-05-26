@@ -1,50 +1,26 @@
 import axios, { AxiosError } from 'axios';
 import { queryClient } from '>/config/reactQuery';
-import { messageStoreActions, accountActions } from '>/services/stores';
-import { hasObjectProps } from '>/services/utils';
+import { messageStoreActions, accountStoreActions } from '>/services/stores';
+import { hasObjectProps, hasStringPropValue } from '>/services/utils';
 
-const NO_RESPONSE_TIMEOUT = 360;
-let firstFailureAt: Temporal.Instant | null = null;
-export const clearTimoutError = () => {
-  firstFailureAt = null;
-};
+export const isNetworkError = (error: unknown): boolean =>
+  hasStringPropValue(error, 'type', 'network');
 
-const timeoutError = async () => {
-  const currentTs = Temporal.Now.instant();
-  if (!firstFailureAt) {
-    firstFailureAt = currentTs;
-  } else {
-    const elapsed = currentTs.since(firstFailureAt);
-    if (elapsed.total({ unit: 'seconds' }) >= NO_RESPONSE_TIMEOUT) {
-      await queryClient.cancelQueries();
-      messageStoreActions.addMessage({
-        id: crypto.randomUUID(),
-        type: 'error',
-        mode: 'header',
-        content: {
-          text: 'Timeout occured to access this resource. Please login again.',
-          duration: 5000,
-        },
-      });
-      accountActions.initialize(); // triggers redirect
-      firstFailureAt = null;
-    }
-  }
-  throw new Error('No response from the server');
-};
+export const createNetworkError = (reason: string) => ({
+  name: 'NetworkError',
+  type: 'network' as const,
+  reason,
+});
 
 const authError = async () => {
   await queryClient.cancelQueries();
   // messageStoreActions.addMessage({
-  //   id: crypto.randomUUID(),
-  //   type: 'error',
-  //   mode: 'header',
   //   content: {
   //     text: 'Currently you are not authorized to access this resource. Please login again.',
   //     duration: 3000,
   //   },
   // });
-  accountActions.initialize(); // triggers redirect
+  accountStoreActions.initialize(); // triggers redirect
   throw new Error('Unauthorized');
 };
 
@@ -63,7 +39,8 @@ export const apiErrorResolver = async (e: unknown) => {
       e.code === axios.AxiosError.ECONNABORTED ||
       e.code === axios.AxiosError.ETIMEDOUT)
   ) {
-    await timeoutError();
+    const networkError = createNetworkError(e.message);
+    throw networkError;
   }
 
   if (hasObjectProps(e, ['response'])) {

@@ -5,8 +5,10 @@
   }
 
   .side-accordion-header {
-    @apply sticky top-0 flex items-center;
-    background-color: var(--color-srf-strong);
+    @apply sticky top-0 flex items-center border-b border-be-0;
+    background-color: var(--color-srf-dim);
+    border-color: var(--color-border-separate);
+    box-shadow: var(--shadow-lg);
   }
 
   /* .side-accordion-content {
@@ -36,7 +38,7 @@
   }
 
   .side-accordion-trigger {
-    @apply flex-1 flex items-center justify-between px-3 py-2 text-left cursor-pointer;
+    @apply flex-1 flex items-center justify-between px-3 py-3 text-left cursor-pointer;
 
     color: var(--color-text);
     transition: background-color 0.2s ease;
@@ -61,7 +63,7 @@
   }
 
   .side-list-item {
-    @apply w-full flex items-center px-4 py-1 text-left border-be;
+    @apply w-full flex items-center px-4 py-2 text-left border-be;
     color: var(--color-text);
     border-color: var(--color-border);
 
@@ -83,7 +85,7 @@
 
     &[data-active="true"] {
       background-color: var(--state-selected);
-      color: var(--color-text);
+      color: var(--color-text-peak);
     }
   }
 }

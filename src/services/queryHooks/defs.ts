@@ -1,14 +1,15 @@
 import pickBy from 'lodash-es/pickBy';
-import { useQuery } from '@tanstack/react-query';
-
 import {
+  useQuery,
   UseMutationResult,
   UseMutateFunction,
   UseMutateAsyncFunction,
   MutationOptions,
 } from '@tanstack/react-query';
+import { accountStoreActions } from '>/services/stores';
+import { createNetworkError } from '>/services/api/apiErrors';
 
-export const STALE_TIME = 5 * 60 * 1000; // 5 minutes
+export const STALE_TIME = 5 * 60 * 1000; // Set default to 5 minutes
 
 export type MutationApi<TData = any, TVariables = any> = {
   mutate: UseMutateFunction<TData, unknown, TVariables>;
@@ -33,10 +34,21 @@ export type MutationCallbacks<
   TContext = unknown,
 > = Partial<MutationOptions<TData, TError, TVariables, TContext>>;
 
-export type DataHookProps<TState = any> = {
+export type DataHookProps<
+  TState,
+  TApi = Record<string, (...args: any[]) => any>,
+> = {
+  api: TApi;
   state: TState;
   query: ReturnType<typeof useQuery>;
 };
+
+export type HookStore<TState = unknown, TApi = unknown, TQuery = unknown> = {
+  state: TState;
+  api: TApi;
+  query: TQuery;
+};
+export type HookSelector<TStore, TResult = TStore> = (store: TStore) => TResult;
 
 export const queryKeys = {
   preferences: () => ['preferences'] as const,
@@ -51,6 +63,28 @@ export const queryKeys = {
 export const getMutationResult = <TData = any, TVariables = any>(
   mutation: UseMutationResult<TData, any, TVariables>,
 ) => {
+  const guardMutate: typeof mutation.mutate = (variables, options) => {
+    if (!accountStoreActions.getAppStatus()) {
+      // const error = createNetworkError('offline');
+      // options?.onError?.(error, variables, undefined, mutation.context);
+      console.log('Mutation attempt while offline = exiting');
+      return;
+    }
+
+    mutation.mutate(variables, options);
+  };
+
+  const guardMutateAsync: typeof mutation.mutateAsync = async (
+    variables,
+    options,
+  ) => {
+    if (!accountStoreActions.getAppStatus()) {
+      throw createNetworkError('offline');
+    }
+
+    return mutation.mutateAsync(variables, options);
+  };
+
   const api = pickBy(mutation, (val) => typeof val === 'function') as {
     mutate: typeof mutation.mutate;
     mutateAsync: typeof mutation.mutateAsync;
@@ -60,5 +94,12 @@ export const getMutationResult = <TData = any, TVariables = any>(
     mutation,
     (val) => typeof val !== 'function',
   ) as MutationQuery<TData>;
-  return { api, query };
+  return {
+    api: {
+      ...api,
+      mutate: guardMutate,
+      mutateAsync: guardMutateAsync,
+    },
+    query,
+  };
 };

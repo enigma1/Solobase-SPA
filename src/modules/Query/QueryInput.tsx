@@ -97,7 +97,7 @@ export const QueryInput = () => {
     <>
       <div className='w-full flex items-center gap-2'>
         <input
-          className='w-full px-3 py-2 border rounded focus:outline-none focus:ring'
+          className='input'
           placeholder='enter database query'
           value={value}
           onChange={(e) => setValue(e.target.value)}

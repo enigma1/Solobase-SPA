@@ -36,7 +36,7 @@ export const DialogRenderer = ({
 };
 
 export const ErrorItem = ({ error }: { error: BasicRecord }) => (
-  <div className='border rounded p-4 space-y-1'>
+  <div className='rounded p-4 space-y-1'>
     <div className='font-semibold'>{error.title}</div>
     <div className='text-sm opacity-70'>{error.msg}</div>
   </div>

@@ -13,4 +13,11 @@
   --tone-11: oklch(0.378 0.016 256);
 
   --overlay: rgb(0 0 0 / 0.35);
+
+  --action: oklch(0.3 0.22 230);
+  --effect: oklch(0.7 0.17 245);
+  --separator:
+    color-mix(in oklch,
+      var(--tone-10) 30%,
+      var(--tone-8));
 }

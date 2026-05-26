@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { dbApi, FetchRowsResponse } from '>/services/api';
-import { useAccountStore, useTablesStore } from '>/services/stores';
+import { useAccountStore, useTablesDataStore } from '>/services/stores';
 import { CollectionColumns, DbTable, DbTableData } from '>/types';
 import { queryKeys, STALE_TIME } from './defs';
 
@@ -25,26 +25,24 @@ export const useTableDataHook = <TSelected = TablesHookProps>(
     columnsOrder: [],
   } satisfies TableDataHookState;
 
-  const { dbSelected, isAuthenticated } = useAccountStore(({ state }) => ({
-    dbSelected: state.dbSelected,
-    isAuthenticated: state.isAuthenticated,
-  }));
-
-  const database = dbSelected ?? null;
-  const { activeTable } = useTablesStore(({ state }) => ({
-    activeTable: state.activeTable,
-  }));
+  const { dbSelected, isAuthenticated, activeTable } = useAccountStore(
+    ({ state }) => ({
+      activeTable: state.activeTable,
+      dbSelected: state.dbSelected,
+      isAuthenticated: state.isAuthenticated,
+    }),
+  );
 
   // React Query fetch
   const q = useQuery<FetchRowsResponse, Error>({
-    queryKey: queryKeys.rows(database, activeTable),
+    queryKey: queryKeys.rows(dbSelected, activeTable),
     queryFn: async () => {
-      if (!database || !activeTable) return { ...initialData };
+      if (!dbSelected || !activeTable) return { ...initialData };
       const data = await dbApi.fetchRows({ table: activeTable });
       return data;
     },
     staleTime: STALE_TIME,
-    enabled: !!database && !!activeTable && isAuthenticated,
+    enabled: !!dbSelected && !!activeTable && isAuthenticated,
     retry: 1,
     refetchOnWindowFocus: false,
     initialData,

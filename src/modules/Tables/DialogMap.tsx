@@ -18,11 +18,11 @@ export const tableDialogMap: DialogMap = ({ payload, onClose }) => ({
         caption={caption}
         content={message}
         controls={
-          <div className='flex gap-2 justify-end'>
+          <div className='btn-group'>
             <button onClick={onClose} className='btn-secondary'>
               Cancel
             </button>
-            <button onClick={onConfirm} className='btn-primary'>
+            <button onClick={onConfirm} className='btn'>
               Confirm
             </button>
           </div>
@@ -44,12 +44,50 @@ export const tableDialogMap: DialogMap = ({ payload, onClose }) => ({
         caption={caption}
         content={message}
         controls={
-          <div className='flex gap-2 justify-end'>
+          <div className='btn-group justify-end'>
             <button onClick={onClose} className='btn-secondary'>
               Cancel
             </button>
-            <button onClick={onConfirm} className='btn-primary'>
+            <button onClick={onConfirm} className='btn'>
               Confirm
+            </button>
+          </div>
+        }
+      />
+    );
+  },
+
+  filterColumns: () => {
+    if (!payload) return null;
+    const { columns, onSave } = payload as {
+      columns: { name: string; visible: boolean }[];
+      onSave: (newOrder: string[]) => void;
+    };
+    return (
+      <ModalDialog
+        isOpen
+        onClose={onClose}
+        caption='Filter Columns'
+        content={
+          <div className='flex flex-col gap-2'>
+            {columns.map((col) => (
+              <label key={col.name} className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  checked={col.visible}
+                  onChange={() =>
+                    onSave(columns.filter((c) => c.visible).map((c) => c.name))
+                  }
+                />
+                {col.name}
+              </label>
+            ))}
+          </div>
+        }
+        controls={
+          <div className='btn-group justify-end'>
+            <button onClick={onClose} className='btn-primary'>
+              Close
             </button>
           </div>
         }
@@ -96,8 +134,8 @@ export const tableDialogMap: DialogMap = ({ payload, onClose }) => ({
           )
         }
         controls={
-          <div className='flex gap-2 justify-end'>
-            <button onClick={onClose} className='px-4 py-2 rounded border'>
+          <div className='btn-group justify-end'>
+            <button onClick={onClose} className='btn-secondary'>
               Cancel
             </button>
             <button
@@ -105,7 +143,7 @@ export const tableDialogMap: DialogMap = ({ payload, onClose }) => ({
                 onSave(row[cId]);
                 onClose();
               }}
-              className='px-4 py-2 rounded border font-medium'
+              className='btn'
             >
               Confirm
             </button>

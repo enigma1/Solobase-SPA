@@ -1,17 +1,21 @@
 @layer components {
+  .menu-container {
+    @apply flex items-center border-b;
+    border-color: var(--color-border-separate);
+  }
+
   .menu {
-    @apply flex w-full items-center px-2 h-10 border-b;
-    background-color: var(--srf-bar);
-    border-color: var(--border);
+    @apply flex w-full items-center px-2 h-10;
+    background-color: var(--color-srf-dim);
   }
 
   .menu-dropdown {
     @apply relative inline-block;
-    color: var(--text-inverted);
-    border-color: var(--border);
+    color: var(--color-text);
+    border-color: var(--color-border);
 
     &:hover {
-      background-color: var(--color-state-selected);
+      background-color: var(--color-srf-muted);
       color: var(--color-text);
     }
   }
@@ -24,18 +28,18 @@
   }
 
   .menu-panel {
-    @apply absolute min-w-48 rounded z-50;
+    @apply absolute min-w-48 z-50;
     color: var(--color-text);
-    background-color: var(--color-srf-bar);
+    background-color: var(--color-srf-dim);
     box-shadow: var(--shadow-md);
 
     & a {
-      @apply block px-4 py-2 items-center border-l border-r border-t last:border-b rounded-t-none rounded-b;
-      border-color: var(--text-muted);
+      @apply block px-4 py-2 items-center border-t border-l border-r last:border-b rounded-t-none last:rounded-b-sm;
+      border-color: var(--color-border-separate);
       transition: background-color 0.15s ease;
 
       &:hover {
-        background-color: var(--color-srf-elevated);
+        background-color: var(--color-srf-muted);
         color: var(--color-text);
       }
 

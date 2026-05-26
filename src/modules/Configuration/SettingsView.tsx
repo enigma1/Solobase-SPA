@@ -2,7 +2,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { isObjectEmpty } from '>/services/utils';
 import { PrimeObject, CollectionRow } from '>/types';
-import { useDialogStore, useTablesStore } from '>/services/stores';
+import { useDialogStore, useTablesDataStore } from '>/services/stores';
 import { useSettingsMutation } from '>/services/queryHooks/useWriteHooks';
 
 import {

@@ -1,15 +1,13 @@
 import { makeStore } from '>/services/utils/emitter';
 import { CollectionColumns, ScalarObject, CollectionRow } from '>/types';
 
-type EditedRow = Record<number, ScalarObject> | Record<string, CollectionRow>;
+type EditedRow = Record<number, ScalarObject>;
 type TablesState = {
-  activeTable: string | null;
   editedRow: EditedRow;
 };
 
 export type TablesActions = {
   initialize: () => void;
-  setActiveTable: (selected: string | null) => void;
   markEditedRow: (
     row: EditedRow | ((prevState: EditedRow) => EditedRow),
   ) => void;
@@ -17,13 +15,7 @@ export type TablesActions = {
 
 export type TablesStore = TablesState & TablesActions;
 
-export const defaultCollectionColumns = {
-  _id: 'string',
-  doc: {},
-} satisfies CollectionColumns;
-
 const initialState: TablesState = {
-  activeTable: null,
   editedRow: {},
 };
 
@@ -33,9 +25,6 @@ const { get, set, setAuto } = baseStore;
 export const tablesStoreActions: TablesActions = {
   initialize: () => {
     set(() => ({ ...initialState }));
-  },
-  setActiveTable: (selected: string | null) => {
-    setAuto({ activeTable: selected });
   },
   markEditedRow: (objOrFn) => {
     setAuto((state) => {

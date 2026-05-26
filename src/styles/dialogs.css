@@ -1,26 +1,36 @@
 @layer components {
-  .dialog-wrapper {
-    @apply fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-black/50 z-50 h-full w-full
+  .dialog-container {
+    @apply fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 h-full w-full;
   }
 
   .dialog {
-    @apply resize-none m-auto min-w-75 max-w-[90%] block relative p-0 rounded-xl shadow-xl border;
+    @apply flex flex-col overflow-hidden resize rounded-md m-auto max-w-[90%] max-h-[90%];
+    min-height: calc(3rem + 10rem + 4rem);
+    min-width: calc(24rem);
+    background-color: var(--color-bg);
 
-    &.caption {
-      @apply px-6 py-4 border-b text-lg font-semibold;
+    &::backdrop {
+      background: var(--overlay);
     }
 
-    &.content {
-      @apply px-6 py-4;
+    & .caption {
+      @apply px-4 py-3 border-b text-lg font-semibold;
+      background-color: var(--color-srf-dim);
+      border-color: var(--color-border-separate);
     }
 
-    &.controls {
-      @apply flex justify-end gap-2 px-6 py-4 border-t;
+    & .content {
+      @apply p-2 flex-1 min-h-0 flex flex-col border-b;
+      border-color: var(--color-border-separate)
     }
 
-    &.loading {
-      @apply px-6 py-10 text-center text-gray-500
-      /* @apply flex items-center justify-center p-6; */
+    & .controls {
+      @apply flex justify-end gap-2 px-6 pt-2 pb-3;
+    }
+
+    & .loading {
+      @apply px-6 py-10 text-center;
+      color: var(--color-text-muted);
     }
   }
 }

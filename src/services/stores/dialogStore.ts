@@ -10,23 +10,29 @@ const initialState: DialogStore = {
 };
 
 const baseStore = makeStore<DialogStore>(() => initialState);
-
 const { set, setAuto } = baseStore;
 
-export const dialogStoreActions = {
-  openDialog: (dialog: DialogState) => {
+export type DialogStoreActions = {
+  openDialog: (dialog: DialogState) => void;
+  closeDialog: () => void;
+  openDialogAsync: (dialog: DialogState) => Promise<void>;
+  closeDialogAsync: () => Promise<void>;
+};
+
+export const dialogStoreActions: DialogStoreActions = {
+  openDialog: (dialog) => {
     setAuto({ dialog });
   },
   closeDialog: () => {
     setAuto({ dialog: null });
   },
 
-  openDialogAsync: (dialog: DialogState) => {
-    setAuto({ dialog }, { wait: true });
+  openDialogAsync: async (dialog) => {
+    await setAuto({ dialog }, { wait: true });
   },
 
-  closeDialogAsync: () => {
-    setAuto({ dialog: null }, { wait: true });
+  closeDialogAsync: async () => {
+    await setAuto({ dialog: null }, { wait: true });
   },
 };
 

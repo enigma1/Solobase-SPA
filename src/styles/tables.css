@@ -1,24 +1,4 @@
 @layer components {
-  .table-shell {
-    @apply flex flex-col;
-    background-color: var(--color-srf);
-  }
-
-  .table-toolbar {
-    @apply flex flex-[0_0_auto] items-center gap-2 px-3 py-2 border-b;
-    background-color: var(--color-srf-elevated);
-    border-color: var(--color-border);
-  }
-
-  .table-title {
-    @apply flex items-center gap-1 text-lg font-medium;
-    color: var(--color-text);
-  }
-
-  .table-actions {
-    @apply flex ml-auto items-center gap-2;
-  }
-
   .table-wrapper {
     @apply relative flex-1 min-h-0 overflow-auto w-full;
     /* >div {
@@ -29,20 +9,31 @@
   .table {
     @apply table-fixed border-collapse w-max;
 
+    & thead>tr {
+      box-shadow: var(--shadow-lg);
+    }
+
     & tr {
       &.odd {
         background-color: var(--color-srf);
       }
 
       &.even {
-        background-color: color-mix(in oklch, var(--color-srf), black 2%);
+        background-color: var(--color-bg);
+      }
+
+
+      &.changed {
+        @apply border-l-4;
+        background-color: color-mix(in oklch, var(--color-srf-elevated), var(--state-selected) 25%);
+        border-color: var(--color-ring);
       }
     }
 
     & th {
-      @apply sticky top-0 z-10 text-left px-3 py-2 border-b;
+      @apply sticky top-0 z-10 text-left px-3 py-2 border-0 border-b;
       box-shadow: inset 0 -1px 0 var(--color-border);
-      background-color: var(--color-srf-strong);
+      background-color: var(--color-srf-dim);
       color: var(--color-text);
       font-weight: 500;
     }
@@ -65,7 +56,7 @@
 
     &::after {
       @apply content-[''] absolute right-0 w-px h-full;
-      background-color: color-mix(in oklch, var(--color-text), white 2%);
+      background-color: color-mix(in oklch, var(--color-text), var(--color-border) 2%);
       top: 25%;
       height: 50%;
       opacity: 0.3;

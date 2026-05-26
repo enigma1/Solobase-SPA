@@ -1,28 +1,19 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { dbApi, FetchTablesResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
-import { DbTable } from '>/types';
-import { queryKeys, STALE_TIME } from './defs';
+import { DbTable, DbQueryData } from '>/types';
+import { queryKeys, STALE_TIME, DataHookProps } from './defs';
 
-type TablesHookState = {
-  tables: Record<string, DbTable>;
-};
-type TablesHookApi = {
-  getTablesCount: () => number;
-};
-
-type TablesHookProps = {
-  state: TablesHookState;
-  api: TablesHookApi;
-  query: ReturnType<typeof useQuery>;
-};
-
+type TablesHookProps = DataHookProps<FetchTablesResponse>;
 export const useTablesHook = <TSelected = TablesHookProps>(
   selector?: (args: TablesHookProps) => TSelected,
 ) => {
   const initialData = {
-    tables: {},
-  } satisfies TablesHookState;
+    rows: [],
+    cols: {},
+    columnsOrder: [],
+  } satisfies DbQueryData;
 
   const { dbSelected, isAuthenticated } = useAccountStore(({ state }) => ({
     dbSelected: state.dbSelected,
@@ -46,19 +37,25 @@ export const useTablesHook = <TSelected = TablesHookProps>(
     initialData,
   });
 
+  const data = q.data ?? initialData;
   // state object
-  const state: TablesHookState = {
-    tables: q.data?.tables ?? initialData.tables,
-  };
+  const api = useMemo(() => {
+    const nameIndex = data.columnsOrder.indexOf('TABLE_NAME');
 
-  // api object (always valid)
-  const api = {
-    getTablesCount: () => Object.keys(state.tables).length,
-  };
+    return {
+      getTablesCount: () => data.rows.length,
+      getTablesNames: () => {
+        if (nameIndex === -1) return [];
+        const result = data.rows.map((row) => row[nameIndex]);
+        return result;
+      },
+    };
+  }, [data.rows, data.columnsOrder]);
 
+  // return selector pattern
   const store = {
-    state,
-    api,
+    state: data,
+    api, // api object (always valid)
     query: q,
   };
   return selector ? selector(store) : (store as TSelected);

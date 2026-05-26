@@ -1,25 +1,39 @@
-type FormFieldWrapperProps = {
-  label: string;
-  error?: string;
+import { StatusType } from '>/types';
+
+type FootNoticeProps = {
+  $status?: StatusType;
+  $notice?: string | boolean;
+};
+export const FootNotice = ({ $status, $notice }: FootNoticeProps) => {
+  if (!$status || !$notice || typeof $notice != 'string') return null;
+
+  return <div className={`field-${$status}`}>{$notice}</div>;
+};
+
+type FieldWrapperProps = FootNoticeProps & {
+  label?: string;
   htmlFor?: string;
   children: React.ReactNode;
+  $status?: string;
+  $notice?: string;
 };
 
 export const FormFieldWrapper = ({
   label,
-  error,
   htmlFor,
   children,
-}: FormFieldWrapperProps) => {
+  $status,
+  $notice,
+}: FieldWrapperProps) => {
   return (
     <div className='field'>
-      <label
-        htmlFor={htmlFor}
-        className={`text-sm ${error ? 'text-red-600' : 'text-gray-700'}`}
-      >
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={htmlFor} data-status={$status}>
+          {label}
+        </label>
+      )}
       {children}
+      <FootNotice $status={$status} $notice={$notice} />
     </div>
   );
 };

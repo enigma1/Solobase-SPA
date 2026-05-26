@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { routes } from '>/config';
-import { Message, MessageContent } from '>/types';
 import {
   useMessageStore,
   useDialogStore,
@@ -43,20 +42,15 @@ export function Logout() {
 
     if (rsp) {
       addMessage({
-        id: crypto.randomUUID(),
         type: 'success',
-        mode: 'header',
         content: { text: `Goodbye ${username}`, duration: 3000 },
-      } satisfies Message<MessageContent>);
+      });
       initialize();
       navigate(routes.front.login, { replace: true });
     } else {
       addMessage({
-        id: crypto.randomUUID(),
-        type: 'error',
-        mode: 'header',
         content: { text: `An error occurred during logout`, duration: 3000 },
-      } satisfies Message<MessageContent>);
+      });
       navigate(routes.front.login, { replace: true });
     }
   };

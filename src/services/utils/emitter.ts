@@ -142,6 +142,7 @@ export const makeStore = <T extends object>(init: StateCreator<T>) => {
   };
 };
 
-export const makeSsrStore = <T extends object>(init: StateCreator<T>) => {
+// Factory pattern for SSR support
+export const makeFactoryStore = <T extends object>(init: StateCreator<T>) => {
   return () => makeStore(init);
 };

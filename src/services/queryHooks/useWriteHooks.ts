@@ -1,11 +1,5 @@
-import {
-  useMutation,
-  useQueryClient,
-  UseMutationOptions,
-  UseMutationResult,
-  MutateOptions,
-} from '@tanstack/react-query';
-import { Message, MessageContent, PrimeObject } from '>/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { PrimeObject } from '>/types';
 import { dbApi } from '>/services/api/dbApi';
 import {
   CreateDatabaseRequest,
@@ -21,12 +15,17 @@ import {
   MutationHookProps,
   getMutationResult,
 } from './defs';
-import {
-  useMessageStore,
-  useTablesStore,
-  useAccountStore,
-} from '>/services/stores';
+import { useAccountStore } from '>/services/stores';
 import { createMutationHook } from './mutationBuilder';
+
+export const useSelectDatabaseMutation = createMutationHook(
+  dbApi.selectDatabase,
+  {
+    database: undefined,
+    success: false,
+    message: '',
+  },
+);
 
 export const useCreateDatabaseMutation = createMutationHook(
   dbApi.createDatabase,
@@ -37,14 +36,20 @@ export const useCreateDatabaseMutation = createMutationHook(
   },
 );
 
-export const useDeleteDatabaseMutation = createMutationHook(
-  dbApi.deleteDatabase,
+export const useDeleteDatabasesMutation = createMutationHook(
+  dbApi.deleteDatabases,
   {
-    database: undefined,
+    databases: [],
     success: false,
     message: '',
   },
 );
+
+export const useDeleteTablesMutation = createMutationHook(dbApi.deleteTables, {
+  tables: [],
+  success: false,
+  message: '',
+});
 
 export const useLoginMutation = <
   TSelected = ReturnType<typeof createMutationHook>,
@@ -76,22 +81,6 @@ export const useLoginMutation = <
   return mutation;
 };
 
-export const useLoginMutationOld = () => {
-  const setAuthenticated = useAccountStore(({ api }) => api.setAuthenticated);
-
-  return useMutation({
-    mutationFn: (data: LoginRequest) => dbApi.login(data),
-
-    onSuccess: (response) => {
-      setAuthenticated(true);
-    },
-
-    onError: (error) => {
-      console.error('Login failed', error);
-    },
-  });
-};
-
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
   const initializeStore = useAccountStore(({ api }) => api.initialize);
@@ -121,7 +110,7 @@ export const useLogoutMutation = () => {
 //   const queryClient = useQueryClient();
 //   const addMessage = useMessageStore(({ api }) => api.addMessage);
 //   const dbSelected = useAccountStore(({ state }) => state.dbSelected);
-//   const { activeTable } = useTablesStore(({ state }) => ({
+//   const { activeTable } = useTablesDataStore(({ state }) => ({
 //     activeTable: state.activeTable,
 //   }));
 
@@ -136,21 +125,16 @@ export const useLogoutMutation = () => {
 //       // reset local edited state if provided
 //       resetEditedRows?.();
 //       addMessage({
-//         id: crypto.randomUUID(),
 //         type: 'success',
-//         mode: 'header',
 //         content: { text: `Rows saved successfully`, duration: 3000 },
-//       } satisfies Message<MessageContent>);
+//       });
 //     },
 
 //     onError: (error) => {
 //       console.error('Update rows failed', error);
 //       addMessage({
-//         id: crypto.randomUUID(),
-//         type: 'error',
-//         mode: 'header',
 //         content: { text: `Failed to save changes`, duration: 3000 },
-//       } satisfies Message<MessageContent>);
+//       });
 //     },
 //   });
 // };

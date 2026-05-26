@@ -4,12 +4,27 @@ import {
   DbTableColumns,
   DbTableRow,
   SqlRow,
+  Scalar,
   ScalarObject,
   PrimeObject,
   CollectionRow,
   SqlColumns,
   SqlColumnsShape,
 } from '>/types';
+
+export type InfoSchema = {
+  rows: Scalar[][];
+  cols: SqlColumnsShape;
+  columnsOrder: string[];
+};
+
+export type SessionRestoreResponse = {
+  sessionId: string;
+  schemas: InfoSchema;
+  username: string;
+  dbSelected: string | null;
+  preferences: Record<string, any>;
+};
 
 export type LoginRequest = {
   username: string;
@@ -27,23 +42,28 @@ export type RunQueryRequest = {
   database?: string;
 };
 
-export type ServerSessionType = {
-  username: string;
-  dbSelected: string | null;
-  preferences: PrimeObject;
-};
+// export type ServerSessionType = {
+//   username: string;
+//   dbSelected: string | null;
+//   preferences: PrimeObject;
+// };
 
-export type FetchDatabasesResponse = {
-  databases: string[];
+export type DatabaseInfo = {
+  name: string;
+  charset: string;
+  collation: string;
 };
+// export type FetchDatabasesResponse = {
+//   databases: DatabaseInfo[];
+// };
+
+export type FetchDatabasesResponse = InfoSchema;
 
 export type FetchTablesRequest = {
   database: string;
 };
 
-export type FetchTablesResponse = {
-  tables: Record<string, DbTable>;
-};
+export type FetchTablesResponse = InfoSchema;
 
 export type FetchRowsRequest = {
   offset?: number;
@@ -96,6 +116,16 @@ export type FetchDatabaseInfoResponse = {
   };
 };
 
+export type SelectDatabaseRequest = {
+  name: string;
+};
+
+export type SelectDatabaseResponse = {
+  success: boolean;
+  database?: string;
+  message: string;
+};
+
 export type CreateDatabaseRequest = {
   name: string;
   charset: string;
@@ -108,12 +138,23 @@ export type CreateDatabaseResponse = {
   message: string;
 };
 
-export type DeleteDatabaseRequest = {
-  name: string;
+export type DeleteDatabasesRequest = {
+  names: string[];
 };
 
-export type DeleteDatabaseResponse = {
+export type DeleteDatabasesResponse = {
   success: boolean;
-  database?: string;
+  databases: string[];
+  message: string;
+};
+
+export type DeleteTablesRequest = {
+  dbName: string;
+  names: string[];
+};
+
+export type DeleteTablesResponse = {
+  success: boolean;
+  tables: string[];
   message: string;
 };
