@@ -1,4 +1,5 @@
-import { useState, useRef, type RefObject } from 'react';
+import { useMemo, type RefObject } from 'react';
+import { SquarePenIcon, PencilLineIcon } from 'lucide-react';
 import { SqlColumnsShape, SqlRow } from '>/types/dbTables';
 import { useColumnResize } from '>/services/hooks';
 import { Checkbox } from '>/modules';
@@ -16,37 +17,42 @@ type EditHandlerProps = {
 type TableContainerProps = {
   rows: ViewRow<SqlRow>[];
   cols: SqlColumnsShape;
+  activeCols: string[];
   columnsOrder: string[];
   store: UiTableStore;
   outerRef: RefObject<HTMLDivElement | null>;
-  tableRef?: React.RefObject<HTMLTableElement | null>;
+  tableRef: React.RefObject<HTMLTableElement | null>;
+  resizeLineRef: RefObject<HTMLDivElement | null>;
   editedRow: Record<number, ScalarObject>;
-  onEditCell: (props: EditHandlerProps) => void;
+  onEditCell?: (props: EditHandlerProps) => void;
+  onEditRow?: (uid: number) => void;
 };
 
 export const TableContainer = ({
   cols,
   rows,
   columnsOrder,
+  activeCols,
   store,
   outerRef,
+  resizeLineRef,
+  tableRef,
   editedRow,
   onEditCell,
+  onEditRow,
 }: TableContainerProps) => {
   // const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-
   const { useStore } = store;
-  const { hasSelects, clearSelected, setSelectedRow, selectedRows } = useStore(
-    ({ state, api }) => ({
-      hasSelects: state.selectedRows.size > 0,
-      clearSelected: api.clearSelected,
-      setSelectedRow: api.setSelectedRow,
-      selectedRows: state.selectedRows,
-    }),
+  const columnIndices = useMemo(
+    () => Object.fromEntries(columnsOrder.map((name, idx) => [name, idx])),
+    [columnsOrder],
   );
 
-  const resizeLineRef = useRef<HTMLDivElement | null>(null);
-  const tableRef = useRef<HTMLTableElement>(null);
+  const { setSelectedRow, selectedRows } = useStore(({ state, api }) => ({
+    setSelectedRow: api.setSelectedRow,
+    selectedRows: state.selectedRows,
+  }));
+
   const { colWidths, startResize } = useColumnResize(
     columnsOrder,
     outerRef,
@@ -90,13 +96,23 @@ export const TableContainer = ({
               : 'odd';
           return (
             <tr key={`row-${uid}`} className={`${rowBg}`}>
-              <td>
-                <Checkbox
-                  checked={selectedRows.has(uid)}
-                  onChange={(checked) => {
-                    setSelectedRow(uid, checked);
-                  }}
-                />
+              <td className='align-middle'>
+                <div className='flex items-center gap-2'>
+                  <Checkbox
+                    checked={selectedRows.has(uid)}
+                    onChange={(checked) => {
+                      setSelectedRow(uid, checked);
+                    }}
+                  />
+                  {onEditRow && (
+                    <button
+                      className='btn-secondary p-0'
+                      onClick={() => onEditRow(uid)}
+                    >
+                      <PencilLineIcon size={18} className='inline-block' />
+                    </button>
+                  )}
+                </div>
               </td>
               {columnsOrder.map((colName, colIndex) => {
                 const getValue = () => {
@@ -117,17 +133,24 @@ export const TableContainer = ({
                 return (
                   <td
                     key={colIndex}
-                    className={`${editedRow?.[uid]?.[colIndex] ? 'selected' : ''}`}
-                    onDoubleClick={() =>
-                      onEditCell({
-                        row: [...row],
-                        rId: uid,
-                        cId: colIndex,
-                        colName,
-                      })
-                    }
+                    className={`editable ${editedRow?.[uid]?.[colIndex] ? 'selected' : ''}`}
                   >
                     {getValue()}
+                    {onEditCell && (
+                      <button
+                        className='btn p-0 edit'
+                        onClick={() =>
+                          onEditCell({
+                            row: [...row],
+                            rId: uid,
+                            cId: colIndex,
+                            colName,
+                          })
+                        }
+                      >
+                        <SquarePenIcon size={18} />
+                      </button>
+                    )}
                   </td>
                 );
               })}
