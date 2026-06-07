@@ -35,7 +35,7 @@ const initialState: AccountStoreState = {
   isAuthenticated: false,
   online: true,
   preferences: {},
-  theme: 'slate',
+  theme: sessionStorage.getItem('dbTheme') ?? 'slate',
 } as const;
 
 const baseStore = makeStore<AccountStoreState>(() => initialState);
@@ -60,7 +60,8 @@ export const accountStoreActions: AccountStoreActions = {
         activeTable: null,
         isAuthenticated: true,
         online: true,
-        theme: data.preferences?.theme || 'slate',
+        // theme: data.preferences?.theme || 'slate',
+        theme: sessionStorage.getItem('dbTheme') ?? 'slate',
         preferences: data.preferences || initialState.preferences,
       });
 
@@ -83,7 +84,10 @@ export const accountStoreActions: AccountStoreActions = {
   setAuthenticated: (value) => setAuto({ isAuthenticated: value }),
   getAppStatus: () => get().online,
   setAppStatus: (value) => setAuto({ online: value }),
-  setTheme: (value) => setAuto({ theme: value }),
+  setTheme: (value) => {
+    setAuto({ theme: value });
+    sessionStorage.setItem('dbTheme', value);
+  },
   setSettings: (settings) => {
     const settingsSchema = getSchemaFromSample(settings);
     if (!settingsSchema.safeParse(settings).success) {

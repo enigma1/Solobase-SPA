@@ -1,16 +1,5 @@
 @import "tailwindcss";
-@import "./palettes/index.css";
-@import "./layout.css";
-@import "./page.css";
-@import "./dialogs.css";
-@import "./buttons.css";
-@import "./inputs.css";
-@import "./accordions.css";
-@import "./icons.css";
-@import "./menus.css";
-@import "./tables.css";
-@import "./lists.css";
-@import "./utils.css";
+@import "./index.css";
 
 :root {
   /* layout surfaces */
@@ -23,12 +12,16 @@
 
   /* text */
   --color-text: var(--tone-11);
-  --color-text-dim: var(--tone-9);
-  --color-text-muted: var(--tone-7);
+  --color-text-dim: var(--tone-10);
+  --color-text-muted: var(--tone-9);
   --color-text-peak: var(--tone-0);
 
   /* actions */
-  --color-action: var(--action);
+  /* --color-action: var(--action); */
+  --color-action: color-mix(in oklch,
+      var(--action) 75%,
+      var(--color-srf-elevated) 25%);
+
   /* effects */
   --color-effect: var(--effect);
   --color-ring:
@@ -37,9 +30,9 @@
       var(--tone-5) 40%);
 
   /* borders */
-  --color-border: var(--tone-4);
+  --color-border: var(--tone-8);
   --color-border-focus: color-mix(in oklch,
-      var(--color-border) 65%,
+      var(--tone-5) 65%,
       var(--color-effect));
   --color-border-separate: var(--separator);
   --color-accent: var(--tone-6);
@@ -63,13 +56,18 @@
   /* interactive states */
   --state-selected:
     color-mix(in oklch,
-      var(--color-action) 75%,
-      var(--color-srf-peak) 15%);
+      var(--color-effect) 15%,
+      var(--color-srf-peak) 75%);
 
   --state-flash:
     color-mix(in oklch,
       var(--color-effect) 40%,
       var(--color-bg) 60%);
+
+  --state-normal:
+    color-mix(in oklch,
+      var(--color-accent) 40%,
+      var(--color-srf) 60%);
 
   /* Shadows */
   --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.02);
@@ -167,6 +165,12 @@
   input::placeholder {
     @apply italic;
     color: var(--color-text-muted);
+  }
+
+  /* Browser uses CanvasText make sure defaults are inherited */
+  dialog {
+    color: inherit;
+    background-color: inherit;
   }
 
   label {

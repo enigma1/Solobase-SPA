@@ -1,4 +1,110 @@
-import { ScalarObject, SqlRow } from '>/types';
+import { ScalarObject, SqlRow, SqlColumns } from '>/types';
+
+export const MAX_TABLE_COLUMNS = 256;
+export const tableColumnTypes = [
+  {
+    id: 'numeric',
+    label: 'Numeric',
+    options: [
+      { value: 'BIT', params: ['Length'] },
+      { value: 'BOOL' },
+      { value: 'BOOLEAN' },
+
+      { value: 'TINYINT' },
+      { value: 'SMALLINT' },
+      { value: 'MEDIUMINT' },
+      { value: 'INT' },
+      { value: 'BIGINT' },
+
+      { value: 'DECIMAL', params: ['Precision', 'Scale'] },
+      { value: 'NUMERIC' },
+
+      { value: 'FLOAT' },
+      { value: 'DOUBLE' },
+    ],
+  },
+
+  {
+    id: 'text',
+    label: 'Text',
+    options: [
+      { value: 'CHAR', params: ['Length'] },
+      { value: 'VARCHAR', params: ['Length'] },
+
+      { value: 'TINYTEXT' },
+      { value: 'TEXT' },
+      { value: 'MEDIUMTEXT' },
+      { value: 'LONGTEXT' },
+    ],
+  },
+
+  {
+    id: 'binary',
+    label: 'Binary',
+    options: [
+      { value: 'BINARY', params: ['Length'] },
+      { value: 'VARBINARY', params: ['Length'] },
+
+      { value: 'TINYBLOB' },
+      { value: 'BLOB' },
+      { value: 'MEDIUMBLOB' },
+      { value: 'LONGBLOB' },
+    ],
+  },
+
+  {
+    id: 'datetime',
+    label: 'Date & Time',
+    options: [
+      { value: 'DATE' },
+      { value: 'TIME' },
+      { value: 'DATETIME' },
+      { value: 'TIMESTAMP' },
+      { value: 'YEAR' },
+    ],
+  },
+
+  {
+    id: 'enum',
+    label: 'Enumeration',
+    options: [
+      { value: 'ENUM', params: ['Enum'] },
+      { value: 'SET', params: ['Set'] },
+    ],
+  },
+
+  {
+    id: 'json',
+    label: 'JSON',
+    options: [{ value: 'JSON' }],
+  },
+
+  {
+    id: 'spatial',
+    label: 'Spatial',
+    options: [
+      { value: 'GEOMETRY' },
+      { value: 'POINT' },
+      { value: 'LINESTRING' },
+      { value: 'POLYGON' },
+
+      { value: 'MULTIPOINT' },
+      { value: 'MULTILINESTRING' },
+      { value: 'MULTIPOLYGON' },
+
+      { value: 'GEOMETRYCOLLECTION' },
+    ],
+  },
+];
+
+export const emptyTableColumn: SqlColumns = {
+  field: '',
+  type: '',
+  nullable: 'NO',
+  key: '',
+  defaultValue: null,
+  extra: '',
+};
 
 // Merge column data given the original row array and edited columns array
 // Edited columns will become the update values

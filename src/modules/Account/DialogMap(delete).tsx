@@ -33,23 +33,16 @@ export const accountDialogMap = ({
 
     return (
       <ModalDialog
-        isOpen
         onClose={onClose}
         caption='Updating record'
         content={`Updating record ${userName}?`}
         controls={
-          <div className='flex gap-2 justify-end'>
-            <button
-              onClick={onClose}
-              className='px-4 py-2 rounded border opacity-80'
-            >
+          <div className='btn-group'>
+            <button onClick={onClose} className='btn-secondary'>
               Cancel
             </button>
 
-            <button
-              onClick={onConfirm}
-              className='px-4 py-2 rounded border font-medium'
-            >
+            <button onClick={onConfirm} className='btn'>
               Confirm
             </button>
           </div>
@@ -68,22 +61,15 @@ export const accountDialogMap = ({
 
     return (
       <ModalDialog
-        isOpen
         onClose={onClose}
         caption='Deleting User'
         content={`The following user will be removed ${userName}`}
         controls={
-          <div className='flex gap-2 justify-end'>
-            <button
-              onClick={onClose}
-              className='px-4 py-2 rounded border opacity-80'
-            >
+          <div className='btn-group'>
+            <button onClick={onClose} className='btn-secondary'>
               Cancel
             </button>
-            <button
-              onClick={onConfirm}
-              className='px-4 py-2 rounded border font-medium'
-            >
+            <button onClick={onConfirm} className='btn'>
               Confirm
             </button>
           </div>
@@ -94,15 +80,11 @@ export const accountDialogMap = ({
 
   validateUser: () => (
     <ModalDialog
-      isOpen
       onClose={onClose}
       caption='Validate User'
       content='Please confirm the range is valid.'
       controls={
-        <button
-          onClick={onClose}
-          className='px-4 py-2 rounded border font-medium'
-        >
+        <button onClick={onClose} className='btn'>
           OK
         </button>
       }
@@ -118,15 +100,11 @@ export const accountDialogMap = ({
 
     return (
       <ModalDialog
-        isOpen
         onClose={onClose}
         caption={error.title}
         content={<ErrorItem error={error} />}
         controls={
-          <button
-            onClick={onClose}
-            className='px-4 py-2 rounded border font-medium'
-          >
+          <button onClick={onClose} className='btn'>
             OK
           </button>
         }
@@ -145,15 +123,11 @@ export const accountDialogMap = ({
 
     return (
       <ModalDialog
-        isOpen
         onClose={onClose}
         caption={error.title}
         content={<ErrorItem error={error} />}
         controls={
-          <button
-            onClick={onClose}
-            className='px-4 py-2 rounded border font-medium'
-          >
+          <button onClick={onClose} className='btn'>
             OK
           </button>
         }
@@ -168,7 +142,6 @@ export const accountDialogMap = ({
 
     return (
       <ModalDialog
-        isOpen
         onClose={onCancelLogout}
         caption='Confirm Logout'
         content='Are you sure you want to logout?'

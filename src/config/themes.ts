@@ -1,1 +1,16 @@
-export const themes = ['slate', 'blue', 'sunset-vibes', 'gray', 'mint'];
+export const themes = [
+  'slate',
+  'blue',
+  'pastel',
+  'lime',
+  'arctic',
+  'sand',
+  'sunset-vibes',
+  'deep-sea',
+  'slack',
+  'garden',
+  'gray',
+  'mint',
+  'forest',
+  'vscode',
+];

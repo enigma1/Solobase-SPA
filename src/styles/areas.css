@@ -1,0 +1,44 @@
+  .area-container {
+    @apply flex flex-col flex-1 min-h-0 w-full h-full;
+  }
+
+  .area-spacer {
+    @apply flex flex-[0_0_auto] gap-2 px-3 py-2 border-b;
+    background: linear-gradient(54deg in oklch, var(--color-srf) 35%, var(--color-srf-dim) 100%);
+    border-color: var(--color-border)
+  }
+
+  .area-title {
+    @apply flex items-center gap-1 text-lg font-medium;
+    color: var(--color-text);
+  }
+
+  .area-actions {
+    @apply flex ml-auto items-center gap-2;
+  }
+
+  .area-content {
+    @apply flex flex-col flex-1 min-h-0 gap-2 p-3 overflow-auto;
+    background-color: var(--color-srf);
+  }
+
+  .area-item {
+    @apply flex flex-col px-3 py-2;
+
+    &.odd {
+      background-color: var(--color-srf);
+    }
+
+    &.even {
+      background-color: var(--color-bg);
+    }
+
+    &:hover {
+      background-color: var(--color-srf-dim);
+    }
+
+    &.separate {
+      @apply border;
+      border-color: var(--color-border-separate)
+    }
+  }

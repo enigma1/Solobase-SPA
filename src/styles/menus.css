@@ -6,7 +6,8 @@
 
   .menu {
     @apply flex w-full items-center px-2 h-10;
-    background-color: var(--color-srf-dim);
+    /* background-color: var(--color-srf-dim); */
+    background: linear-gradient(54deg in oklch, var(--color-srf-dim) 39%, var(--color-action) 100%);
   }
 
   .menu-dropdown {

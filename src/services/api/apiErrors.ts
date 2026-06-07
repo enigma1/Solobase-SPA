@@ -25,11 +25,13 @@ const authError = async () => {
 };
 
 const unknownResponseError = (response: any) => {
-  throw new Error(
-    response?.data?.message ??
-      response.message ??
-      'Unknown response received from server',
-  );
+  return {
+    name: 'ApiError',
+    type: 'server',
+    status: response?.status,
+    message: response?.message ?? 'Unknown response received from server',
+    data: response,
+  };
 };
 
 export const apiErrorResolver = async (e: unknown) => {
@@ -42,11 +44,19 @@ export const apiErrorResolver = async (e: unknown) => {
     const networkError = createNetworkError(e.message);
     throw networkError;
   }
-
   if (hasObjectProps(e, ['response'])) {
-    const response = e.response as any;
-    response?.status === 401 && (await authError());
-    unknownResponseError(response);
+    const axiosError = e as any;
+
+    const status = axiosError.response?.status;
+    const data = axiosError.response?.data;
+
+    if (status === 401) {
+      await authError();
+    }
+    throw unknownResponseError({
+      status,
+      message: data?.error ?? data?.message,
+    });
   }
   if (e instanceof Error) {
     throw e;

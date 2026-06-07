@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { JSONObject } from 'type-plus';
 import ReactJsonView, { InteractionProps } from '@microlink/react-json-view';
-import { isObjectEmpty } from '>/services/utils';
-import { PrimeObject, CollectionRow } from '>/types';
+import { queryClient } from '>/config/reactQuery';
+import { dialogActions } from '>/services/utils';
 import {
   useDialogStore,
   useTablesDataStore,
@@ -14,13 +14,10 @@ import {
   useUpdateRowsMutation,
   MutationCallbacks,
 } from '>/services/queryHooks';
-
 import { UpdateRowsRequest, UpdateRowsResponse } from '>/services/api';
-import { DialogRenderer, ScreenLoader, PageTableShell } from '>/modules';
-import { tableDataDialogMap } from './DialogMap';
+import { DialogContent, ScreenLoader, PageTableShell } from '>/modules';
+import { PrimeObject, CollectionRow } from '>/types';
 import { updateRowsCollectionTransformer } from './helpers';
-// Replaced styled-components with Tailwind classes in JSX
-import { queryClient } from '</src/config/reactQuery';
 
 type KnownProps = {
   _id: string;
@@ -130,15 +127,20 @@ export const CollectionView = (props: CollectionViewProps) => {
 
   const discardChanges = () => {
     openDialog({
-      type: 'discardChanges',
       payload: {
-        caption: 'Discard Changes',
-        message: 'Are you sure you want to discard all changes?',
-        onConfirm: () => {
-          closeDialog();
-          markEditedRow({});
-        },
-        onCancel: () => closeDialog(),
+        caption: 'Collection Edits',
+        component: (
+          <DialogContent note='Discard Changes'>
+            {'About to discard all changes made. Are you sure?'}
+          </DialogContent>
+        ),
+
+        actions: dialogActions.confirmCancel({
+          onConfirm: () => {
+            closeDialog();
+            markEditedRow({});
+          },
+        }),
       },
     });
   };
@@ -203,11 +205,6 @@ export const CollectionView = (props: CollectionViewProps) => {
         );
       })}
       {isLoading && <ScreenLoader />}
-      <DialogRenderer
-        dialog={dialog}
-        onClose={closeDialog}
-        map={tableDataDialogMap}
-      />
     </>
   );
 };

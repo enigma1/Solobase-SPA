@@ -1,11 +1,6 @@
-import { useDialogStore } from '>/services/stores';
+import { dialogStoreActions } from '>/services/stores';
 
 export const useErrorDialog = () => {
-  const { openDialog, closeDialog } = useDialogStore(({ api }) => ({
-    openDialog: api.openDialog,
-    closeDialog: api.closeDialog,
-  }));
-
   const withErrorDialog = async <T>(
     fn: () => Promise<T>,
     title: string,
@@ -15,11 +10,11 @@ export const useErrorDialog = () => {
       return await fn();
     } catch (error) {
       const err = error as Error;
-      openDialog({
+      dialogStoreActions.openDialog({
         type,
         payload: {
           error: { title, msg: err.message },
-          onClear: closeDialog,
+          onClear: dialogStoreActions.closeDialog,
         },
       });
       return undefined;

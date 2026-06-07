@@ -6,7 +6,8 @@
 
   .side-accordion-header {
     @apply sticky top-0 flex items-center border-b border-be-0;
-    background-color: var(--color-srf-dim);
+    /* background-color: var(--color-srf-dim); */
+    background: linear-gradient(54deg in oklch, var(--color-srf-dim) 39%, var(--color-bg) 100%);
     border-color: var(--color-border-separate);
     box-shadow: var(--shadow-lg);
   }

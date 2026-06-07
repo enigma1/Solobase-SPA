@@ -12,15 +12,19 @@ import {
   SqlColumnsShape,
 } from '>/types';
 
-export type InfoSchema = {
-  rows: Scalar[][];
+export type BasicResponse = {
+  ok: boolean;
+  message: string;
+};
+
+export type BasicRowsShape = {
+  rows: SqlRow[];
   cols: SqlColumnsShape;
   columnsOrder: string[];
 };
 
 export type SessionRestoreResponse = {
-  sessionId: string;
-  schemas: InfoSchema;
+  schemas: BasicRowsShape;
   username: string;
   dbSelected: string | null;
   preferences: Record<string, any>;
@@ -57,18 +61,24 @@ export type DatabaseInfo = {
 //   databases: DatabaseInfo[];
 // };
 
-export type FetchDatabasesResponse = InfoSchema;
+export type FetchDatabasesResponse = BasicRowsShape;
 
 export type FetchTablesRequest = {
-  database: string;
+  database?: string;
 };
 
-export type FetchTablesResponse = InfoSchema;
+export type FetchTablesResponse = BasicRowsShape;
 
 export type FetchRowsRequest = {
+  table: string;
   offset?: number;
   limit?: number;
-  table: string;
+  sortBy?: (
+    | `${string} ASC`
+    | `${string} DESC`
+    | `${string} asc`
+    | `${string} desc`
+  )[];
 };
 
 export type FetchRowsResponse = {
@@ -94,25 +104,32 @@ export type UpdateRowsResponse = {
   rows: DbTableRow[];
 };
 
-export type RunQueryResponse = {
-  rows: SqlRow[];
-  cols: SqlColumnsShape;
-  columnsOrder: string[];
+export type RunQueryResponse = BasicRowsShape & {
   query: string;
   truncated: boolean;
 };
 
-export type CharsetMeta = {
+type CharsetMeta = {
   maxlen: number;
   defaultCollation: string;
   collations: string[];
 };
 
+export type StorageEngineMeta = {
+  name: string;
+  isDefault: boolean;
+  transactions: boolean;
+  xa: boolean;
+  savepoints: boolean;
+};
+
 export type FetchDatabaseInfoResponse = {
   collationsByCharset: Record<string, CharsetMeta>;
+  engines: StorageEngineMeta[];
   defaults: {
     charset: string;
     collation: string;
+    engine: string;
   };
 };
 
@@ -120,41 +137,77 @@ export type SelectDatabaseRequest = {
   name: string;
 };
 
-export type SelectDatabaseResponse = {
-  success: boolean;
+export type SelectDatabaseResponse = BasicResponse & {
   database?: string;
-  message: string;
 };
 
 export type CreateDatabaseRequest = {
   name: string;
-  charset: string;
-  collation: string;
+  charset?: string;
+  collation?: string;
 };
 
-export type CreateDatabaseResponse = {
-  success: boolean;
+export type CreateDatabaseResponse = BasicResponse & {
   database?: string;
-  message: string;
+};
+
+export type EditDatabaseRequest = {
+  name: string;
+  charset?: string;
+  collation?: string;
+};
+
+export type EditDatabaseResponse = BasicResponse & {
+  database?: string;
 };
 
 export type DeleteDatabasesRequest = {
   names: string[];
 };
 
-export type DeleteDatabasesResponse = {
-  success: boolean;
+export type DeleteDatabasesResponse = BasicResponse & {
   databases: string[];
-  message: string;
 };
 
 export type DeleteTablesRequest = {
-  dbName: string;
-  names: string[];
+  database: string;
+  tables: string[];
 };
 
-export type DeleteTablesResponse = {
-  success: boolean;
+export type CreateTableRequest = {
+  database: string;
+  table: string;
+  engine?: string;
+  charset?: string;
+  collation?: string;
+};
+
+export type CreateTableResponse = BasicResponse & {
+  database: string;
+  table: string;
+};
+
+export type EditTableRequest = {
+  table: string;
+  database: string;
+  engine?: string;
+  charset?: string;
+  collation?: string;
+};
+
+export type EditTableResponse = BasicResponse & {
+  database: string;
+  table: string;
+};
+
+export type DeleteTablesResponse = BasicResponse & {
   tables: string[];
-  message: string;
+};
+
+export type ExportDatabasesRequest = {
+  databases: string[];
+};
+
+export type ExportDatabasesResponse = BasicResponse & {
+  databases: string[];
 };

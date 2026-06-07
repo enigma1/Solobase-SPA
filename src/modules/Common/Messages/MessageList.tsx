@@ -18,14 +18,16 @@ export const MessageList = ({ mode }: MessageListProps) => {
 
   return (
     <>
-      {messages.map((msg: Message<MessageContent>) => {
+      {messages.map((msg, idx) => {
         return (
           <MessageBar
-            key={msg.id}
-            type={msg.type}
+            key={`${msg.id}-${idx}`}
+            type={msg.type ?? 'error'}
             msg={msg.content.text}
             duration={msg.content.duration}
-            onClose={() => removeMessage(msg.id, msg.mode)}
+            onClose={() =>
+              msg.id && msg.mode && removeMessage(msg.id, msg.mode)
+            }
           />
         );
       })}

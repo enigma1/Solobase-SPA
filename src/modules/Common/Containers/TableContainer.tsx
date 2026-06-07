@@ -58,18 +58,18 @@ export const TableContainer = ({
     outerRef,
     resizeLineRef,
   );
-
+  const isEditable = onEditCell;
   return (
     <table className='table' ref={tableRef}>
       <thead>
         <tr>
           <th />
-          {columnsOrder.map((colName, idx) => {
+          {activeCols.map((colName) => {
             const colData = cols[colName];
             const title = `type: ${colData?.type} / nullable: ${colData?.nullable} / key: ${colData?.key} / default: ${colData?.defaultValue} / extra: ${colData?.extra}`;
             return (
               <th
-                key={`col-${colName}-${idx}`}
+                key={`col-${colName}`}
                 title={title}
                 style={{ width: `${colWidths[colName]}px` }}
               >
@@ -95,7 +95,7 @@ export const TableContainer = ({
               ? 'even'
               : 'odd';
           return (
-            <tr key={`row-${uid}`} className={`${rowBg}`}>
+            <tr key={`row-${uid}-${idx}`} className={`${rowBg}`}>
               <td className='align-middle'>
                 <div className='flex items-center gap-2'>
                   <Checkbox
@@ -106,7 +106,7 @@ export const TableContainer = ({
                   />
                   {onEditRow && (
                     <button
-                      className='btn-secondary p-0'
+                      className='btn-secondary p-0 bg-transparent border-0'
                       onClick={() => onEditRow(uid)}
                     >
                       <PencilLineIcon size={18} className='inline-block' />
@@ -114,7 +114,8 @@ export const TableContainer = ({
                   )}
                 </div>
               </td>
-              {columnsOrder.map((colName, colIndex) => {
+              {activeCols.map((colName) => {
+                const colIndex = columnIndices[colName];
                 const getValue = () => {
                   const value = row[colIndex];
                   if (value === null) return 'NULL';
@@ -130,28 +131,30 @@ export const TableContainer = ({
                   }
                   return String(value);
                 };
-                return (
+
+                return isEditable ? (
                   <td
                     key={colIndex}
                     className={`editable ${editedRow?.[uid]?.[colIndex] ? 'selected' : ''}`}
                   >
                     {getValue()}
-                    {onEditCell && (
-                      <button
-                        className='btn p-0 edit'
-                        onClick={() =>
-                          onEditCell({
-                            row: [...row],
-                            rId: uid,
-                            cId: colIndex,
-                            colName,
-                          })
-                        }
-                      >
-                        <SquarePenIcon size={18} />
-                      </button>
-                    )}
+
+                    <button
+                      className='btn p-0 edit'
+                      onClick={() =>
+                        onEditCell({
+                          row: [...row],
+                          rId: uid,
+                          cId: colIndex,
+                          colName,
+                        })
+                      }
+                    >
+                      <SquarePenIcon size={18} />
+                    </button>
                   </td>
+                ) : (
+                  <td key={colIndex}>{getValue()}</td>
                 );
               })}
             </tr>

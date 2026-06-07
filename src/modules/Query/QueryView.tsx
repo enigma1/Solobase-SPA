@@ -5,29 +5,12 @@ import {
   useColumnResize,
   useEffectiveTableWidth,
 } from '>/services/hooks';
-import {
-  useHistoryStore,
-  useAccountStore,
-  useDialogStore,
-} from '>/services/stores';
-import {
-  DialogRenderer,
-  errorDialogMap,
-  EffectiveTableWrapper,
-  ScreenLoader,
-} from '>/modules/Common';
-import { isObjectEmpty } from '>/services/utils';
+import { useHistoryStore } from '>/services/stores';
+import { EffectiveTableWrapper, ScreenLoader } from '>/modules';
 
 export const QueryView = () => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const { dialog, openDialog, closeDialog } = useDialogStore(
-    ({ state, api }) => ({
-      openDialog: api.openDialog,
-      closeDialog: api.closeDialog,
-      dialog: state.dialog,
-    }),
-  );
 
   const { withErrorDialog } = useErrorDialog();
   const { getQuery } = useHistoryStore(({ api }) => ({
@@ -153,11 +136,6 @@ export const QueryView = () => {
           </tbody>
         </table>
         {isLoading && <ScreenLoader />}
-        <DialogRenderer
-          dialog={dialog}
-          onClose={closeDialog}
-          map={errorDialogMap}
-        />
       </EffectiveTableWrapper>
     </>
   );

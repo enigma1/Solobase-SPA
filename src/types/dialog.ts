@@ -1,12 +1,50 @@
 import { ReactNode } from 'react';
+export type DialogVariants = 'success' | 'error' | 'info' | 'warn';
+export type ButtonStatus = 'hidden' | 'disabled';
 
-export type DialogState = { type: string; payload?: Record<string, any> };
+export type DialogAction =
+  | {
+      label: string;
+      classes?: string;
+      onClick: () => void;
+      id?: never;
+      status?: never;
+    }
+  | {
+      id: string;
+      label: string;
+      classes?: string;
+      onClick: () => void;
+      status?: ButtonStatus;
+    };
 
-type DialogMapProps = {
-  payload?: Record<string, any>;
-  onClose: () => void;
+export type DialogSizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'full';
+export type DialogPayload = {
+  caption: ReactNode;
+  component: ReactNode;
+  actions?: DialogAction[];
+  variant?: DialogVariants;
+  initialSize?: DialogSizes;
 };
 
-export type DialogMap = (
-  props: DialogMapProps,
-) => Record<string, () => ReactNode>;
+export type DialogState = {
+  payload: DialogPayload;
+};
+
+export type WizardHandlers = {
+  next?: () => void;
+  previous?: () => void;
+  skip?: () => void;
+  finish?: () => void;
+};
+
+export type DialogMap<T extends { type: string; payload: unknown }> = {
+  [K in T['type']]: (
+    payload: Extract<T, { type: K }>['payload'],
+    onClose: () => void,
+  ) => ReactNode;
+};
+
+export type DialogStore = {
+  dialog: DialogState | null;
+};

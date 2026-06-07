@@ -35,11 +35,15 @@ export const useColumnResize = (
 
       const parentRect = parent.getBoundingClientRect();
       const x = parentRect.right - rect.left + outerRef.current!.scrollLeft;
-
       if (resizeLineRef.current) {
         resizeLineRef.current.style.left = `${x}px`;
         resizeLineRef.current!.style.opacity = '1';
       }
+
+      // console.log('mousemove', {
+      //   x,
+      //   ref: resizeLineRef.current,
+      // });
     };
 
     const onMouseUp = () => {

@@ -7,7 +7,6 @@ import {
   useAccountStore,
 } from '>/services/stores';
 import { DialogRenderer } from '>/modules/Common';
-import { errorDialogMap } from '>/modules/Common/DialogRenderer';
 
 export const QueryList = () => {
   const queryClient = useQueryClient();
@@ -46,13 +45,13 @@ export const QueryList = () => {
     dbSelected: state.dbSelected,
   }));
 
-  // const { dialog, openDialog, closeDialog } = useDialogStore(
-  //   ({ state, api }) => ({
-  //     openDialog: api.openDialog,
-  //     closeDialog: api.closeDialog,
-  //     dialog: state.dialog,
-  //   }),
-  // );
+  const { dialog, openDialog, closeDialog } = useDialogStore(
+    ({ state, api }) => ({
+      openDialog: api.openDialog,
+      closeDialog: api.closeDialog,
+      dialog: state.dialog,
+    }),
+  );
 
   // useEffect(() => {
   //   if (!dbSelected || !querySelection) return;
@@ -92,11 +91,6 @@ export const QueryList = () => {
           <div className='side-list-empty'>No Queries Set</div>
         )}
       </div>
-      {/* <DialogRenderer
-        dialog={dialog}
-        onClose={closeDialog}
-        map={errorDialogMap}
-      /> */}
     </>
   );
 };

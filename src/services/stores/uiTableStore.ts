@@ -1,5 +1,8 @@
 import { makeStore, makeFactoryStore } from '>/services/utils/emitter';
 
+type WithUiKey = {
+  uiKey: number;
+};
 type UiTableState = {
   selectedRows: Set<number>;
 };
@@ -7,6 +10,7 @@ type UiTableState = {
 export type UiTableActions = {
   initialize: () => void;
   clearSelected: () => void;
+  setAllRows: (rows: WithUiKey[]) => void;
   setSelectedRow: (row: number, active: boolean) => void;
 };
 
@@ -51,6 +55,11 @@ export const createUiTableStore = () => {
       setAuto({
         selectedRows: new Set(),
       });
+    },
+
+    setAllRows: (rows: WithUiKey[]) => {
+      const selectedRows = new Set<number>(rows.map((r) => r.uiKey));
+      setAuto({ selectedRows });
     },
 
     setSelectedRow: (row, active) => {

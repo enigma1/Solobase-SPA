@@ -1,0 +1,23 @@
+[data-theme="sand"] {
+  --tone-0: oklch(0.94 0.005 85);
+  --tone-1: oklch(0.84 0.02 65);
+  --tone-2: oklch(0.94 0.02 70);
+  --tone-3: oklch(0.87 0.03 55);
+  --tone-4: oklch(0.79 0.04 45);
+  --tone-5: oklch(0.74 0.04 37);
+  --tone-6: oklch(0.70 0.07 43);
+  --tone-7: oklch(0.2 0.02 110);
+  --tone-8: oklch(0.65 0.04 122);
+  --tone-9: oklch(0.55 0.04 252);
+  --tone-10: oklch(0.471 0.04 252);
+  --tone-11: oklch(0.353 0.04 252);
+
+  --overlay: rgb(0.2 0.1 0 / 0.35);
+
+  --action: oklch(0.7 0.03 80);
+  --effect: oklch(0.6 0.04 250);
+  --separator:
+    color-mix(in oklch,
+      var(--tone-10) 30%,
+      var(--tone-8));
+}

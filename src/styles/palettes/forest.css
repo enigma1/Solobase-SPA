@@ -1,0 +1,25 @@
+[data-theme="forest"] {
+  --tone-0: oklch(0.993 0.004 140);
+  --tone-1: oklch(0.982 0.005 140);
+  --tone-2: oklch(0.961 0.007 140);
+  --tone-3: oklch(0.940 0.009 140);
+  --tone-4: oklch(0.918 0.012 140);
+  --tone-5: oklch(0.894 0.015 140);
+  --tone-6: oklch(0.865 0.020 140);
+  --tone-7: oklch(0.818 0.028 140);
+
+  --tone-8: oklch(0.649 0.040 180);
+  --tone-9: oklch(0.606 0.048 200);
+  --tone-10: oklch(0.503 0.055 220);
+  --tone-11: oklch(0.375 0.060 240);
+
+  --overlay: rgb(0 20 20 / 0.35);
+
+  --action: oklch(0.40 0.16 145);
+  --effect: oklch(0.60 0.12 200);
+
+  --separator:
+    color-mix(in oklch,
+      var(--tone-10) 30%,
+      var(--tone-8));
+}

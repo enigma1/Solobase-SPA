@@ -1,6 +1,6 @@
 @layer components {
   .combo-shell {
-    @apply relative flex items-stretch h-full rounded-md border;
+    @apply flex items-stretch rounded-md border;
     background: var(--color-srf);
     color: var(--color-text);
     border-color: var(--color-border);
@@ -65,12 +65,20 @@
   }
 
   .combo-menu {
-    @apply absolute left-0 top-full -mt-0.5 w-full rounded-md rounded-t-none z-50 max-h-60 overflow-auto border;
+    /* @apply absolute left-0 top-full -mt-0.5 w-full rounded-md rounded-t-none max-h-60 overflow-auto border;*/
+    @apply rounded-md rounded-t-none max-h-60 overflow-auto border;
+    z-index: 60;
     background-color: var(--color-srf);
     border-color: var(--color-border-focus);
     box-shadow: var(--shadow-md);
 
-    & li {
+    & li.group {
+      @apply px-3 pl-2 py-1.5 text-xs font-semibold italic tracking-wide pointer-events-none cursor-default border-b;
+      color: var(--color-text-muted);
+      border-color: var(--color-border-focus);
+    }
+
+    & li:not(.group) {
       @apply px-3 py-2 text-sm cursor-pointer border-b;
       border-color: var(--color-border);
 

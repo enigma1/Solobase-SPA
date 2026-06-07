@@ -7,37 +7,64 @@ import {
   useDialogStore,
   messageStoreActions,
   createUiTableStore,
+  dialogStoreActions,
 } from '>/services/stores';
-import type { SqlColumnsShape, Scalar, ViewRow, ScalarObject } from '>/types';
+import type {
+  SqlColumnsShape,
+  Scalar,
+  SqlRow,
+  ViewRow,
+  ScalarObject,
+} from '>/types';
 import {
   PageTableShell,
   EffectiveTableWrapper,
   TableContainer,
   ScreenLoader,
-  DialogRenderer,
   Checkbox,
+  DialogContent,
+  FilterColumns,
 } from '>/modules';
-import { getMergedColumnData } from '>/services/utils';
-import { tableDialogMap } from './DialogMap';
+import {
+  getSingleColumnFromResult,
+  getColumnsFromResult,
+  getColumnsFromRow,
+  getMergedColumnData,
+  dialogActions,
+} from '>/services/utils';
+import { TableEdit } from './TableEdit';
+import { TablesDeletePreview } from './TablesPreviews';
 
 type TablesListProps = {
+  dbSelected: string;
   rows: ViewRow<Scalar[]>[];
   cols: SqlColumnsShape;
   columnsOrder: string[];
 };
 
-export const TablesList = ({ rows, cols, columnsOrder }: TablesListProps) => {
+export const TablesList = ({
+  dbSelected,
+  rows,
+  cols,
+  columnsOrder,
+}: TablesListProps) => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const tableStore = useMemo(() => createUiTableStore(), []);
-  const dbSelected = useAccountStore(({ state }) => state.dbSelected);
+  const rowMap = useMemo(
+    () => new Map(rows.map((r) => [r.uiKey, r.row])),
+    [rows],
+  );
 
-  const { editedRow, markEditedRow } = useTablesStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, ScalarObject>,
-    markEditedRow: api.markEditedRow,
-  }));
+  const { editedRow, markEditedRow, hiddenColumns, setHiddenColumns } =
+    useTablesStore(({ state, api }) => ({
+      editedRow: state.editedRow as Record<number, ScalarObject>,
+      markEditedRow: api.markEditedRow,
+      hiddenColumns: state.hiddenColumns,
+      setHiddenColumns: api.setHiddenColumns,
+    }));
 
   const { dialog, openDialog, closeDialog } = useDialogStore(
     ({ api, state }) => ({
@@ -49,20 +76,29 @@ export const TablesList = ({ rows, cols, columnsOrder }: TablesListProps) => {
 
   const callbacks = {
     onSuccess: (data: any) => {
-      if (data?.success) {
+      if (data.ok) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.databases(),
           exact: true,
         });
+
+        messageStoreActions.addMessage({
+          type: 'success',
+          content: { text: 'Selected Rows removed', duration: 3000 },
+        });
+      } else {
+        messageStoreActions.addMessage({
+          type: 'warn',
+          content: {
+            text: data.message ?? 'Failed to remove some data rows',
+            duration: 3000,
+          },
+        });
       }
-      messageStoreActions.addMessage({
-        type: 'success',
-        content: { text: 'Selected Databases removed', duration: 3000 },
-      });
     },
     onError: (error: any) => {
       messageStoreActions.addMessage({
-        content: { text: 'Failed to remove databases', duration: 3000 },
+        content: { text: 'Failed to remove data rows', duration: 3000 },
       });
     },
   };
@@ -78,15 +114,50 @@ export const TablesList = ({ rows, cols, columnsOrder }: TablesListProps) => {
 
   const discardEditedRows = () => {
     openDialog({
-      type: 'discardChanges',
       payload: {
-        caption: 'Discard Changes',
-        message: 'Are you sure you want to discard all changes?',
-        onConfirm: () => {
-          closeDialog();
-          markEditedRow({});
-        },
-        onCancel: () => closeDialog(),
+        caption: 'SQL Edits',
+        component: (
+          <DialogContent note='Discard Changes'>
+            {'About to discard all changes made in the tables. Are you sure?'}
+          </DialogContent>
+        ),
+        actions: dialogActions.confirmCancel({
+          onConfirm: () => {
+            closeDialog();
+            markEditedRow({});
+          },
+        }),
+      },
+    });
+  };
+
+  const onEditRow = (uid: number) => {
+    const row = rowMap.get(uid);
+    if (!row) return;
+    const fields = getColumnsFromRow(row, columnsOrder, [
+      'TABLE_NAME',
+      'ENGINE',
+      'TABLE_COLLATION',
+      'AUTO_INCREMENT',
+      'ROW_FORMAT',
+      'TABLE_COMMENT',
+    ]);
+    dialogStoreActions.openDialog({
+      payload: {
+        caption: 'Previews',
+        component: (
+          <TableEdit
+            database={dbSelected}
+            table={fields.TABLE_NAME as string}
+            cols={[]}
+            engine={fields.ENGINE as string}
+            charset={fields.DEFAULT_CHARACTER_SET_NAME as string}
+            collation={fields.DEFAULT_COLLATION_NAME as string}
+            // comment={fields.TABLE_COMMENT as string}
+            // rowFormat={fields.ROW_FORMAT as string}
+          />
+        ),
+        variant: 'warn',
       },
     });
   };
@@ -94,18 +165,89 @@ export const TablesList = ({ rows, cols, columnsOrder }: TablesListProps) => {
   const onDoubleClick = () => {};
   const handleSelectedExports = () => {};
   const handleSaveRows = () => {};
-  const handleDeleteTables = () => {};
-  const handleColumnsActive = () => {};
+
+  const handleDeleteTables = () => {
+    const sRows = tableStore.get().selectedRows;
+    if (sRows.size === 0) {
+      return;
+    }
+
+    const tableEntries: SqlRow[] = [];
+
+    for (const id of sRows) {
+      const row = rowMap.get(id);
+      if (row) tableEntries.push(row);
+    }
+    const tableNames = getSingleColumnFromResult(
+      tableEntries,
+      columnsOrder,
+      'TABLE_NAME',
+    );
+
+    dialogStoreActions.openDialog({
+      payload: {
+        caption: 'Removal of Databases',
+        variant: 'error',
+        component: (
+          <TablesDeletePreview
+            database={dbSelected}
+            rows={tableEntries}
+            columnsOrder={columnsOrder}
+          />
+        ),
+        actions: dialogActions.confirmCancel({
+          onConfirm: () => {
+            dialogStoreActions.closeDialog();
+            mutate({
+              database: dbSelected,
+              tables: tableNames,
+            });
+          },
+        }),
+      },
+    });
+  };
+
+  // Filter Columns
+  const handleColumnsActive = () => {
+    const valueRef = { current: { ...hiddenColumns } };
+    dialogStoreActions.openDialog({
+      payload: {
+        caption: 'Filter Columns',
+        component: (
+          <FilterColumns
+            hiddenColumns={hiddenColumns}
+            columnsOrder={columnsOrder}
+            onChange={(col, hidden) => {
+              if (hidden) {
+                valueRef.current[col] = true;
+              } else {
+                delete valueRef.current[col];
+              }
+            }}
+          />
+        ),
+        actions: dialogActions.withEnableConfirmCancel({
+          onConfirm: () => {
+            setHiddenColumns(valueRef.current);
+            dialogStoreActions.closeDialog();
+          },
+        }),
+      },
+    });
+  };
 
   const shellHandlers = {
+    onDiscardEdits:
+      Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
+    onSave: Object.entries(editedRow).length > 0 ? handleSaveRows : undefined,
     onExport: handleSelectedExports,
-    onDiscardEdits: discardEditedRows,
     onDelete: handleDeleteTables,
     onDownload: handleSelectedExports,
-    onSave: handleSaveRows,
     onFilterColumns: handleColumnsActive,
   };
 
+  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
   return (
     <>
       <PageTableShell
@@ -123,19 +265,17 @@ export const TablesList = ({ rows, cols, columnsOrder }: TablesListProps) => {
           cols={cols}
           rows={rows}
           columnsOrder={columnsOrder}
+          activeCols={activeCols}
           store={tableStore}
           outerRef={outerRef}
           tableRef={tableRef}
+          resizeLineRef={resizeLineRef}
           onEditCell={onDoubleClick}
           editedRow={editedRow}
+          onEditRow={onEditRow}
         />
       </EffectiveTableWrapper>
       {isPending && <ScreenLoader />}
-      <DialogRenderer
-        dialog={dialog}
-        onClose={closeDialog}
-        map={tableDialogMap}
-      />
     </>
   );
 };

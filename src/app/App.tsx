@@ -4,10 +4,12 @@ import {
   Route,
   createBrowserRouter,
   Await,
+  Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { messageStoreActions } from '>/services/stores';
-import { useSessionRestore } from '>/services/queryHooks';
+import { useQueryClient } from '@tanstack/react-query';
+import { messageStoreActions, accountStoreActions } from '>/services/stores';
+import { queryKeys, useSessionRestore } from '>/services/queryHooks';
 import {
   RootLayout,
   AuthGuard,
@@ -20,25 +22,34 @@ import {
   GuestGuard,
   HomeRedirect,
   Login,
-  Logout,
   NetworkDown,
 } from '>/modules';
+import { isNonEmptyString } from '>/services/utils';
+
 import { routes } from '>/config';
 
-const defaultThemeProps = {
-  colors: 'default', // semantic theme
-  typography: 'default', // alternate typography sets
-  spacing: 'default', // spacing token set
-};
-
 export const App = () => {
+  const queryClient = useQueryClient();
   const { session, isSuccess } = useSessionRestore(({ query, state }) => ({
     isSuccess: query.isSuccess,
     session: state,
   }));
 
+  // used to block session restore after logout
   useEffect(() => {
-    if (isSuccess && session) {
+    const canRestore = sessionStorage.getItem('can-restore');
+    if (canRestore !== 'true') {
+      sessionStorage.setItem('can-restore', 'true');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isSuccess && session && isNonEmptyString(session.username)) {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.databases(),
+        exact: true,
+      });
+
       messageStoreActions.addMessage({
         type: 'success',
         content: {
@@ -62,6 +73,11 @@ export const App = () => {
           path: routes.front.networkDown,
           element: <NetworkDown />,
         },
+
+        {
+          path: '*',
+          element: <Navigate to={routes.front.home} replace />,
+        },
         // {
         //   path: routes.front.login,
         //   element: <Account key={location.pathname} />,
@@ -69,8 +85,8 @@ export const App = () => {
         {
           element: <GuestGuard />,
           children: [
-            { path: routes.front.home, element: <Login /> },
-            { path: routes.front.login, element: <Login /> },
+            { path: routes.front.home, element: <HomeRedirect /> },
+            // { path: routes.front.login, element: <Login /> },
             // { path: routes.front.register, element: <Register /> },
           ],
         },
@@ -78,10 +94,10 @@ export const App = () => {
         {
           element: <AuthGuard />,
           children: [
-            {
-              path: routes.front.logout,
-              element: <Logout />,
-            },
+            // {
+            //   path: routes.front.logout,
+            //   element: <Logout />,
+            // },
             {
               path: routes.front.newDatabase,
               element: <DatabaseNew />,

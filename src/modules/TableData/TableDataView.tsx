@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { routes } from '>/config';
 import { queryKeys, useTableDataHook } from '>/services/queryHooks';
 import { useAccountStore, tablesDataStoreActions } from '>/services/stores';
 import {
@@ -17,17 +19,17 @@ type ViewRow<T> = {
 };
 
 export const TableDataView = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const queryClient = useQueryClient();
   const { dbSelected, activeTable } = useAccountStore(({ state, api }) => ({
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
   }));
 
-  const { rows, cols, columnsOrder, type, isSuccess, isError, isLoading } =
+  const { rows, cols, columnsOrder, type, isSuccess, isError, isFetching } =
     useTableDataHook(({ state, query }) => {
-      // console.log('rows', state.rows);
-      // console.log('cols', state.cols);
-
       return {
         rows: state.rows,
         cols: state.cols,
@@ -35,7 +37,7 @@ export const TableDataView = () => {
         type: state.type,
         isSuccess: query.isSuccess,
         isError: query.isError,
-        isLoading: query.isLoading,
+        isFetching: query.isFetching,
       };
     });
 
@@ -47,8 +49,8 @@ export const TableDataView = () => {
   }, [rows]);
 
   useEffect(() => {
+    tablesDataStoreActions.initialize();
     if (!dbSelected || !activeTable) {
-      tablesDataStoreActions.initialize();
       return;
     }
 
@@ -63,12 +65,19 @@ export const TableDataView = () => {
     });
   }, [dbSelected, activeTable]);
 
-  if (!dbSelected || !activeTable || !isSuccess) {
-    return isLoading ? (
-      <ScreenLoader />
-    ) : (
-      <EmptyPage note='Request Failure invalid database or table selected' />
-    );
+  const isBusy = isFetching;
+
+  if (!dbSelected) {
+    navigate(routes.front.dbView, { replace: true });
+    return null;
+  }
+  if (!activeTable) {
+    navigate(routes.front.listTables, { replace: true });
+    return null;
+  }
+
+  if (isBusy) {
+    return <ScreenLoader />;
   }
 
   if (rows.length === 0) {

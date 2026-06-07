@@ -1,5 +1,5 @@
 import { Outlet, Link, Navigate, useLocation } from 'react-router-dom';
-import { useAccountStore } from '>/services/stores';
+import { useAccountStore, dialogStoreActions } from '>/services/stores';
 import { routes } from '>/config';
 import {
   HeartbeatMonitor,
@@ -8,6 +8,8 @@ import {
   Auth,
   Guest,
   DropdownMenu,
+  GlobalDialog,
+  dialogFactories,
 } from '>/modules';
 // For testing purposes only, remove in production
 import { NavigationDebugger } from '>/modules/Debug/NavigationDebugger';
@@ -28,7 +30,16 @@ const AuthMenu = () => (
       </DropdownMenu>
       <div className='menu-separator'>|</div>
       <DropdownMenu label='Database'>
-        <Link to={routes.front.newDatabase}>New Database</Link>
+        <a
+          href='#'
+          onClick={() =>
+            dialogStoreActions.openDialog({
+              payload: dialogFactories.createDatabase(),
+            })
+          }
+        >
+          New Database
+        </a>
         <Link to={routes.front.listDatabases}>Show Databases</Link>
       </DropdownMenu>
       <div className='menu-separator'>|</div>
@@ -67,38 +78,41 @@ export const RootLayout = () => {
     return <Navigate to={routes.front.networkDown} replace />;
   }
   return (
-    <div className='app'>
-      <HeartbeatMonitor />
-      <NavigationDebugger />
-      {online && (
-        <>
-          <header className='app-header'>
-            <div className='app-logo'>
-              <Link to={routes.front.home} className='font-semibold'>
-                Home
-              </Link>
-            </div>
-            <nav className='w-full flex items-center gap-4'>
-              <AuthNavigationLinks />
-              <GuestNavigationLinks />
-            </nav>
-          </header>
+    <>
+      <div className='app'>
+        <HeartbeatMonitor />
+        <NavigationDebugger />
+        {online && (
+          <>
+            <header className='app-header'>
+              <div className='app-logo'>
+                <Link to={routes.front.home} className='font-semibold'>
+                  Home
+                </Link>
+              </div>
+              <nav className='w-full flex items-center gap-4'>
+                <AuthNavigationLinks />
+                <GuestNavigationLinks />
+              </nav>
+            </header>
 
-          <div className='menu-container'>
-            <AuthMenu />
-            <GuestMenu />
-          </div>
-        </>
-      )}
-      <div>
-        <MessageList mode='header' />
+            <div className='menu-container'>
+              <AuthMenu />
+              <GuestMenu />
+            </div>
+          </>
+        )}
+        <div>
+          <MessageList mode='header' />
+        </div>
+        <div className='app-content'>
+          {online && <AuthSideContent />}
+          <main>
+            <Outlet />
+          </main>
+        </div>
       </div>
-      <div className='app-content'>
-        {online && <AuthSideContent />}
-        <main>
-          <Outlet />
-        </main>
-      </div>
-    </div>
+      <GlobalDialog />
+    </>
   );
 };

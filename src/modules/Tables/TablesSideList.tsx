@@ -1,14 +1,14 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTablesHook } from '>/services/queryHooks';
-import { isObjectEmpty } from '>/services/utils';
+import { isObjectEmpty, dialogActions } from '>/services/utils';
 import {
   useAccountStore,
-  useDialogStore,
   useTablesDataStore,
+  dialogStoreActions,
 } from '>/services/stores';
-import { DialogRenderer, ScreenLoader } from '>/modules';
+import { ScreenLoader, DialogContent } from '>/modules';
+
 import { routes } from '>/config';
-import { tableDialogMap } from './DialogMap';
 
 export const TablesSideList = () => {
   const navigate = useNavigate();
@@ -24,19 +24,11 @@ export const TablesSideList = () => {
     markEditedRow: api.markEditedRow,
   }));
 
-  const { dialog, openDialog, closeDialog } = useDialogStore(
-    ({ api, state }) => ({
-      dialog: state.dialog,
-      openDialog: api.openDialog,
-      closeDialog: api.closeDialog,
-    }),
-  );
-
-  const { tables, tablesCount, isLoading, isSuccess } = useTablesHook(
+  const { tables, tablesCount, isFetching, isSuccess } = useTablesHook(
     ({ api, query }) => ({
       tables: api.getTablesNames(),
       tablesCount: api.getTablesCount(),
-      isLoading: query.isLoading,
+      isFetching: query.isFetching,
       isSuccess: query.isSuccess,
     }),
   );
@@ -44,24 +36,28 @@ export const TablesSideList = () => {
   const handleSwitchTable = (name: string) => {
     if (name === activeTable) return;
     if (!isObjectEmpty(editedRow)) {
-      openDialog({
-        type: 'unsavedChanges',
+      dialogStoreActions.openDialog({
         payload: {
           caption: 'Unsaved Changes',
-          message:
-            'You have unsaved changes. Switching tables will discard them. Continue?',
-          onConfirm: () => {
-            closeDialog();
-            markEditedRow({});
-            setActiveTable(name);
-            if (location.pathname !== routes.front.tableView) {
-              navigate(routes.front.tableView);
-            }
-          },
-          onCancel: () => closeDialog(),
+          component: (
+            <DialogContent note='Data Row Edits'>
+              {
+                'You have unsaved changes. Switching tables will discard them. Continue?'
+              }
+            </DialogContent>
+          ),
+          actions: dialogActions.confirmCancel({
+            onConfirm: () => {
+              dialogStoreActions.closeDialog();
+              markEditedRow({});
+              setActiveTable(name);
+              if (location.pathname !== routes.front.tableView) {
+                navigate(routes.front.tableView);
+              }
+            },
+          }),
         },
       });
-
       return;
     }
     setActiveTable(name);
@@ -69,6 +65,9 @@ export const TablesSideList = () => {
       navigate(routes.front.tableView);
     }
   };
+
+  const isBusy = isFetching;
+  if (isBusy) return <ScreenLoader />;
 
   return (
     <>
@@ -92,12 +91,6 @@ export const TablesSideList = () => {
           )
         ) : null}
       </div>
-      <DialogRenderer
-        dialog={dialog}
-        onClose={closeDialog}
-        map={tableDialogMap}
-      />
-      {isLoading && <ScreenLoader />}
     </>
   );
 };

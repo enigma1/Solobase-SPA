@@ -5,12 +5,25 @@ import {
   DatabaseIcon,
   FileStackIcon,
   ChevronsLeftRightEllipsisIcon,
+  CircleSlash2Icon,
 } from 'lucide-react';
 import { routes } from '>/config';
-import { DatabasesSideList, TablesSideList } from '>/modules';
-import { useHistoryStore, useAccountStore } from '>/services/stores';
+import {
+  DatabaseNew,
+  DatabasesSideList,
+  TableNew,
+  TablesSideList,
+  dialogFactories,
+} from '>/modules';
+import {
+  useHistoryStore,
+  useAccountStore,
+  dialogStoreActions,
+} from '>/services/stores';
+import { WizardHandlers } from '>/types';
 import { QueryList } from '>/modules/Query';
 import { useTablesHook } from '>/services/queryHooks';
+import { dialogActions } from '>/services/utils';
 
 export const Sidebar = () => {
   const [expandedSection, setExpandedSection] = useState<string | null>(
@@ -49,9 +62,9 @@ export const Sidebar = () => {
         <DatabaseIcon
           size={20}
           onClick={() => {
-            if (location.pathname !== routes.front.newDatabase) {
-              navigate(routes.front.newDatabase);
-            }
+            dialogStoreActions.openDialog({
+              payload: dialogFactories.createDatabase(),
+            });
           }}
         />
       ),
@@ -62,15 +75,37 @@ export const Sidebar = () => {
       getRoute: () =>
         activeTable ? routes.front.tableView : routes.front.listTables,
       component: <TablesSideList />,
-      icon: (
+      icon: dbSelected ? (
         <FileStackIcon
           size={20}
           onClick={() => {
-            if (location.pathname !== routes.front.newTable) {
-              navigate(routes.front.newTable);
-            }
+            const handlers: WizardHandlers = {};
+            dialogStoreActions.openDialog({
+              payload: {
+                initialSize: 'lg',
+                caption: 'Database Forms',
+                component: (
+                  <TableNew wizardHandlers={handlers} database={dbSelected} />
+                ),
+                variant: 'success',
+                actions: dialogActions.wizard({
+                  onNext: () => {
+                    handlers.next?.();
+                  },
+                  onPrevious: () => {
+                    handlers.previous?.();
+                  },
+                  onFinish: () => {
+                    handlers.finish?.();
+                    dialogStoreActions.closeDialog();
+                  },
+                }),
+              },
+            });
           }}
         />
+      ) : (
+        <CircleSlash2Icon size={20} />
       ),
     },
     {
@@ -98,7 +133,6 @@ export const Sidebar = () => {
   const toggleSection = (section: SideSectionItem) => {
     setExpandedSection(section.id);
     const route = section.getRoute();
-    console.log('routing', route);
     if (route && location.pathname !== route) {
       navigate(route);
     }

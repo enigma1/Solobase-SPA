@@ -1,16 +1,12 @@
 import { makeStore } from '>/services/utils/emitter';
-import { DialogState } from '>/types';
-
-type DialogStore = {
-  dialog: DialogState | null;
-};
+import { DialogState, DialogStore } from '>/types';
 
 const initialState: DialogStore = {
   dialog: null,
 };
 
-const baseStore = makeStore<DialogStore>(() => initialState);
-const { set, setAuto } = baseStore;
+const baseStore = makeStore<DialogStore>(() => ({ ...initialState }));
+const { setAuto } = baseStore;
 
 export type DialogStoreActions = {
   openDialog: (dialog: DialogState) => void;

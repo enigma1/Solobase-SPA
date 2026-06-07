@@ -1,24 +1,18 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { CogIcon, LogOutIcon, DatabaseSearchIcon } from 'lucide-react';
-import { useAccountStore, useDialogStore } from '>/services/stores';
+import { useAccountStore } from '>/services/stores';
 import { ComboBox, Auth, QueryInput } from '>/modules';
+import { handleLogout } from '>/modules/Account';
 import { routes, themes } from '>/config';
 
 export const AuthNavigationLinks = () => {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const { dbSelected, theme, setTheme } = useAccountStore(({ state, api }) => ({
-    dbSelected: state.dbSelected,
+  // const buttonRef = useRef<HTMLButtonElement>(null);
+  const { username, theme, setTheme } = useAccountStore(({ state, api }) => ({
+    username: state.username,
     theme: state.theme,
     setTheme: api.setTheme,
   }));
-  const { dialog, openDialog, closeDialog } = useDialogStore(
-    ({ api, state }) => ({
-      dialog: state.dialog,
-      openDialog: api.openDialog,
-      closeDialog: api.closeDialog,
-    }),
-  );
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -59,49 +53,49 @@ export const AuthNavigationLinks = () => {
 
   // }
   return (
-    <Auth>
-      <div className='flex items-center gap-2 w-full'>
-        <div className='flex w-48'>
-          {/* <span
-            className='flex flex-1 items-center cursor-pointer'
-            onClick={() => document.getElementById('select-theme')?.focus()}
-          >
-            Theme:
-          </span> */}
-          <ComboBox
-            value={theme}
-            onChange={setTheme}
-            $options={themes.map((t) => ({
-              value: t,
-              label: t,
-            }))}
-            $placeholder='Select Theme'
-          />
-        </div>
+    <>
+      <Auth>
+        <div className='flex items-center gap-2 w-full'>
+          <div className='flex w-48'>
+            <ComboBox
+              value={theme}
+              onChange={setTheme}
+              $options={themes.map((t) => ({
+                value: t,
+                label: t,
+              }))}
+              $placeholder='Select Theme'
+            />
+          </div>
 
-        <div className='flex-1'>
-          <QueryInput />
+          <div className='flex-1'>
+            <QueryInput />
+          </div>
+          <nav className='flex items-center gap-2'>
+            <button
+              className='btn'
+              title='Execute Query'
+              onClick={handleQueryExecute}
+            >
+              <DatabaseSearchIcon size={24} />
+            </button>
+            <Link
+              className='btn'
+              to={routes.front.settings}
+              title='Set Defaults'
+            >
+              <CogIcon size={24} />
+            </Link>
+            <button
+              className='btn-secondary'
+              title='Logout'
+              onClick={() => handleLogout(username)}
+            >
+              <LogOutIcon size={24} />
+            </button>
+          </nav>
         </div>
-        <nav className='flex items-center gap-2'>
-          <button
-            className='btn'
-            title='Execute Query'
-            onClick={handleQueryExecute}
-          >
-            <DatabaseSearchIcon size={24} />
-          </button>
-          <Link className='btn' to={routes.front.settings} title='Set Defaults'>
-            <CogIcon size={24} />
-          </Link>
-          <Link
-            className='btn-secondary'
-            to={routes.front.logout}
-            title='Logout'
-          >
-            <LogOutIcon size={24} />
-          </Link>
-        </nav>
-      </div>
-    </Auth>
+      </Auth>
+    </>
   );
 };

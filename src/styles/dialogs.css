@@ -1,31 +1,56 @@
 @layer components {
   .dialog-container {
-    @apply fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 h-full w-full;
+    @apply fixed flex top-0 left-0 right-0 bottom-0 justify-center items-center z-50 h-full w-full;
   }
 
   .dialog {
-    @apply flex flex-col overflow-hidden resize rounded-md m-auto max-w-[90%] max-h-[90%];
+    @apply flex flex-col border overflow-hidden resize rounded-md m-auto max-w-[90%] max-h-[90%];
     min-height: calc(3rem + 10rem + 4rem);
     min-width: calc(24rem);
     background-color: var(--color-bg);
+    border-color: var(--color-border);
 
     &::backdrop {
       background: var(--overlay);
     }
 
     & .caption {
-      @apply px-4 py-3 border-b text-lg font-semibold;
-      background-color: var(--color-srf-dim);
+      @apply flex px-4 py-3 text-lg font-semibold;
+      /* background-color: var(--color-srf-dim); */
       border-color: var(--color-border-separate);
+      background: linear-gradient(54deg in oklch, var(--color-srf-dim) 39%, var(--color-action) 100%);
+      box-shadow: var(--shadow-lg);
+
+      &.warn {
+        background: linear-gradient(54deg in oklch, var(--color-srf-dim) 35%, var(--color-warn-bg) 100%);
+      }
+
+      &.info {
+        background: linear-gradient(54deg in oklch, var(--color-srf-dim) 35%, var(--color-info-bg) 100%);
+      }
+
+      &.success {
+        background: linear-gradient(54deg in oklch, var(--color-srf-dim) 35%, var(--color-success-bg) 100%);
+      }
+
+      &.error {
+        background: linear-gradient(54deg in oklch, var(--color-srf-dim) 35%, var(--color-error-bg) 100%);
+      }
+
+    }
+
+    & .caption-title {
+      @apply flex-1;
     }
 
     & .content {
-      @apply p-2 flex-1 min-h-0 flex flex-col border-b;
+      @apply flex-1 grow min-h-0 flex flex-col border-b;
       border-color: var(--color-border-separate)
     }
 
     & .controls {
       @apply flex justify-end gap-2 px-6 pt-2 pb-3;
+      background: linear-gradient(65deg in oklch, var(--color-srf-dim) 35%, var(--color-bg) 100%);
     }
 
     & .loading {

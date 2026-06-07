@@ -1,38 +1,38 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { queryClient } from '>/config/reactQuery';
-import {
-  useAccountStore,
-  useTablesDataStore,
-  useMessageStore,
-  useDialogStore,
-  createUiTableStore,
-} from '>/services/stores';
 import {
   Scalar,
   ScalarObject,
   SqlColumnsShape,
   SqlRow,
-} from '>/types/dbTables';
+  ViewRow,
+} from '>/types';
 import {
-  TableContainer,
-  DialogRenderer,
-  EffectiveTableWrapper,
-  ScreenLoader,
-  PageTableShell,
-} from '>/modules';
-import { tableDataDialogMap } from './DialogMap';
+  useTablesDataStore,
+  useMessageStore,
+  createUiTableStore,
+  dialogStoreActions,
+} from '>/services/stores';
 import {
   MutationCallbacks,
   queryKeys,
   useUpdateRowsMutation,
 } from '>/services/queryHooks';
-import { updateRowsSqlTransformer } from './helpers';
-import { isObjectEmpty, getMergedColumnData } from '>/services/utils';
-import { ViewRow } from '>/types/common';
+import { dialogActions } from '>/services/utils';
+import {
+  TableContainer,
+  EffectiveTableWrapper,
+  ScreenLoader,
+  PageTableShell,
+  DialogContent,
+  FilterColumns,
+  EditDataCellRaw,
+} from '>/modules';
 import {
   UpdateRowsRequest,
   UpdateRowsResponse,
 } from '>/services/api/dbApiTypes';
+import { updateRowsSqlTransformer } from './helpers';
 
 type TableViewProps = {
   rows: ViewRow<SqlRow>[];
@@ -53,19 +53,15 @@ export const SqlView = ({
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const tableStore = useMemo(() => createUiTableStore(), []);
-  const addMessage = useMessageStore(({ api }) => api.addMessage);
-  const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, ScalarObject>,
-    markEditedRow: api.markEditedRow,
-  }));
 
-  const { dialog, openDialog, closeDialog } = useDialogStore(
-    ({ api, state }) => ({
-      dialog: state.dialog,
-      openDialog: api.openDialog,
-      closeDialog: api.closeDialog,
-    }),
-  );
+  const addMessage = useMessageStore(({ api }) => api.addMessage);
+  const { editedRow, markEditedRow, hiddenColumns, setHiddenColumns } =
+    useTablesDataStore(({ state, api }) => ({
+      editedRow: state.editedRow as Record<number, ScalarObject>,
+      markEditedRow: api.markEditedRow,
+      hiddenColumns: state.hiddenColumns,
+      setHiddenColumns: api.setHiddenColumns,
+    }));
 
   const callbacks = {
     onSuccess: () => {
@@ -98,7 +94,7 @@ export const SqlView = ({
     callbacks,
   );
 
-  const handleDoubleClick = ({
+  const handleEditClick = ({
     row,
     rId,
     cId,
@@ -109,26 +105,37 @@ export const SqlView = ({
     cId: number;
     colName: string;
   }) => {
-    openDialog({
-      type: 'editCell',
+    const valueRef = { current: row[cId] };
+    const saveChanges = (newValue: Scalar) => {
+      markEditedRow((previousState) => {
+        const prevRow =
+          (previousState as Record<number, ScalarObject>)[rId] || {};
+        const updatedRow = { ...prevRow };
+        updatedRow[cId] = newValue;
+        return {
+          ...previousState,
+          [rId]: updatedRow,
+        };
+      });
+    };
+    dialogStoreActions.openDialog({
       payload: {
-        row,
-        cId,
-        rId,
-        colName,
-        onSave: (newValue: Scalar) => {
-          closeDialog();
-          markEditedRow((previousState) => {
-            const prevRow =
-              (previousState as Record<number, ScalarObject>)[rId] || {};
-            const updatedRow = { ...prevRow };
-            updatedRow[cId] = newValue;
-            return {
-              ...previousState,
-              [rId]: updatedRow,
-            };
-          });
-        },
+        caption: `SQL Edits`,
+        variant: 'warn',
+        component: (
+          <DialogContent note={`Table: ${colName} @row:[${rId}]`}>
+            <EditDataCellRaw
+              value={row[cId]}
+              onChange={(v: Scalar) => (valueRef.current = v)}
+            />
+          </DialogContent>
+        ),
+        actions: dialogActions.withEnableConfirmCancel({
+          onConfirm: () => {
+            dialogStoreActions.closeDialog();
+            saveChanges(valueRef.current);
+          },
+        }),
       },
     });
   };
@@ -139,16 +146,21 @@ export const SqlView = ({
   };
 
   const discardEditedRows = () => {
-    openDialog({
-      type: 'discardChanges',
+    dialogStoreActions.openDialog({
       payload: {
-        caption: 'Discard Changes',
-        message: 'Are you sure you want to discard all changes?',
-        onConfirm: () => {
-          closeDialog();
-          markEditedRow({});
-        },
-        onCancel: () => closeDialog(),
+        caption: 'SQL Edits',
+        component: (
+          <DialogContent note='Discard Changes'>
+            {'Are you sure you want to discard all changes?'}
+          </DialogContent>
+        ),
+        variant: 'warn',
+        actions: dialogActions.confirmCancel({
+          onConfirm: () => {
+            dialogStoreActions.closeDialog();
+            markEditedRow({});
+          },
+        }),
       },
     });
   };
@@ -175,23 +187,39 @@ export const SqlView = ({
 
   // Filter Columns
   const handleColumnsActive = () => {
-    openDialog({
-      type: 'filterColumns',
+    const valueRef = { current: { ...hiddenColumns } };
+    dialogStoreActions.openDialog({
       payload: {
-        columns: columnsOrder,
-        onSave: (newOrder: string[]) => {
-          closeDialog();
-          // setColumnsOrder(newOrder);
-        },
+        caption: 'Filter Columns',
+        component: (
+          <FilterColumns
+            hiddenColumns={hiddenColumns}
+            columnsOrder={columnsOrder}
+            onChange={(col, hidden) => {
+              if (hidden) {
+                valueRef.current[col] = true;
+              } else {
+                delete valueRef.current[col];
+              }
+            }}
+          />
+        ),
+        actions: dialogActions.withEnableConfirmCancel({
+          onConfirm: () => {
+            setHiddenColumns(valueRef.current);
+            dialogStoreActions.closeDialog();
+          },
+        }),
       },
     });
   };
 
   const shellHandlers = {
     onExport: handleSelectedExports,
-    onDiscardEdits: discardEditedRows,
+    onDiscardEdits:
+      Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
     onDelete: handleDeleteRows,
-    onSave: handleSaveRows,
+    onSave: Object.entries(editedRow).length > 0 ? handleSaveRows : undefined,
     onFilterColumns: handleColumnsActive,
   };
 
@@ -202,7 +230,11 @@ export const SqlView = ({
   //     console.log('TableView UNMOUNT');
   //   };
   // }, []);
+  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
 
+  const isBusy = isPending;
+
+  if (isBusy) return <ScreenLoader />;
   return (
     <>
       <PageTableShell
@@ -220,19 +252,15 @@ export const SqlView = ({
           cols={cols}
           rows={rows}
           columnsOrder={columnsOrder}
+          activeCols={activeCols}
           store={tableStore}
           outerRef={outerRef}
           tableRef={tableRef}
-          onEditCell={handleDoubleClick}
+          resizeLineRef={resizeLineRef}
+          onEditCell={handleEditClick}
           editedRow={editedRow}
         />
       </EffectiveTableWrapper>
-      {isPending && <ScreenLoader />}
-      <DialogRenderer
-        dialog={dialog}
-        onClose={closeDialog}
-        map={tableDataDialogMap}
-      />
     </>
   );
 };

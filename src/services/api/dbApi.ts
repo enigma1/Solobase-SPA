@@ -3,6 +3,7 @@ import { handleApiAxios } from './apiHelpers';
 import { routes } from '>/config/routes';
 
 import {
+  BasicResponse,
   SessionRestoreResponse,
   LoginRequest,
   LoginResponse,
@@ -20,10 +21,18 @@ import {
   SelectDatabaseResponse,
   CreateDatabaseRequest,
   CreateDatabaseResponse,
+  EditDatabaseRequest,
+  EditDatabaseResponse,
   DeleteDatabasesRequest,
   DeleteDatabasesResponse,
+  CreateTableRequest,
+  CreateTableResponse,
+  EditTableRequest,
+  EditTableResponse,
   DeleteTablesRequest,
   DeleteTablesResponse,
+  ExportDatabasesRequest,
+  ExportDatabasesResponse,
 } from './dbApiTypes';
 import { DbTable, PrimeObject } from '>/types';
 
@@ -39,10 +48,10 @@ apiClient.interceptors.response.use(
   },
 );
 
-const apiCall = <T>(fn: () => Promise<{ data: T }>) =>
+const apiCall = <T>(fn: () => Promise<any>, unwrap = true) =>
   handleApiAxios(async () => {
     const res = await fn();
-    return res.data;
+    return unwrap ? res.data : res;
   });
 
 const ping = () => apiCall<{ ok: true }>(() => apiClient.get('/api/active'));
@@ -52,7 +61,8 @@ const sessionRestore = () =>
 
 const login = (data: LoginRequest) =>
   apiCall<LoginResponse>(() => apiClient.post('/auth/login', data));
-const logout = () => apiCall(() => apiClient.get('/auth/logout'));
+const logout = () =>
+  apiCall<BasicResponse>(() => apiClient.get('/auth/logout'));
 
 const runQuery = (data: RunQueryRequest, signal?: AbortSignal) =>
   apiCall<RunQueryResponse>(() =>
@@ -72,6 +82,15 @@ const updateRows = (data: UpdateRowsRequest) =>
 const exportDatabase = () =>
   apiCall<UpdateRowsResponse>(() => apiClient.get('/db/export-database'));
 
+const exportDatabases = (data: ExportDatabasesRequest) =>
+  apiCall(
+    () =>
+      apiClient.post('/db/export-databases', data, {
+        responseType: 'blob',
+      }),
+    false,
+  );
+
 const fetchDatabaseInfo = () =>
   apiCall<FetchDatabaseInfoResponse>(() =>
     apiClient.get('/db/fetch-database-info'),
@@ -87,14 +106,25 @@ const createDatabase = (data: CreateDatabaseRequest) =>
     apiClient.post('/db/create-database', data),
   );
 
+const editDatabase = (data: EditDatabaseRequest) =>
+  apiCall<EditDatabaseResponse>(() =>
+    apiClient.post('/db/edit-database', data),
+  );
+
 const deleteDatabases = (data: DeleteDatabasesRequest) =>
   apiCall<DeleteDatabasesResponse>(() =>
-    apiClient.post('/db/delete-database', data),
+    apiClient.post('/db/delete-databases', data),
   );
+
+const createTable = (data: CreateTableRequest) =>
+  apiCall<CreateTableResponse>(() => apiClient.post('/db/create-table', data));
+
+const editTable = (data: EditTableRequest) =>
+  apiCall<EditTableResponse>(() => apiClient.post('/db/edit-table', data));
 
 const deleteTables = (data: DeleteTablesRequest) =>
   apiCall<DeleteTablesResponse>(() =>
-    apiClient.post('/db/delete-database', data),
+    apiClient.post('/db/delete-tables', data),
   );
 
 const saveSettings = (data: PrimeObject) =>
@@ -118,8 +148,12 @@ export const dbApi = {
   selectDatabase,
   exportDatabase,
   createDatabase,
+  editDatabase,
   deleteDatabases,
+  createTable,
+  editTable,
   deleteTables,
   saveSettings,
   loadSettings,
+  exportDatabases,
 };

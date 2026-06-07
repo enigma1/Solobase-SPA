@@ -4,6 +4,7 @@ import { CollectionColumns, ScalarObject, CollectionRow } from '>/types';
 type EditedRow = Record<number, ScalarObject>;
 type TablesState = {
   editedRow: EditedRow;
+  hiddenColumns: Record<string, boolean>;
 };
 
 export type TablesActions = {
@@ -11,12 +12,14 @@ export type TablesActions = {
   markEditedRow: (
     row: EditedRow | ((prevState: EditedRow) => EditedRow),
   ) => void;
+  setHiddenColumns: (hiddenColumns: Record<string, boolean>) => void;
 };
 
 export type TablesStore = TablesState & TablesActions;
 
 const initialState: TablesState = {
   editedRow: {},
+  hiddenColumns: {},
 };
 
 const baseStore = makeStore<TablesState>(() => initialState);
@@ -33,6 +36,9 @@ export const tablesStoreActions: TablesActions = {
 
       return { editedRow: nextEditedRow };
     });
+  },
+  setHiddenColumns: (cols) => {
+    setAuto({ hiddenColumns: { ...cols } });
   },
 };
 

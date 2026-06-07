@@ -6,8 +6,9 @@ import { queryKeys, STALE_TIME } from './defs';
 import {
   FetchDatabasesResponse,
   SessionRestoreResponse,
-  InfoSchema,
+  BasicRowsShape,
 } from '>/services/api';
+import { getSingleColumnFromResult } from '>/services/utils';
 import { DataHookProps, HookStore } from './defs';
 import { DbQueryData } from '>/types';
 
@@ -23,7 +24,6 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
   );
 
   const initialData: SessionRestoreResponse = {
-    sessionId: '',
     username: '',
     schemas: {
       rows: [],
@@ -33,7 +33,7 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
     dbSelected: null,
     preferences: {},
   };
-
+  const canRestore = sessionStorage.getItem('can-restore');
   const q = useQuery<SessionRestoreResponse, Error>({
     queryKey: queryKeys.session(),
     queryFn: async (): Promise<SessionRestoreResponse> => {
@@ -43,20 +43,28 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
     },
     staleTime: STALE_TIME,
     retry: false,
-    enabled: !isAuthenticated,
+    enabled: !isAuthenticated && canRestore === 'true',
     refetchOnWindowFocus: false,
   });
 
   const data = q.data ?? initialData;
 
   const api = useMemo(() => {
-    const nameIndex = data.schemas.columnsOrder.indexOf('SCHEMA_NAME');
+    // const nameIndex = data.schemas.columnsOrder.indexOf('SCHEMA_NAME');
 
+    // return {
+    //   getDbNames: () => {
+    //     if (nameIndex === -1) return [];
+    //     return data.schemas.rows.map((row) => row[nameIndex]);
+    //   },
+    // };
     return {
-      getDbNames: () => {
-        if (nameIndex === -1) return [];
-        return data.schemas.rows.map((row) => row[nameIndex]);
-      },
+      getDbNames: () =>
+        getSingleColumnFromResult(
+          data.schemas.rows,
+          data.schemas.columnsOrder,
+          'SCHEMA_NAME',
+        ),
     };
   }, [data.schemas.rows, data.schemas.columnsOrder]);
 
@@ -79,7 +87,6 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
   } satisfies DbQueryData;
 
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
-
   // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
   const q = useQuery<FetchDatabasesResponse, Error>({
     queryKey: queryKeys.databases(),
@@ -98,13 +105,9 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
   const data = q.data ?? initialData;
 
   const api = useMemo(() => {
-    const nameIndex = data.columnsOrder.indexOf('SCHEMA_NAME');
-
     return {
-      getDbNames: () => {
-        if (nameIndex === -1) return [];
-        return data.rows.map((row) => row[nameIndex]);
-      },
+      getDbNames: () =>
+        getSingleColumnFromResult(data.rows, data.columnsOrder, 'SCHEMA_NAME'),
     };
   }, [data.rows, data.columnsOrder]);
 
@@ -124,9 +127,11 @@ export const useDatabaseServerInfo = <TSelected = DatabaseServerInfoHookProps>(
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
   const initialData = {
     collationsByCharset: {},
+    engines: [],
     defaults: {
       charset: '',
       collation: '',
+      engine: '',
     },
   } satisfies FetchDatabaseInfoResponse;
   const q = useQuery<FetchDatabaseInfoResponse, Error>({

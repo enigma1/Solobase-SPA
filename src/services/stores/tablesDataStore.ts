@@ -4,6 +4,7 @@ import { CollectionColumns, ScalarObject, CollectionRow } from '>/types';
 type EditedRow = Record<number, ScalarObject> | Record<string, CollectionRow>;
 type TablesDataState = {
   editedRow: EditedRow;
+  hiddenColumns: Record<string, boolean>;
 };
 
 export type TablesDataActions = {
@@ -11,6 +12,8 @@ export type TablesDataActions = {
   markEditedRow: (
     row: EditedRow | ((prevState: EditedRow) => EditedRow),
   ) => void;
+  // setColumnActivity: (colName: string, hide?: boolean) => void;
+  setHiddenColumns: (hiddenColumns: Record<string, boolean>) => void;
 };
 
 export type TablesDataStore = TablesDataState & TablesDataActions;
@@ -22,9 +25,10 @@ export const defaultCollectionColumns = {
 
 const initialState: TablesDataState = {
   editedRow: {},
+  hiddenColumns: {},
 };
 
-const baseStore = makeStore<TablesDataState>(() => initialState);
+const baseStore = makeStore<TablesDataState>(() => ({ ...initialState }));
 const { get, set, setAuto } = baseStore;
 
 export const tablesDataStoreActions: TablesDataActions = {
@@ -39,6 +43,21 @@ export const tablesDataStoreActions: TablesDataActions = {
       return { editedRow: nextEditedRow };
     });
   },
+  setHiddenColumns: (cols) => {
+    setAuto({ hiddenColumns: { ...cols } });
+  },
+  // setColumnActivity: (colName, hide) => {
+  //   setAuto((state) => {
+  //     const { [colName]: removed, ...rest } = state.hiddenColumns;
+  //     if (!hide) return { hiddenColumns: { ...rest } };
+  //     return {
+  //       hiddenColumns: {
+  //         ...state.hiddenColumns,
+  //         [colName]: hide,
+  //       },
+  //     };
+  //   });
+  // },
 };
 
 type SelectorProps = {

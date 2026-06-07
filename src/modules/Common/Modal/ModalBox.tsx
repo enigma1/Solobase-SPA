@@ -1,4 +1,15 @@
-import { Children, isValidElement, ReactNode, useEffect, useRef } from 'react';
+import {
+  Children,
+  isValidElement,
+  ReactNode,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
+import { XIcon } from 'lucide-react';
+import { useModal, ModalContext } from '>/services/hooks';
+import { dialogSizes } from '>/services/utils';
+import { DialogVariants } from '>/types';
 
 type ModalCompoundComponent = React.FC<ModalBoxProps> & {
   Caption: React.FC<{ children: ReactNode }>;
@@ -7,32 +18,44 @@ type ModalCompoundComponent = React.FC<ModalBoxProps> & {
 };
 
 type ModalBoxProps = {
-  isOpen: boolean;
+  // isOpen: boolean;
   loading?: boolean;
   loadingBody?: ReactNode;
   onClose: () => void;
   children: ReactNode;
 };
 
-const Caption = ({ children }: { children: ReactNode }) => (
-  <div className='caption'>{children}</div>
-);
+const Caption = ({ children }: { children: ReactNode }) => {
+  const { onClose, variant } = useModal();
+
+  return (
+    <div className={`caption ${variant}`}>
+      <div className='caption-title'>{children}</div>
+      <button className='btn-secondary' onClick={onClose}>
+        <XIcon size={16} />
+      </button>
+    </div>
+  );
+};
 
 const Content = ({ children }: { children: ReactNode }) => (
   <div className='content'>{children}</div>
 );
 
-const Controls = ({ children }: { children: ReactNode }) => (
-  <div className='controls'>{children}</div>
-);
+const Controls = ({ children }: { children: ReactNode }) => {
+  return Children.count(children) > 0 ? (
+    <div className='controls'>{children}</div>
+  ) : null;
+};
 
 export const ModalBox: ModalCompoundComponent = ({
-  isOpen,
+  // isOpen,
   onClose,
   loading,
   loadingBody,
   children,
 }) => {
+  const { initialSize } = useModal();
   const childArray = Children.toArray(children);
 
   const caption = childArray.find(
@@ -54,16 +77,29 @@ export const ModalBox: ModalCompoundComponent = ({
     console.log('test-clicks', e.target === modalRef.current);
   };
 
+  // useEffect(() => {
+  //   const dialog = modalRef.current;
+  //   if (!dialog) return;
+
+  //   if (isOpen && !dialog.open) {
+  //     dialog.showModal();
+  //   } else if (!isOpen && dialog.open) {
+  //     dialog.close();
+  //   }
+  // }, [isOpen]);
+
   useEffect(() => {
     const dialog = modalRef.current;
     if (!dialog) return;
 
-    if (isOpen && !dialog.open) {
-      dialog.showModal();
-    } else if (!isOpen && dialog.open) {
-      dialog.close();
-    }
-  }, [isOpen]);
+    dialog.showModal();
+
+    return () => {
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, []);
 
   return (
     <div className='dialog-container' onClick={handleContainerClick}>
@@ -71,7 +107,7 @@ export const ModalBox: ModalCompoundComponent = ({
         ref={modalRef}
         onClick={handleClick}
         onCancel={onClose}
-        className='dialog'
+        className={`dialog ${dialogSizes[initialSize ?? 'sm']}`}
       >
         {caption}
         {loading ? (

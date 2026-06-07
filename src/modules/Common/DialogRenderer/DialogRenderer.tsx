@@ -1,43 +1,19 @@
-import { ReactNode } from 'react';
 import { DialogState } from '>/types';
-
-export type BasicRecord = {
-  title: string;
-  msg: string | undefined;
-};
-
-type DialogMapFieldOutput = Record<string, () => ReactNode>;
-type DialogMapFieldProps<TPayload = Record<string, unknown>> = {
-  payload?: TPayload;
-  onClose: () => void;
-};
-type DialogMap = (props: DialogMapFieldProps) => DialogMapFieldOutput;
+import { DialogComponent } from './CommonMap';
 
 export type DialogRendererProps = {
   dialog: DialogState | null;
   onClose: () => void;
-  map: DialogMap;
 };
 
-export const DialogRenderer = ({
-  dialog,
-  onClose,
-  map,
-}: DialogRendererProps) => {
+export const DialogRenderer = ({ dialog, onClose }: DialogRendererProps) => {
   if (!dialog) return null;
 
-  const dialogMap = map({
-    payload: dialog.payload ?? undefined,
-    onClose,
-  });
-
-  const renderer = dialogMap[dialog.type];
-  return renderer ? renderer() : null;
+  return <DialogComponent payload={dialog.payload} onClose={onClose} />;
 };
-
-export const ErrorItem = ({ error }: { error: BasicRecord }) => (
-  <div className='rounded p-4 space-y-1'>
-    <div className='font-semibold'>{error.title}</div>
-    <div className='text-sm opacity-70'>{error.msg}</div>
-  </div>
-);
+// export const ErrorItem = ({ error }: { error: BasicRecord }) => (
+//   <div className='rounded p-4 space-y-1'>
+//     <div className='font-semibold'>{error.title}</div>
+//     <div className='text-sm opacity-70'>{error.msg}</div>
+//   </div>
+// );

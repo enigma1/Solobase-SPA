@@ -18,38 +18,58 @@ import {
 import { useAccountStore } from '>/services/stores';
 import { createMutationHook } from './mutationBuilder';
 
+const dbDefaults = {
+  database: undefined,
+  ok: false,
+  message: 'default',
+};
+export const useEditDatabaseMutation = createMutationHook(
+  dbApi.editDatabase,
+  dbDefaults,
+);
+
 export const useSelectDatabaseMutation = createMutationHook(
   dbApi.selectDatabase,
-  {
-    database: undefined,
-    success: false,
-    message: '',
-  },
+  dbDefaults,
 );
 
 export const useCreateDatabaseMutation = createMutationHook(
   dbApi.createDatabase,
-  {
-    database: undefined,
-    success: false,
-    message: '',
-  },
+  dbDefaults,
 );
 
 export const useDeleteDatabasesMutation = createMutationHook(
   dbApi.deleteDatabases,
   {
     databases: [],
-    success: false,
-    message: '',
+    ok: false,
+    message: 'default',
   },
 );
 
 export const useDeleteTablesMutation = createMutationHook(dbApi.deleteTables, {
+  database: undefined,
   tables: [],
-  success: false,
-  message: '',
+  ok: false,
+  message: 'default',
 });
+
+const tableDefaults = {
+  database: undefined,
+  table: undefined,
+  ok: false,
+  message: 'default',
+};
+
+export const useCreateTableMutation = createMutationHook(
+  dbApi.createTable,
+  tableDefaults,
+);
+
+export const useEditTableMutation = createMutationHook(
+  dbApi.editTable,
+  tableDefaults,
+);
 
 export const useLoginMutation = <
   TSelected = ReturnType<typeof createMutationHook>,
@@ -81,26 +101,26 @@ export const useLoginMutation = <
   return mutation;
 };
 
-export const useLogoutMutation = () => {
-  const queryClient = useQueryClient();
-  const initializeStore = useAccountStore(({ api }) => api.initialize);
+// export const useLogoutMutation = () => {
+//   const queryClient = useQueryClient();
+//   const initializeStore = useAccountStore(({ api }) => api.initialize);
 
-  return useMutation({
-    mutationFn: () => dbApi.logout(),
+//   return useMutation({
+//     mutationFn: () => dbApi.logout(),
 
-    onSuccess: () => {
-      // 1. Remove session query cache
-      queryClient.removeQueries({ queryKey: queryKeys.session() });
+//     onSuccess: () => {
+//       // 1. Remove session query cache
+//       queryClient.removeQueries({ queryKey: queryKeys.session() });
 
-      // 2. Reset your store
-      initializeStore();
-    },
+//       // 2. Reset your store
+//       initializeStore();
+//     },
 
-    onError: (error) => {
-      console.error('Logout failed', error);
-    },
-  });
-};
+//     onError: (error) => {
+//       console.error('Logout failed', error);
+//     },
+//   });
+// };
 
 // type UpdateRowsProps = {
 //   resetEditedRows?: () => void;

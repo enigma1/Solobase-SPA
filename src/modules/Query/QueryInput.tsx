@@ -13,7 +13,7 @@ import {
   queryKeys,
 } from '>/services/queryHooks';
 import { useErrorDialog } from '>/services/hooks';
-import { DialogRenderer, errorDialogMap, ScreenLoader } from '>/modules/Common';
+import { ScreenLoader } from '>/modules';
 import { routes } from '>/config/routes';
 
 export const QueryInput = () => {
@@ -106,11 +106,6 @@ export const QueryInput = () => {
         />
       </div>
       {isPending && <ScreenLoader />}
-      <DialogRenderer
-        dialog={dialog}
-        onClose={closeDialog}
-        map={errorDialogMap}
-      />
     </>
   );
 };

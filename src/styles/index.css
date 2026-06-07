@@ -1,0 +1,13 @@
+@import "./palettes/index.css";
+@import "./areas.css";
+@import "./layout.css";
+@import "./page.css";
+@import "./dialogs.css";
+@import "./buttons.css";
+@import "./inputs.css";
+@import "./accordions.css";
+@import "./icons.css";
+@import "./menus.css";
+@import "./tables.css";
+@import "./lists.css";
+@import "./utils.css";

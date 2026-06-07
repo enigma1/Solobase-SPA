@@ -49,21 +49,22 @@ export const PageTableShell = ({
       <div className='page-toolbar'>
         <div className='page-title'>{title}</div>
         <div className='page-actions'>
-          <button
-            className='btn-secondary'
-            onClick={onDownload}
-            title='Export Data from all or selected Rows'
-          >
-            <DownloadIcon size={24} />
-          </button>
-
-          {onFilterColumns && (
+          {onDownload && (
+            <button
+              className={`btn-secondary ${hasSelects && 'icon-warn'}`}
+              onClick={onDownload}
+              title='Export Data from all or selected Rows'
+            >
+              <DownloadIcon size={24} />
+            </button>
+          )}
+          {hasSelects && (
             <button
               className='btn-secondary'
-              onClick={onFilterColumns}
-              title='Select columns'
+              onClick={clearSelected}
+              title='Clear Selected'
             >
-              <TableColumnsSplitIcon size={24} />
+              <RouteOffIcon size={24} />
             </button>
           )}
           {onDiscardEdits && (
@@ -80,16 +81,6 @@ export const PageTableShell = ({
               <CaptionsIcon size={24} />
             </button>
           )}
-
-          {hasSelects && (
-            <button
-              className='btn-secondary'
-              onClick={clearSelected}
-              title='Clear Selected'
-            >
-              <RouteOffIcon size={24} />
-            </button>
-          )}
           {onDelete && hasSelects && (
             <button
               className='btn icon-critical'
@@ -99,7 +90,15 @@ export const PageTableShell = ({
               <LayersMinusIcon size={24} />
             </button>
           )}
-
+          {onFilterColumns && (
+            <button
+              className='btn-secondary'
+              onClick={onFilterColumns}
+              title='Select columns'
+            >
+              <TableColumnsSplitIcon size={24} />
+            </button>
+          )}
           {tableRef && (
             <button
               title={isPacked ? 'Columns inline' : 'Pack columns'}

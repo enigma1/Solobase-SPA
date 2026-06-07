@@ -68,14 +68,14 @@
   }
 
   .check {
-    @apply w-4 h-4 rounded border;
+    @apply w-5 h-5 rounded-sm border;
 
     appearance: none;
     display: inline-block;
     vertical-align: middle;
     flex-shrink: 0;
 
-    background: var(--color-srf);
+    background: var(--state-normal);
     border-color: var(--color-border);
 
     transition:
@@ -84,8 +84,8 @@
       box-shadow 0.15s ease;
 
     &:checked {
-      background: var(--color-action);
-      border-color: var(--color-action);
+      background: var(--state-selected);
+      border-color: var(--color-border-focus);
     }
 
     &:focus {
@@ -108,7 +108,7 @@
   }
 
   .text-dialog-area {
-    @apply flex-1 min-h-0 w-full resize-none py-2 px-3;
+    @apply flex-1 w-full h-full resize-none;
 
     background: var(--color-srf);
     color: var(--color-text);

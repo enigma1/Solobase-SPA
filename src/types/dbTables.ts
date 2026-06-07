@@ -49,3 +49,49 @@ export type DbQueryData = {
   cols: DbTableColumns;
   columnsOrder: string[];
 };
+
+export type DatabaseShape = {
+  name: string;
+  charset?: string;
+  collation?: string;
+};
+
+export type TableShapeBasics = {
+  database: string;
+  table: string;
+  engine?: string;
+  charset?: string;
+  collation?: string;
+};
+
+export type TableShapeKeys = {
+  foreign: string[];
+  unique: string[];
+  indices: string[];
+};
+
+export type TableShape = TableShapeBasics &
+  TableShapeKeys & {
+    cols: SqlColumns[];
+    colsParams: Record<string, string | number>[];
+  };
+
+export type TableFormModel = {
+  database: string;
+  table: string;
+  engine?: string;
+  charset?: string;
+  collation?: string;
+
+  cols: {
+    field: string;
+    type: string;
+    params: Record<string, string | number>;
+  }[];
+
+  keys: {
+    foreign: string[];
+    unique: string[];
+    indices: string[];
+  };
+};

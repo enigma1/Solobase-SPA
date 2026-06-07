@@ -1,5 +1,3 @@
-import isEqual from 'lodash-es/isEqual';
-
 export type EqualityFn<U = any> = (a: U, b: U) => boolean;
 
 // Base comparison types
@@ -13,7 +11,6 @@ export const comparisonTypes: Record<string, EqualityFn> = {
   },
   shallowEqual: (a, b) => {
     if (Object.is(a, b)) return true;
-
     if (!a || !b) return false;
 
     const aKeys = Object.keys(a);
@@ -26,8 +23,7 @@ export const comparisonTypes: Record<string, EqualityFn> = {
     return aKeys.every((k) => Object.is(a[k], b[k]));
   },
   shallowCheckFromLeft: (a, b) =>
-    Object.entries(a).every(([k, v]) => b[k] === v),
-  isEqual, // lodash isEqual
+    Object.entries(a).every(([k, v]) => Object.is(v, b[k])),
 };
 
 // Helper to compare objects with optional type selection

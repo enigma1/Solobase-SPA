@@ -13,7 +13,7 @@ export const TablesMainView = () => {
     dbSelected: state.dbSelected,
   }));
 
-  const { rows, cols, columnsOrder, isSuccess, isError, isLoading } =
+  const { rows, cols, columnsOrder, isSuccess, isError, isFetching } =
     useTablesHook(({ state, query }) => {
       return {
         rows: state.rows,
@@ -21,7 +21,7 @@ export const TablesMainView = () => {
         columnsOrder: state.columnsOrder,
         isSuccess: query.isSuccess,
         isError: query.isError,
-        isLoading: query.isLoading,
+        isFetching: query.isFetching,
       };
     });
 
@@ -49,16 +49,21 @@ export const TablesMainView = () => {
     });
   }, [dbSelected, activeTable]);
 
+  if (isFetching) return <ScreenLoader />;
   return (
     <>
-      {isSuccess && rows.length > 0 ? (
-        <TablesList rows={viewRows} cols={cols} columnsOrder={columnsOrder} />
+      {dbSelected && isSuccess && rows.length > 0 ? (
+        <TablesList
+          dbSelected={dbSelected}
+          rows={viewRows}
+          cols={cols}
+          columnsOrder={columnsOrder}
+        />
       ) : (
         <EmptyPage
-          note={`${dbSelected ? 'No Tables in' + dbSelected : 'No database selected'}`}
+          note={`${dbSelected ? 'No Tables in database: ' + dbSelected : 'No database selected'}`}
         />
       )}
-      {isLoading && <ScreenLoader />}
     </>
   );
 };

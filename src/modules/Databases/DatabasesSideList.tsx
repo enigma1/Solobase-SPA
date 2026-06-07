@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { aStub } from '>/services/utils';
 import { routes } from '>/config';
 import {
   queryKeys,
@@ -14,8 +13,7 @@ import {
   useTablesDataStore,
   messageStoreActions,
 } from '>/services/stores';
-import { DialogRenderer, ScreenLoader } from '>/modules/Common';
-import { dbDialogMap } from './DialogMap';
+import { ScreenLoader } from '>/modules/Common';
 
 export const DatabasesSideList = () => {
   const navigate = useNavigate();
@@ -43,11 +41,11 @@ export const DatabasesSideList = () => {
   //   }),
   // );
 
-  const { dbList, isError, isLoading, isSuccess } = useDatabases(
+  const { dbList, isError, isFetching, isSuccess } = useDatabases(
     ({ state, query, api }) => ({
       dbList: api.getDbNames() as string[],
       isError: query.isError,
-      isLoading: query.isLoading,
+      isFetching: query.isFetching,
       isSuccess: query.isSuccess,
     }),
   );
@@ -101,29 +99,27 @@ export const DatabasesSideList = () => {
   const handleDbChange = async (dbName: string) => {
     mutate({ name: dbName });
   };
-
+  const isBusy = isFetching;
+  if (isBusy) return <ScreenLoader />;
   return (
-    <>
-      <div className='side-list'>
-        {dbList.length > 0 ? (
-          dbList.map((db, idx) => {
-            const isSelected = dbSelected === db;
-            return (
-              <button
-                key={`${name}-${idx}`}
-                className='side-list-item'
-                data-active={isSelected}
-                onClick={() => handleDbChange(db)}
-              >
-                {db}
-              </button>
-            );
-          })
-        ) : (
-          <div className='side-list-empty'>No Databases</div>
-        )}
-      </div>
-      {isLoading && <ScreenLoader />}
-    </>
+    <div className='side-list'>
+      {dbList.length > 0 ? (
+        dbList.map((db, idx) => {
+          const isSelected = dbSelected === db;
+          return (
+            <button
+              key={`${name}-${idx}`}
+              className='side-list-item'
+              data-active={isSelected}
+              onClick={() => handleDbChange(db)}
+            >
+              {db}
+            </button>
+          );
+        })
+      ) : (
+        <div className='side-list-empty'>No Databases</div>
+      )}
+    </div>
   );
 };

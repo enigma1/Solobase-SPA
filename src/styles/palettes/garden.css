@@ -1,0 +1,24 @@
+[data-theme="garden"] {
+  --tone-0: oklch(0.30 0.04 115);
+  --tone-1: oklch(0.38 0.3 115);
+  --tone-2: oklch(0.45 0.06 110);
+  --tone-3: oklch(0.55 0.08 110);
+  --tone-4: oklch(0.62 0.06 110);
+  --tone-5: oklch(0.68 0.07 105);
+  --tone-6: oklch(0.70 0.06 130);
+  --tone-7: oklch(0.818 0.05 130);
+  --tone-8: oklch(0.75 0.05 80);
+  --tone-9: oklch(0.80 0.04 85);
+  --tone-10: oklch(0.89 0.04 80);
+  --tone-11: oklch(0.97 0.03 100);
+
+  --overlay: rgb(20 25 15 / 0.35);
+
+  --action: oklch(0.72 0.11 65);
+  --effect: oklch(0.57 0.13 50);
+
+  --separator:
+    color-mix(in oklch,
+      var(--tone-10) 30%,
+      var(--tone-8));
+}
