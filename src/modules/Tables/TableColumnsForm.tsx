@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
+  FormProvider,
   UseFormReturn,
   Controller,
   useWatch,
@@ -12,6 +13,8 @@ import {
   tableColumnTypes,
   emptyTableColumn,
   isColumnParameterValid,
+  hasDuplicatedValues,
+  isDuplicatedValue,
   MAX_TABLE_COLUMNS,
 } from '>/services/utils';
 import { SqlColumns, TableShape } from '>/types';
@@ -30,9 +33,10 @@ export const TableColumnsForm = ({
   onValidation,
   defaults,
 }: TableColumnsFormProps) => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
 
   const {
+    getValues,
     clearErrors,
     setValue,
     control,
@@ -44,53 +48,45 @@ export const TableColumnsForm = ({
     name: 'cols',
   });
 
-  const columns =
-    useWatch({
-      control,
-      name: 'cols',
-    }) ?? [];
-
-  const {
-    insert: insertParam,
-    append: appendParam,
-    remove: removeParam,
-  } = useFieldArray({
-    control,
-    name: 'colsParams',
-  });
+  const columns = useWatch({ control, name: 'cols' });
 
   useEffect(() => {
-    const valid =
-      columns.length > 0 &&
-      columns.every((c) => c.field?.trim() && c.type?.trim());
+    onValidation(fields.length > 0 && form.formState.isValid);
+  }, [fields, form.formState.isValid]);
 
-    onValidation(valid);
-  }, [columns]);
+  const getActiveColumnIndex = () => {
+    return fields.findIndex((c) => c.uid === activeColumnId);
+  };
 
-  const canAddColumn = columns.length < MAX_TABLE_COLUMNS;
-  const canApplyDefaults =
-    columns.length > 0 && activeIndex != null && columns?.[activeIndex] != null;
+  const canAddColumn = fields.length < MAX_TABLE_COLUMNS;
+  const canApplyDefaults = getActiveColumnIndex() !== -1;
 
   const onApplyDefaults = () => {
-    if (!canApplyDefaults) return;
+    const idx = getActiveColumnIndex();
+    if (idx === -1) return;
 
-    setValue(`cols.${activeIndex}`, {
-      ...columns[activeIndex],
-      ...defaults.column, // or whatever shape you define
-    });
-    clearErrors();
+    const column = fields[idx];
+
+    setValue(
+      `cols.${idx}`,
+      {
+        ...column,
+        ...defaults.column,
+      },
+      {
+        shouldValidate: true,
+      },
+    );
+
+    clearErrors(`cols.${idx}`);
   };
 
   const onAddColumn = () => {
-    if (activeIndex == null) {
-      append({ ...emptyTableColumn });
-      appendParam({});
-      return;
-    }
-
-    insert(activeIndex + 1, { ...emptyTableColumn });
-    insertParam(activeIndex + 1, {});
-    setActiveIndex(activeIndex + 1);
+    const item = emptyTableColumn();
+    const idx = getActiveColumnIndex();
+    const insertIndex = idx === -1 ? fields.length : idx + 1;
+    setActiveColumnId(item.uid);
+    insert(insertIndex, item);
   };
 
   return (
@@ -120,7 +116,7 @@ export const TableColumnsForm = ({
       </div>
       <div className='area-content'>
         {fields.map((field, index) => {
-          const columnType = columns[index]?.type;
+          const columnType = columns?.[index]?.type;
           const typeMeta = tableColumnTypes
             .flatMap((g) => g.options)
             .find((o) => o.value === columnType);
@@ -128,9 +124,9 @@ export const TableColumnsForm = ({
           const bg = index % 2 ? 'odd' : 'even';
           return (
             <div
-              key={field.id}
-              className={`area-item separate ${bg} ${activeIndex === index ? 'active' : ''}`}
-              onClick={() => setActiveIndex(index)}
+              key={field.uid}
+              className={`area-item separate ${bg} ${activeColumnId === field.uid ? 'active' : ''}`}
+              onClick={() => setActiveColumnId(field.uid)}
             >
               <div className='flex items-center justify-between mb-2'>
                 <span className='text-xs font-semibold text-muted'>
@@ -140,7 +136,12 @@ export const TableColumnsForm = ({
                   type='button'
                   onClick={(e) => {
                     e.stopPropagation();
-                    setValue(`colsParams.${index}`, {});
+                    const isActive = field.uid === activeColumnId;
+                    remove(index);
+                    if (!isActive) return;
+
+                    const next = fields.filter((_, i) => i !== index);
+                    setActiveColumnId(next[0]?.uid ?? null);
                   }}
                 >
                   <Trash2Icon size={18} />
@@ -164,6 +165,17 @@ export const TableColumnsForm = ({
                     noWhitespaceEdges: (v) =>
                       (typeof v === 'string' && !/^\s|\s$/.test(v)) ||
                       'No lead/trail spaces',
+                    isUnique: (v) => {
+                      const cols = getValues('cols');
+                      const isDuplicated = isDuplicatedValue({
+                        entries: cols,
+                        prop: 'field',
+                        value: v,
+                        index,
+                      });
+
+                      return !isDuplicated || 'Column name must be unique';
+                    },
                   },
                 }}
               />
@@ -181,28 +193,44 @@ export const TableColumnsForm = ({
                       id={`table-type-${index}`}
                       value={field.value}
                       onChange={(v) => {
-                        setValue(`colsParams.${index}`, {});
                         field.onChange(v);
+                        const params =
+                          typeMeta?.params?.reduce(
+                            (acc, p) => ({
+                              ...acc,
+                              [p]: '',
+                            }),
+                            {},
+                          ) ?? {};
+
+                        setValue(`cols.${index}.params`, params);
                       }}
                       $groups={tableColumnTypes}
                     />
                   </FormFieldWrapper>
                 )}
               />
-              {typeMeta?.params?.map((param) => (
-                <FormTextField
-                  key={param}
-                  id={`cols-${index}-${param}`}
-                  name={`colsParams.${index}.${param}`}
-                  label={`${param}:`}
-                  control={control}
-                  rules={{
-                    validate: {
-                      isValid: (v) => isColumnParameterValid(param, v),
-                    },
-                  }}
-                />
-              ))}
+              {typeMeta?.params?.map((param) => {
+                const label = `${param.replace(/\s*\*$/, '')}:`;
+                const currentValue = columns?.[index]?.params?.[param];
+                if (currentValue === undefined) {
+                  setValue(`cols.${index}.params.${param}`, '');
+                }
+                return (
+                  <FormTextField
+                    key={param}
+                    id={`cols-${index}-${param}`}
+                    name={`cols.${index}.params.${param}`}
+                    label={label}
+                    control={control}
+                    rules={{
+                      validate: {
+                        isValid: (v) => isColumnParameterValid(param, v),
+                      },
+                    }}
+                  />
+                );
+              })}
             </div>
           );
         })}

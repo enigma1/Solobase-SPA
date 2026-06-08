@@ -1,6 +1,15 @@
-import { ScalarObject, SqlRow, SqlColumns } from '>/types';
+import {
+  ScalarObject,
+  SqlRow,
+  SqlColumns,
+  TableShapeKey,
+  TableShapeColumn,
+} from '>/types';
 
 export const MAX_TABLE_COLUMNS = 256;
+export const MAX_TABLE_KEYS = 64;
+export const MAX_COLUMNS_PER_KEY = 16;
+
 export const tableColumnTypes = [
   {
     id: 'numeric',
@@ -28,8 +37,8 @@ export const tableColumnTypes = [
     id: 'text',
     label: 'Text',
     options: [
-      { value: 'CHAR', params: ['Length'] },
-      { value: 'VARCHAR', params: ['Length'] },
+      { value: 'CHAR', params: ['Length *'] },
+      { value: 'VARCHAR', params: ['Length *'] },
 
       { value: 'TINYTEXT' },
       { value: 'TEXT' },
@@ -97,15 +106,27 @@ export const tableColumnTypes = [
   },
 ];
 
-export const emptyTableColumn: SqlColumns = {
+export const emptyTableColumn = (): TableShapeColumn => ({
+  uid: crypto.randomUUID(),
   field: '',
   type: '',
-  nullable: 'NO',
-  key: '',
-  defaultValue: null,
-  extra: '',
-};
+  params: {},
+});
 
+export const emptyTableColumnKey = (): TableShapeKey => ({
+  uid: crypto.randomUUID(),
+  type: 'INDEX',
+  name: '',
+  columns: [],
+  references: undefined,
+});
+
+export const tableColumnKeyList = [
+  { value: 'PRIMARY', label: 'Primary' },
+  { value: 'UNIQUE', label: 'Unique' },
+  { value: 'INDEX', label: 'Index' },
+  { value: 'FOREIGN', label: 'Foreign Key' },
+];
 // Merge column data given the original row array and edited columns array
 // Edited columns will become the update values
 // and everything else becomes a "where" condition because is untouched

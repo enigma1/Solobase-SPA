@@ -1,11 +1,19 @@
+import { useState, useEffect } from 'react';
 import {
   UseFormReturn,
   Controller,
   useWatch,
   useFieldArray,
 } from 'react-hook-form';
-
+import { SquareActivityIcon, Trash2Icon, ListPlusIcon } from 'lucide-react';
 import { FormTextField, ComboBox } from '>/modules';
+import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+import {
+  emptyTableColumnKey,
+  tableColumnKeyList,
+  MAX_COLUMNS_PER_KEY,
+  MAX_TABLE_KEYS,
+} from '>/services/utils';
 import { TableShape } from '>/types';
 
 type TableKeysFormProps = {
@@ -14,31 +22,58 @@ type TableKeysFormProps = {
 };
 
 export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const {
     clearErrors,
     setValues,
     setValue,
     control,
+
     formState: { errors },
   } = form;
 
-  const columns =
+  const keys =
     useWatch({
       control,
-      name: 'cols',
+      name: 'keys',
     }) ?? [];
+
+  const columns = useWatch({
+    control,
+    name: 'cols',
+  });
+  const { fields, insert, append, remove } = useFieldArray({
+    control,
+    name: 'keys',
+  });
+
+  useEffect(() => {
+    onValidation(form.formState.isValid);
+  }, [form.formState.isValid]);
+
+  const canAddKey = keys.length < MAX_TABLE_KEYS;
+  const hasKeys = false;
+
+  const onAddKey = () => {
+    append(emptyTableColumnKey());
+  };
+  const onClearAllKeys = () => {};
+  const columnsList = columns.map((c) => ({
+    label: c.field,
+    value: c.field,
+  }));
 
   return (
     <div className='area-container'>
       <div className='area-spacer'>
-        <h1 className='area-title'>Create Columns</h1>
+        <h1 className='area-title'>Create Keys</h1>
         <div className='area-actions'>
           <button
             type='button'
             className='btn'
             onClick={onAddKey}
-            title='Add new column'
-            disabled={canAddKey}
+            title='Add key'
+            disabled={!canAddKey}
           >
             <ListPlusIcon size={24} />
           </button>
@@ -77,42 +112,41 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
                   <Trash2Icon size={18} />
                 </button>
               </div>
-              <FormTextField
-                id={`table-name-${index}`}
-                name={`cols.${index}.field`}
-                label='Field Name:'
-                control={control}
-                rules={{
-                  required: 'A column name is required',
-                  minLength: { value: 1, message: 'min 1 character' },
-                  maxLength: { value: 64, message: 'max 64 characters' },
-                  validate: {
-                    isString: (v) =>
-                      typeof v === 'string' || 'Must be a string',
-                    noNullBytes: (v) =>
-                      (typeof v === 'string' && !/\u0000/.test(v)) ||
-                      'Invalid characters',
-                    noWhitespaceEdges: (v) =>
-                      (typeof v === 'string' && !/^\s|\s$/.test(v)) ||
-                      'No lead/trail spaces',
-                  },
-                }}
-              />
               <Controller
-                name={`cols.${index}.type`}
+                name={`keys.${index}.type`}
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormFieldWrapper
-                    label='Type:'
-                    htmlFor={`table-type-${index}`}
+                    label='Key Type:'
+                    htmlFor={`key-type-${index}`}
                     $status={fieldState.error ? 'error' : undefined}
                     $notice={fieldState.error?.message}
                   >
                     <ComboBox
-                      id={`table-type-${index}`}
+                      id={`key-type-${index}`}
                       value={field.value}
                       onChange={field.onChange}
-                      $groups={tableColumnTypes}
+                      $options={tableColumnKeyList}
+                    />
+                  </FormFieldWrapper>
+                )}
+              />
+              <Controller
+                name={`keys.${index}.columns`}
+                control={control}
+                render={({ field, fieldState }) => (
+                  <FormFieldWrapper
+                    label='Columns:'
+                    htmlFor={`column-index-${index}`}
+                    $status={fieldState.error ? 'error' : undefined}
+                    $notice={fieldState.error?.message}
+                  >
+                    <ComboBox
+                      id={`column-index-${index}`}
+                      value={field.value}
+                      onChange={field.onChange}
+                      $options={columnsList}
+                      $multiple
                     />
                   </FormFieldWrapper>
                 )}

@@ -23,11 +23,12 @@ type OptionGroup = {
 
 type ComboBoxProps = {
   id?: string;
-  value?: string;
+  value?: string | string[];
   $editable?: boolean;
+  $multiple?: boolean;
   $placeholder?: string;
   $status?: StatusType;
-  onChange: (value: string) => void;
+  onChange: (value: string | string[]) => void;
   $options?: Option[];
   $groups?: OptionGroup[];
   // $open?: boolean;
@@ -42,6 +43,7 @@ export const ComboBox = ({
   $options = [],
   $groups = [],
   $editable = true,
+  $multiple = false,
   $placeholder = 'Select...',
   $status,
   // $open,
@@ -71,14 +73,26 @@ export const ComboBox = ({
   }, []);
 
   useEffect(() => {
+    if (!internalOpen) return;
     if (!ref.current) return;
 
+    // set menu width
     setMenuWidth(ref.current.offsetWidth);
-  }, [internalOpen]);
 
-  // useEffect(() => {
-  //   console.log('Is updating comboBox value:', value);
-  // }, [value]);
+    // goto first selected item if exists
+    requestAnimationFrame(() => {
+      if (!floatingRef.current) return;
+
+      const selection = floatingRef.current.querySelector(
+        '[data-selected="true"]',
+      );
+
+      selection?.scrollIntoView({
+        block: 'center',
+        behavior: 'auto',
+      });
+    });
+  }, [internalOpen]);
 
   const flatOptions = useMemo(() => {
     if ($options.length) return $options;
@@ -86,12 +100,17 @@ export const ComboBox = ({
     return $groups.flatMap((g) => g.options);
   }, [$options, $groups]);
 
-  const selected = useMemo(
-    () => flatOptions.find((o) => o.value === value),
-    [flatOptions, value],
-  );
+  const singleSelect = useMemo(() => {
+    if ($multiple) return undefined;
+    return flatOptions.find((o) => o.value === value);
+  }, [flatOptions, value, $multiple]);
 
-  const filtered = useMemo(() => {
+  const multiSelect = useMemo(() => {
+    if (!$multiple) return [];
+    return flatOptions.filter((o) => value?.includes(o.value));
+  }, [flatOptions, value, $multiple]);
+
+  const filteredOptions = useMemo(() => {
     return $options.filter((o) =>
       (o.label ?? o.value).toLowerCase().includes(query.toLowerCase()),
     );
@@ -118,43 +137,59 @@ export const ComboBox = ({
   });
 
   const getFlatList = (flatList: Option[]) => {
-    return flatList.map((o) => (
-      <li
-        className='option'
-        data-disabled={o.disabled || undefined}
-        key={o.value}
-        onMouseDown={() => {
-          onChange(o.value);
-          setQuery('');
-          setInternalOpen(false);
-        }}
-      >
-        {o.label ?? o.value}
-      </li>
-    ));
+    return flatList.map((o, idx) => {
+      const bg = idx % 2 ? 'odd' : 'even';
+      const isSelected = $multiple
+        ? Array.isArray(value) && value.includes(o.value)
+        : o.value === value;
+
+      return (
+        <li
+          className={`option ${bg}`}
+          data-disabled={o.disabled || undefined}
+          data-selected={isSelected ? 'true' : undefined}
+          key={o.value}
+          onMouseDown={(e) => {
+            if (e.button !== 0) return;
+            if (!$multiple) {
+              onChange(o.value);
+              setQuery('');
+              setInternalOpen(false);
+            } else {
+              const current = Array.isArray(value) ? value : [];
+              const exists = current.includes(o.value);
+              const next = exists
+                ? current.filter((v) => v !== o.value)
+                : [...current, o.value];
+              onChange(next);
+            }
+          }}
+        >
+          {o.label ?? o.value}
+        </li>
+      );
+    });
   };
 
   const getGroupList = (groupList: OptionGroup[]) => {
-    return groupList.map((g) => (
-      <Fragment key={g.label}>
-        <li className='group'>{g.label}</li>
-        {getFlatList(g.options)}
-      </Fragment>
-    ));
+    return groupList.map((g, idx) => {
+      const bg = idx % 2 ? 'odd' : 'even';
+      return (
+        <Fragment key={g.label}>
+          <li className={`group ${bg}`}>{g.label}</li>
+          {getFlatList(g.options)}
+        </Fragment>
+      );
+    });
   };
 
   const isReadOnly = !$editable;
-  const useGroups = $groups.length > 0;
-  const items = useGroups ? filteredGroups : filtered;
+  const areGroups = $groups.length > 0;
+  const items = areGroups ? filteredGroups : filteredOptions;
   const isEmpty = items.length === 0;
   const hasItems = !isEmpty;
+  const hasSelection = $multiple ? multiSelect.length > 0 : !!singleSelect;
 
-  console.log('combobox-render', {
-    value,
-    selected,
-    query,
-    internalOpen,
-  });
   return (
     <div
       className='combo-shell'
@@ -165,17 +200,46 @@ export const ComboBox = ({
         refs.setReference(node);
       }}
     >
+      {$multiple && multiSelect.length > 0 && (
+        <div className='combo-bits'>
+          {multiSelect.map((opt) => (
+            <span key={opt.value}>
+              {opt.label ?? opt.value}
+
+              <button
+                type='button'
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  const current = Array.isArray(value) ? value : [];
+                  const next = current.filter((v) => v !== opt.value);
+
+                  onChange(next);
+                }}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
       <input
         id={id}
         value={
-          internalOpen ? query : (selected?.label ?? selected?.value ?? '')
+          internalOpen
+            ? query
+            : $multiple
+              ? ''
+              : (singleSelect?.label ?? singleSelect?.value ?? '')
         }
         onFocus={() => setInternalOpen(true)}
         onChange={(e) => {
           setQuery(e.target.value);
           setInternalOpen(true);
         }}
-        placeholder={isEmpty ? 'No options' : $placeholder}
+        placeholder={hasSelection ? '' : isEmpty ? 'No options' : $placeholder}
         className={`combo-input`}
         data-read-only={isReadOnly}
         readOnly={isReadOnly}
@@ -208,7 +272,9 @@ export const ComboBox = ({
           }}
           className='combo-menu'
         >
-          {useGroups ? getGroupList(filteredGroups) : getFlatList(filtered)}
+          {areGroups
+            ? getGroupList(filteredGroups)
+            : getFlatList(filteredOptions)}
         </ul>
       )}
     </div>

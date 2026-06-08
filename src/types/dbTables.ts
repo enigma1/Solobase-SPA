@@ -64,34 +64,32 @@ export type TableShapeBasics = {
   collation?: string;
 };
 
-export type TableShapeKeys = {
-  foreign: string[];
-  unique: string[];
-  indices: string[];
-};
+export type TableShapeKey = {
+  uid: string;
+  type: 'PRIMARY' | 'UNIQUE' | 'INDEX' | 'FOREIGN';
+  name?: string;
+  columns: string[];
 
-export type TableShape = TableShapeBasics &
-  TableShapeKeys & {
-    cols: SqlColumns[];
-    colsParams: Record<string, string | number>[];
-  };
-
-export type TableFormModel = {
-  database: string;
-  table: string;
-  engine?: string;
-  charset?: string;
-  collation?: string;
-
-  cols: {
-    field: string;
-    type: string;
-    params: Record<string, string | number>;
-  }[];
-
-  keys: {
-    foreign: string[];
-    unique: string[];
-    indices: string[];
+  // only if FOREIGN
+  references?: {
+    table: string;
+    columns: string[];
   };
 };
+
+export type TableShapeColumn = {
+  uid: string; // UI identity only
+  field: string;
+  type: string;
+  params?: Record<string, string | number>;
+};
+export type TableShape = TableShapeBasics & {
+  keys: TableShapeKey[];
+  cols: TableShapeColumn[];
+};
+
+// export type TableShape = TableShapeBasics &
+//   TableShapeKeys & {
+//     cols: SqlColumns[];
+//     colsParams: Record<string, string | number>[];
+//   };

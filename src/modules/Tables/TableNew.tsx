@@ -63,11 +63,5 @@ export const TableNew = ({ database, wizardHandlers }: TableNewProps) => {
   const isBusy = isPending;
 
   if (isBusy) return <ScreenLoader />;
-  return (
-    <TableForm
-      wizardHandlers={wizardHandlers}
-      initialValues={{ collation: '', charset: '', engine: '' }}
-      onSubmit={onNewSubmit}
-    />
-  );
+  return <TableForm wizardHandlers={wizardHandlers} onSubmit={onNewSubmit} />;
 };

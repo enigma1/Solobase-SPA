@@ -10,8 +10,15 @@ import {
   ComboBox,
   DialogContent,
 } from '>/modules';
-import { emptyTableColumn } from '>/services/utils';
-import { SqlColumns, ButtonStatus, TableShape, WizardHandlers } from '>/types';
+import { emptyTableColumn, emptyTableColumnKey } from '>/services/utils';
+import {
+  SqlColumns,
+  ButtonStatus,
+  TableShape,
+  WizardHandlers,
+  TableShapeColumn,
+  TableShapeKey,
+} from '>/types';
 import { TableBasicsForm } from './TableBasicsForm';
 import { TableColumnsForm } from './TableColumnsForm';
 import { TableKeysForm } from './TableKeysForm';
@@ -22,20 +29,20 @@ type TableFormStep = 'basics' | 'columns' | 'keys' | 'review';
 const stepOrder: TableFormStep[] = ['basics', 'columns', 'keys', 'review'];
 
 type TableFormProps = {
-  initialValues: {
+  initialValues?: {
     table?: string;
     engine?: string;
     charset?: string;
     collation?: string;
-    cols?: SqlColumns[];
-    colsParams?: Record<string, string | number>[];
+    cols?: TableShapeColumn[];
+    keys?: TableShapeKey[];
   };
   onSubmit: (data: TableShape) => void;
   wizardHandlers: WizardHandlers;
 };
 
 export const TableForm = ({
-  initialValues,
+  initialValues = {},
   onSubmit,
   wizardHandlers,
 }: TableFormProps) => {
@@ -63,11 +70,12 @@ export const TableForm = ({
   const form = useForm<TableShape>({
     defaultValues: {
       ...initialValues,
+      table: initialValues.table ?? '',
       charset: initialValues.charset ?? defaults.charset,
       engine: initialValues.engine ?? defaults.engine,
       collation: initialValues.collation ?? defaults.collation,
-      cols: initialValues.cols ? initialValues.cols : [{ ...emptyTableColumn }],
-      colsParams: initialValues.colsParams ?? [],
+      cols: initialValues.cols ? initialValues.cols : [emptyTableColumn()],
+      keys: initialValues.keys ? initialValues.keys : [emptyTableColumnKey()],
     },
     mode: 'onChange',
     reValidateMode: 'onChange',

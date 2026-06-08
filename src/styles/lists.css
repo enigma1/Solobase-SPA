@@ -36,6 +36,17 @@
     box-shadow: var(--shadow-md);
   }
 
+  .combo-bits {
+    @apply flex-1 p-2 min-w-0 h-full w-full text-sm rounded-md rounded-r-none border-0 outline-0;
+    background: transparent;
+    color: inherit;
+
+    >span {
+      @apply py-1 px-2 mx-1 rounded-lg;
+      background-color: var(--color-srf-muted);
+    }
+  }
+
   .combo-input {
     @apply flex-1 min-w-0 h-full w-full px-3 py-2 text-sm rounded-md rounded-r-none border-0 outline-0;
     background: transparent;
@@ -73,9 +84,10 @@
     box-shadow: var(--shadow-md);
 
     & li.group {
-      @apply px-3 pl-2 py-1.5 text-xs font-semibold italic tracking-wide pointer-events-none cursor-default border-b;
+      @apply pl-1 py-1.5 pt-3 text-sm font-bold italic tracking-wide pointer-events-none cursor-default border-b;
       color: var(--color-text-muted);
       border-color: var(--color-border-focus);
+      background: linear-gradient(54deg in oklch, var(--color-srf-elevated) 35%, var(--color-effect) 100%);
     }
 
     & li:not(.group) {
@@ -93,5 +105,23 @@
         opacity: 0.5;
       }
     }
+
+    & li.odd {
+      background-color: var(--color-srf);
+    }
+
+    & li.even {
+      background-color: var(--color-bg);
+    }
+
+    & li[data-selected='true'] {
+      background-color: var(--color-srf-peak);
+      color: var(--color-text-peak);
+
+      &:hover {
+        background-color: color-mix(in oklch, var(--color-action) 50%, var(--color-bg) 10%);
+      }
+    }
+
   }
 }
