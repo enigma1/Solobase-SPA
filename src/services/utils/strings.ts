@@ -8,3 +8,9 @@ export const trimString = (query: string) => query.replace(/\s+/g, ' ').trim();
 
 export const isNonEmptyString = (s: unknown): s is string =>
   typeof s === 'string' && s.trim().length > 0;
+
+export const extractNameFromRequired = (param: string) =>
+  param
+    .replace(/\s*\*$/, '')
+    .trim()
+    .toLowerCase();

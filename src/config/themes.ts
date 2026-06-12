@@ -6,6 +6,7 @@ export const themes = [
   'arctic',
   'sand',
   'sunset-vibes',
+  'neon',
   'deep-sea',
   'slack',
   'garden',
@@ -13,4 +14,5 @@ export const themes = [
   'mint',
   'forest',
   'vscode',
+  'medley',
 ];

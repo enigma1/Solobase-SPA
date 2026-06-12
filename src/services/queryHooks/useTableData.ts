@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { dbApi, FetchRowsResponse } from '>/services/api';
+import { dbApi, FetchRowsResponse, BasicResponse } from '>/services/api';
 import { useAccountStore, useTablesDataStore } from '>/services/stores';
-import { CollectionColumns, DbTable, DbTableData } from '>/types';
+import { defaultResponse } from '>/services/utils';
+import { CollectionColumns, TableData } from '>/types';
 import { queryKeys, STALE_TIME } from './defs';
 
-type TableDataHookState = DbTableData;
+type TableDataHookState = TableData & BasicResponse;
 type TablesHookProps = {
   state: TableDataHookState;
   query: ReturnType<typeof useQuery>;
@@ -19,6 +20,7 @@ export const useTableDataHook = <TSelected = TablesHookProps>(
   selector?: (args: TablesHookProps) => TSelected,
 ) => {
   const initialData = {
+    ...defaultResponse,
     rows: [],
     cols: defaultCollectionColumns,
     type: 'collection',

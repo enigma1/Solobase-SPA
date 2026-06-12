@@ -12,6 +12,7 @@ import {
   useDatabaseServerInfo,
 } from '>/services/queryHooks';
 import {
+  useUtilitiesStore,
   useDatabasesStore,
   messageStoreActions,
   createUiTableStore,
@@ -22,6 +23,7 @@ import {
   getSingleColumnFromResult,
   createFileSaveUrl,
   dialogActions,
+  makeColumnsActive,
 } from '>/services/utils';
 import { SqlColumnsShape, SqlRow, ScalarObject } from '>/types';
 import {
@@ -64,13 +66,15 @@ export const DatabasesList = ({
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
   );
-  const { editedRow, markEditedRow, hiddenColumns, setHiddenColumns } =
-    useDatabasesStore(({ state, api }) => ({
-      editedRow: state.editedRow as Record<number, ScalarObject>,
-      markEditedRow: api.markEditedRow,
-      hiddenColumns: state.hiddenColumns,
-      setHiddenColumns: api.setHiddenColumns,
-    }));
+
+  const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
+    hiddenColumns: state.hiddenColumns,
+  }));
+
+  const { editedRow, markEditedRow } = useDatabasesStore(({ state, api }) => ({
+    editedRow: state.editedRow as Record<number, ScalarObject>,
+    markEditedRow: api.markEditedRow,
+  }));
 
   const { collationsByCharset, defaults, isLoading, isSuccess } =
     useDatabaseServerInfo(({ state, query }) => ({
@@ -232,39 +236,46 @@ export const DatabasesList = ({
   };
 
   // Filter Columns
-  const handleColumnsActive = () => {
-    const valueRef = { current: { ...hiddenColumns } };
-    dialogStoreActions.openDialog({
-      payload: {
-        caption: 'Filter Columns',
-        initialSize: 'sm',
-        component: (
-          <FilterColumns
-            hiddenColumns={hiddenColumns}
-            columnsOrder={columnsOrder}
-            onChange={(col, hidden) => {
-              if (hidden) {
-                valueRef.current[col] = true;
-              } else {
-                delete valueRef.current[col];
-              }
-            }}
-          />
-        ),
-        actions: dialogActions.withEnableConfirmCancel({
-          onConfirm: () => {
-            setHiddenColumns(valueRef.current);
-            dialogStoreActions.closeDialog();
-          },
-        }),
-      },
-    });
-  };
+  // const handleColumnsActive = () => {
+  //   const valueRef = { current: { ...hiddenColumns } };
+  //   dialogStoreActions.openDialog({
+  //     payload: {
+  //       caption: 'Filter Columns',
+  //       initialSize: 'sm',
+  //       component: (
+  //         <FilterColumns
+  //           hiddenColumns={hiddenColumns}
+  //           columnsOrder={columnsOrder}
+  //           onChange={(col, hidden) => {
+  //             if (hidden) {
+  //               valueRef.current[col] = true;
+  //             } else {
+  //               delete valueRef.current[col];
+  //             }
+  //           }}
+  //         />
+  //       ),
+  //       actions: dialogActions.withEnableConfirmCancel({
+  //         onConfirm: () => {
+  //           setHiddenColumns(valueRef.current);
+  //           dialogStoreActions.closeDialog();
+  //         },
+  //       }),
+  //     },
+  //   });
+  // };
 
-  const handleSaveRows = () => {};
-
-  const dbCharsets = Object.keys(collationsByCharset);
-  const isBusy = isLoading || isPending;
+  // const handleColumnsActive = () => {
+  //   dialogStoreActions.openDialog({
+  //     payload: dialogFactories.filterColumns({
+  //       filterProps: {
+  //         hiddenColumns,
+  //         columnsOrder,
+  //         onChange: onChangeColumnsActivePrefs,
+  //       },
+  //     }),
+  //   });
+  // };
 
   const onEditRow = (uid: number) => {
     const row = rowMap.get(uid);
@@ -294,11 +305,16 @@ export const DatabasesList = ({
       Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
     onDelete: handleDeleteDatabases,
     onDownload: handleConfirmSelectedExports,
-    onSave: Object.entries(editedRow).length > 0 ? handleSaveRows : undefined,
-    onFilterColumns: handleColumnsActive,
+    onFilterColumns: () => {
+      makeColumnsActive(columnsOrder);
+    },
   };
 
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
+
+  const isBusy = isLoading || isPending;
+  if (isBusy) return <ScreenLoader />;
+
   return (
     <>
       <PageTableShell
@@ -325,7 +341,6 @@ export const DatabasesList = ({
           onEditRow={onEditRow}
         />
       </EffectiveTableWrapper>
-      {isBusy && <ScreenLoader />}
     </>
   );
 };

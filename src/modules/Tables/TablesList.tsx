@@ -2,7 +2,7 @@ import { useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys, useDeleteTablesMutation } from '>/services/queryHooks';
 import {
-  useAccountStore,
+  useUtilitiesStore,
   useTablesStore,
   useDialogStore,
   messageStoreActions,
@@ -23,7 +23,7 @@ import {
   ScreenLoader,
   Checkbox,
   DialogContent,
-  FilterColumns,
+  dialogFactories,
 } from '>/modules';
 import {
   getSingleColumnFromResult,
@@ -31,6 +31,7 @@ import {
   getColumnsFromRow,
   getMergedColumnData,
   dialogActions,
+  makeColumnsActive,
 } from '>/services/utils';
 import { TableEdit } from './TableEdit';
 import { TablesDeletePreview } from './TablesPreviews';
@@ -58,13 +59,14 @@ export const TablesList = ({
     [rows],
   );
 
-  const { editedRow, markEditedRow, hiddenColumns, setHiddenColumns } =
-    useTablesStore(({ state, api }) => ({
-      editedRow: state.editedRow as Record<number, ScalarObject>,
-      markEditedRow: api.markEditedRow,
-      hiddenColumns: state.hiddenColumns,
-      setHiddenColumns: api.setHiddenColumns,
-    }));
+  const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
+    hiddenColumns: state.hiddenColumns,
+  }));
+
+  const { editedRow, markEditedRow } = useTablesStore(({ state, api }) => ({
+    editedRow: state.editedRow as Record<number, ScalarObject>,
+    markEditedRow: api.markEditedRow,
+  }));
 
   const { dialog, openDialog, closeDialog } = useDialogStore(
     ({ api, state }) => ({
@@ -134,6 +136,7 @@ export const TablesList = ({
   const onEditRow = (uid: number) => {
     const row = rowMap.get(uid);
     if (!row) return;
+
     const fields = getColumnsFromRow(row, columnsOrder, [
       'TABLE_NAME',
       'ENGINE',
@@ -143,29 +146,20 @@ export const TablesList = ({
       'TABLE_COMMENT',
     ]);
     dialogStoreActions.openDialog({
-      payload: {
-        caption: 'Previews',
-        component: (
-          <TableEdit
-            database={dbSelected}
-            table={fields.TABLE_NAME as string}
-            cols={[]}
-            engine={fields.ENGINE as string}
-            charset={fields.DEFAULT_CHARACTER_SET_NAME as string}
-            collation={fields.DEFAULT_COLLATION_NAME as string}
-            // comment={fields.TABLE_COMMENT as string}
-            // rowFormat={fields.ROW_FORMAT as string}
-          />
-        ),
-        variant: 'warn',
-      },
+      payload: dialogFactories.editTable({
+        database: dbSelected,
+        table: fields.TABLE_NAME,
+      }),
     });
   };
 
-  const onDoubleClick = () => {};
   const handleSelectedExports = () => {};
   const handleSaveRows = () => {};
-
+  const handleCreateTable = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.createTable(dbSelected),
+    });
+  };
   const handleDeleteTables = () => {
     const sRows = tableStore.get().selectedRows;
     if (sRows.size === 0) {
@@ -186,7 +180,7 @@ export const TablesList = ({
 
     dialogStoreActions.openDialog({
       payload: {
-        caption: 'Removal of Databases',
+        caption: 'Removal of Tables',
         variant: 'error',
         component: (
           <TablesDeletePreview
@@ -208,53 +202,31 @@ export const TablesList = ({
     });
   };
 
-  // Filter Columns
-  const handleColumnsActive = () => {
-    const valueRef = { current: { ...hiddenColumns } };
-    dialogStoreActions.openDialog({
-      payload: {
-        caption: 'Filter Columns',
-        component: (
-          <FilterColumns
-            hiddenColumns={hiddenColumns}
-            columnsOrder={columnsOrder}
-            onChange={(col, hidden) => {
-              if (hidden) {
-                valueRef.current[col] = true;
-              } else {
-                delete valueRef.current[col];
-              }
-            }}
-          />
-        ),
-        actions: dialogActions.withEnableConfirmCancel({
-          onConfirm: () => {
-            setHiddenColumns(valueRef.current);
-            dialogStoreActions.closeDialog();
-          },
-        }),
-      },
-    });
-  };
-
   const shellHandlers = {
     onDiscardEdits:
       Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
     onSave: Object.entries(editedRow).length > 0 ? handleSaveRows : undefined,
     onExport: handleSelectedExports,
+    onCreate: handleCreateTable,
     onDelete: handleDeleteTables,
     onDownload: handleSelectedExports,
-    onFilterColumns: handleColumnsActive,
+    onFilterColumns: () => {
+      makeColumnsActive(columnsOrder);
+    },
   };
 
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
+
+  const isBusy = isPending;
+  if (isBusy) return <ScreenLoader />;
+
   return (
     <>
       <PageTableShell
         store={tableStore}
         tableRef={tableRef}
         actions={shellHandlers}
-        title={`Tables in ${dbSelected}`}
+        title={`Tables in [${dbSelected}]`}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}
@@ -270,12 +242,10 @@ export const TablesList = ({
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
-          onEditCell={onDoubleClick}
           editedRow={editedRow}
           onEditRow={onEditRow}
         />
       </EffectiveTableWrapper>
-      {isPending && <ScreenLoader />}
     </>
   );
 };

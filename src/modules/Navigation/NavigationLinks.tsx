@@ -59,7 +59,7 @@ export const AuthNavigationLinks = () => {
           <div className='flex w-48'>
             <ComboBox
               value={theme}
-              onChange={setTheme}
+              onChange={(t) => setTheme(t as string)}
               $options={themes.map((t) => ({
                 value: t,
                 label: t,

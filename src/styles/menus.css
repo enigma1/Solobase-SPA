@@ -40,17 +40,16 @@
       transition: background-color 0.15s ease;
 
       &:hover {
-        background-color: var(--color-srf-muted);
+        background-color: var(--color-srf-elevated);
         color: var(--color-text);
       }
 
-      &[data-disabled] {
-        color: var(--text-muted);
+      &[data-disabled='true'] {
+        @apply line-through;
+        color: var(--color-text-muted);
+        background-color: var(--color-srf-dim);
         cursor: not-allowed;
 
-        &:hover {
-          background-color: transparent;
-        }
       }
     }
   }

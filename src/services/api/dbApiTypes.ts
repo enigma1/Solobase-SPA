@@ -1,8 +1,7 @@
 import {
-  DbTable,
-  DbTableType,
-  DbTableColumns,
-  DbTableRow,
+  TableDataType,
+  TableDataColumns,
+  TableDataRow,
   SqlRow,
   Scalar,
   ScalarObject,
@@ -10,6 +9,11 @@ import {
   CollectionRow,
   SqlColumns,
   SqlColumnsShape,
+  TableShapeKey,
+  TableShapeColumn,
+  TableShape,
+  TableData,
+  TableBasics,
 } from '>/types';
 
 export type BasicResponse = {
@@ -23,7 +27,7 @@ export type BasicRowsShape = {
   columnsOrder: string[];
 };
 
-export type SessionRestoreResponse = {
+export type SessionRestoreResponse = BasicResponse & {
   schemas: BasicRowsShape;
   username: string;
   dbSelected: string | null;
@@ -35,7 +39,7 @@ export type LoginRequest = {
   password: string;
 };
 
-export type LoginResponse = {
+export type LoginResponse = BasicResponse & {
   success: boolean;
   username: string;
   schemas: string[];
@@ -46,28 +50,13 @@ export type RunQueryRequest = {
   database?: string;
 };
 
-// export type ServerSessionType = {
-//   username: string;
-//   dbSelected: string | null;
-//   preferences: PrimeObject;
-// };
-
-export type DatabaseInfo = {
-  name: string;
-  charset: string;
-  collation: string;
-};
-// export type FetchDatabasesResponse = {
-//   databases: DatabaseInfo[];
-// };
-
-export type FetchDatabasesResponse = BasicRowsShape;
+export type FetchDatabasesResponse = BasicResponse & BasicRowsShape;
 
 export type FetchTablesRequest = {
   database?: string;
 };
 
-export type FetchTablesResponse = BasicRowsShape;
+export type FetchTablesResponse = BasicResponse & BasicRowsShape;
 
 export type FetchRowsRequest = {
   table: string;
@@ -81,15 +70,16 @@ export type FetchRowsRequest = {
   )[];
 };
 
-export type FetchRowsResponse = {
-  type: DbTableType;
-  rows: DbTableRow[];
-  cols: DbTableColumns;
-  columnsOrder: string[];
+export type FetchRowsResponse = BasicResponse & TableData;
+export type CreateDataRowsRequest = BasicRowsShape & {
+  database: string;
+  table: string;
 };
 
+export type CreateDataRowsResponse = BasicResponse & BasicRowsShape;
+
 type ChangedRow = {
-  originalRow: DbTableRow; // original row as fetched from the database
+  originalRow: TableDataRow; // original row as fetched from the database
   updatedValues: ScalarObject | CollectionRow; // column name with new value
   rowIndex?: number; // optional original row index as it was fetched
 };
@@ -100,8 +90,8 @@ export type UpdateRowsRequest = {
   command?: string; // original SQL command
 };
 
-export type UpdateRowsResponse = {
-  rows: DbTableRow[];
+export type UpdateRowsResponse = BasicResponse & {
+  rows: TableDataRow[];
 };
 
 export type RunQueryResponse = BasicRowsShape & {
@@ -123,7 +113,7 @@ export type StorageEngineMeta = {
   savepoints: boolean;
 };
 
-export type FetchDatabaseInfoResponse = {
+export type FetchDatabaseInfoResponse = BasicResponse & {
   collationsByCharset: Record<string, CharsetMeta>;
   engines: StorageEngineMeta[];
   defaults: {
@@ -174,31 +164,18 @@ export type DeleteTablesRequest = {
   tables: string[];
 };
 
-export type CreateTableRequest = {
-  database: string;
-  table: string;
-  engine?: string;
-  charset?: string;
-  collation?: string;
-};
-
+export type CreateTableRequest = TableShape;
 export type CreateTableResponse = BasicResponse & {
   database: string;
   table: string;
 };
 
 export type EditTableRequest = {
-  table: string;
-  database: string;
-  engine?: string;
-  charset?: string;
-  collation?: string;
+  original: TableShape;
+  modified: TableShape;
 };
 
-export type EditTableResponse = BasicResponse & {
-  database: string;
-  table: string;
-};
+export type EditTableResponse = BasicResponse & TableBasics;
 
 export type DeleteTablesResponse = BasicResponse & {
   tables: string[];
@@ -211,3 +188,17 @@ export type ExportDatabasesRequest = {
 export type ExportDatabasesResponse = BasicResponse & {
   databases: string[];
 };
+
+export type GetTableDetailsRequest = TableBasics;
+// Make engine, charset, collation required for this type
+export type GetTableDetailsResponse = BasicResponse &
+  TableShape & {
+    engine: string;
+    charset: string;
+    collation: string;
+  };
+
+export type GetTableColumnsInfoRequest = TableBasics;
+export type GetTableColumnsInfoResponse = BasicResponse &
+  TableBasics &
+  BasicRowsShape;

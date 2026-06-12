@@ -6,3 +6,4 @@ export * from './historyStore';
 export * from './accountStore';
 export * from './databasesStore';
 export * from './uiTableStore';
+export * from './utilitiesStore';

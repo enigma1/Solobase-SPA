@@ -19,6 +19,7 @@ export type AccountStoreActions = {
   // logout: () => Promise<unknown>;
   setActiveDatabase: (db: string) => void;
   setActiveTable: (table: string) => void;
+  getAuthenticated: () => boolean;
   setAuthenticated: (value: boolean) => void;
   getAppStatus: () => boolean;
   setAppStatus: (value: boolean) => void;
@@ -81,6 +82,7 @@ export const accountStoreActions: AccountStoreActions = {
     setAuto({ activeTable: table });
   },
 
+  getAuthenticated: () => get().isAuthenticated,
   setAuthenticated: (value) => setAuto({ isAuthenticated: value }),
   getAppStatus: () => get().online,
   setAppStatus: (value) => setAuto({ online: value }),

@@ -8,6 +8,7 @@ import {
   ViewRow,
 } from '>/types';
 import {
+  useUtilitiesStore,
   useTablesDataStore,
   useMessageStore,
   createUiTableStore,
@@ -18,7 +19,7 @@ import {
   queryKeys,
   useUpdateRowsMutation,
 } from '>/services/queryHooks';
-import { dialogActions } from '>/services/utils';
+import { dialogActions, makeColumnsActive } from '>/services/utils';
 import {
   TableContainer,
   EffectiveTableWrapper,
@@ -27,6 +28,7 @@ import {
   DialogContent,
   FilterColumns,
   EditDataCellRaw,
+  dialogFactories,
 } from '>/modules';
 import {
   UpdateRowsRequest,
@@ -54,14 +56,15 @@ export const SqlView = ({
   const outerRef = useRef<HTMLDivElement>(null);
   const tableStore = useMemo(() => createUiTableStore(), []);
 
+  const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
+    hiddenColumns: state.hiddenColumns,
+  }));
+
   const addMessage = useMessageStore(({ api }) => api.addMessage);
-  const { editedRow, markEditedRow, hiddenColumns, setHiddenColumns } =
-    useTablesDataStore(({ state, api }) => ({
-      editedRow: state.editedRow as Record<number, ScalarObject>,
-      markEditedRow: api.markEditedRow,
-      hiddenColumns: state.hiddenColumns,
-      setHiddenColumns: api.setHiddenColumns,
-    }));
+  const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
+    editedRow: state.editedRow as Record<number, ScalarObject>,
+    markEditedRow: api.markEditedRow,
+  }));
 
   const callbacks = {
     onSuccess: () => {
@@ -185,32 +188,12 @@ export const SqlView = ({
     const selRows = tableStore.get().selectedRows;
   };
 
-  // Filter Columns
-  const handleColumnsActive = () => {
-    const valueRef = { current: { ...hiddenColumns } };
+  const handleCreateRows = () => {
     dialogStoreActions.openDialog({
-      payload: {
-        caption: 'Filter Columns',
-        component: (
-          <FilterColumns
-            hiddenColumns={hiddenColumns}
-            columnsOrder={columnsOrder}
-            onChange={(col, hidden) => {
-              if (hidden) {
-                valueRef.current[col] = true;
-              } else {
-                delete valueRef.current[col];
-              }
-            }}
-          />
-        ),
-        actions: dialogActions.withEnableConfirmCancel({
-          onConfirm: () => {
-            setHiddenColumns(valueRef.current);
-            dialogStoreActions.closeDialog();
-          },
-        }),
-      },
+      payload: dialogFactories.insertDataRows({
+        database: dbSelected,
+        table: activeTable,
+      }),
     });
   };
 
@@ -220,7 +203,10 @@ export const SqlView = ({
       Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
     onDelete: handleDeleteRows,
     onSave: Object.entries(editedRow).length > 0 ? handleSaveRows : undefined,
-    onFilterColumns: handleColumnsActive,
+    onFilterColumns: () => {
+      makeColumnsActive(columnsOrder);
+    },
+    onCreate: handleCreateRows,
   };
 
   // useEffect(() => {

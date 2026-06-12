@@ -36,20 +36,20 @@ type ComboBoxProps = {
   $defaultOpen?: boolean;
 };
 
-export const ComboBox = ({
-  id,
-  value,
-  onChange,
-  $options = [],
-  $groups = [],
-  $editable = true,
-  $multiple = false,
-  $placeholder = 'Select...',
-  $status,
-  // $open,
-  // $onOpenChange,
-  $defaultOpen,
-}: ComboBoxProps) => {
+export const ComboBox = (props: ComboBoxProps) => {
+  const {
+    id,
+    value,
+    $options = [],
+    $groups = [],
+    $editable = true,
+    $multiple = false,
+    $placeholder = 'Select...',
+    $status,
+    // $open,
+    // $onOpenChange,
+    $defaultOpen,
+  } = props;
   const [internalOpen, setInternalOpen] = useState($defaultOpen ?? false);
   const [menuWidth, setMenuWidth] = useState<number>();
   const [query, setQuery] = useState('');
@@ -152,7 +152,7 @@ export const ComboBox = ({
           onMouseDown={(e) => {
             if (e.button !== 0) return;
             if (!$multiple) {
-              onChange(o.value);
+              props.onChange(o.value);
               setQuery('');
               setInternalOpen(false);
             } else {
@@ -161,7 +161,7 @@ export const ComboBox = ({
               const next = exists
                 ? current.filter((v) => v !== o.value)
                 : [...current, o.value];
-              onChange(next);
+              props.onChange(next);
             }
           }}
         >
@@ -176,7 +176,9 @@ export const ComboBox = ({
       const bg = idx % 2 ? 'odd' : 'even';
       return (
         <Fragment key={g.label}>
-          <li className={`group ${bg}`}>{g.label}</li>
+          <li className={`group ${bg}`}>
+            <span>{g.label}</span>
+          </li>
           {getFlatList(g.options)}
         </Fragment>
       );
@@ -215,7 +217,7 @@ export const ComboBox = ({
                   const current = Array.isArray(value) ? value : [];
                   const next = current.filter((v) => v !== opt.value);
 
-                  onChange(next);
+                  props.onChange(next);
                 }}
               >
                 ×

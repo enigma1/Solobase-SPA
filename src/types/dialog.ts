@@ -28,6 +28,7 @@ export type DialogPayload = {
 };
 
 export type DialogState = {
+  anonymous?: boolean;
   payload: DialogPayload;
 };
 

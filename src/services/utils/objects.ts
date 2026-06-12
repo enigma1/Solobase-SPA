@@ -3,6 +3,11 @@ import isEqual from 'lodash-es/isEqual';
 import cloneDeep from 'lodash-es/cloneDeep';
 import merge from 'lodash-es/merge';
 
+export const defaultResponse = {
+  ok: false,
+  message: 'Warning - No Request made, this is a dummy response',
+};
+
 export const hasObject = <T extends Record<string, unknown>>(
   target: T,
   list: T[],

@@ -1,7 +1,7 @@
 import { UpdateRowsRequest } from '>/services/api';
 import {
   CollectionRow,
-  DbTableRow,
+  TableDataRow,
   ScalarObject,
   SqlColumnsShape,
   SqlRow,
@@ -35,7 +35,7 @@ type UpdateRowsSqlProps = {
   componentShape: Record<number, ScalarObject>;
   cols: SqlColumnsShape;
   table: string;
-  originalRows: DbTableRow[];
+  originalRows: TableDataRow[];
 };
 
 export const updateRowsSqlTransformer = (

@@ -1,15 +1,19 @@
 import { JSONObject } from 'type-plus';
 import { PrimeObject } from './common';
-const DB_TABLE_TYPE = ['table', 'collection'] as const;
-// export type DbTableType = 'table' | 'collection';
-export type DbTableType = (typeof DB_TABLE_TYPE)[number];
 
-export type DbTable = {
-  name: string;
-  rows?: number;
-  cols?: PrimeObject;
-  engine?: string;
+export type DataEditorType =
+  | 'input'
+  | 'textarea'
+  | 'json'
+  | 'boolean'
+  | 'selection';
+export type DataCell = {
+  value: Scalar;
+  editorType: DataEditorType;
 };
+
+const DB_TABLE_TYPE = ['table', 'collection'] as const;
+export type TableDataType = (typeof DB_TABLE_TYPE)[number];
 
 export type SqlColumns = {
   field: string;
@@ -29,25 +33,19 @@ export type Scalar = Date | bigint | boolean | null | number | string;
 export type ScalarObject = Record<string, Scalar>;
 
 export type CollectionRow = { _id: string } & PrimeObject<JSONObject>;
-// export type SqlRow = {
-//   __rowId: string;
-// } & ScalarObject;
-
 export type SqlRow = Scalar[];
 export type SqlColumnsShape = Record<string, SqlColumns>;
-export type DbTableRow = CollectionRow | SqlRow;
-export type DbTableColumns = CollectionColumns | SqlColumnsShape;
+export type TableDataRow = CollectionRow | SqlRow;
+export type TableDataColumns = CollectionColumns | SqlColumnsShape;
 
-export type DbTableData = {
-  rows: DbTableRow[];
-  cols: DbTableColumns;
-  type: DbTableType;
+export type BaseTableData = {
+  rows: TableDataRow[];
+  cols: TableDataColumns;
   columnsOrder: string[];
 };
-export type DbQueryData = {
-  rows: DbTableRow[];
-  cols: DbTableColumns;
-  columnsOrder: string[];
+
+export type TableData = BaseTableData & {
+  type: TableDataType;
 };
 
 export type DatabaseShape = {
@@ -56,9 +54,12 @@ export type DatabaseShape = {
   collation?: string;
 };
 
-export type TableShapeBasics = {
+export type TableBasics = {
   database: string;
   table: string;
+};
+
+export type TableShapeBasics = TableBasics & {
   engine?: string;
   charset?: string;
   collation?: string;
@@ -78,18 +79,17 @@ export type TableShapeKey = {
 };
 
 export type TableShapeColumn = {
-  uid: string; // UI identity only
+  uid: string;
   field: string;
   type: string;
   params?: Record<string, string | number>;
+  nullable?: boolean;
+  defaultValue?: string | null;
+  autoIncrement?: boolean;
+  unsigned?: boolean;
+  comment?: string;
 };
 export type TableShape = TableShapeBasics & {
   keys: TableShapeKey[];
   cols: TableShapeColumn[];
 };
-
-// export type TableShape = TableShapeBasics &
-//   TableShapeKeys & {
-//     cols: SqlColumns[];
-//     colsParams: Record<string, string | number>[];
-//   };

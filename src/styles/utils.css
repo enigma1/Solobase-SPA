@@ -10,7 +10,7 @@
 
 @layer utilities {
   .animate-fade-out {
-    animation: fadeOut 1s ease-out forwards;
+    animation: fadeOut 6s ease-out forwards;
   }
 
   .field-error {

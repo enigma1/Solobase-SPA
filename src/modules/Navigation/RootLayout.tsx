@@ -2,7 +2,7 @@ import { Outlet, Link, Navigate, useLocation } from 'react-router-dom';
 import { useAccountStore, dialogStoreActions } from '>/services/stores';
 import { routes } from '>/config';
 import {
-  HeartbeatMonitor,
+  AliveMonitor,
   Sidebar,
   MessageList,
   Auth,
@@ -19,37 +19,52 @@ import { AuthNavigationLinks } from './NavigationLinks';
 const GuestNavigationLinks = () => null;
 const GuestMenu = () => null;
 
-const AuthMenu = () => (
-  <Auth>
-    <div className='menu'>
-      <DropdownMenu label='Account'>
-        <Link to={routes.front.newUser}>User Privileges</Link>
-        <Link to={routes.front.editUser}>Create User</Link>
-        <Link to={routes.front.settings}>Settings</Link>
-        <Link to={routes.front.logout}>Logout</Link>
-      </DropdownMenu>
-      <div className='menu-separator'>|</div>
-      <DropdownMenu label='Database'>
-        <a
-          href='#'
-          onClick={() =>
-            dialogStoreActions.openDialog({
-              payload: dialogFactories.createDatabase(),
-            })
-          }
-        >
-          New Database
-        </a>
-        <Link to={routes.front.listDatabases}>Show Databases</Link>
-      </DropdownMenu>
-      <div className='menu-separator'>|</div>
-      <DropdownMenu label='Tables'>
-        <Link to={routes.front.newDatabase}>New Table</Link>
-        <Link to={routes.front.listTables}>Show Tables</Link>
-      </DropdownMenu>
-    </div>
-  </Auth>
-);
+const AuthMenu = () => {
+  const dbSelected = useAccountStore(({ state }) => state.dbSelected);
+  return (
+    <Auth>
+      <div className='menu'>
+        <DropdownMenu label='Account'>
+          <Link to={routes.front.newUser}>User Privileges</Link>
+          <Link to={routes.front.editUser}>Create User</Link>
+          <Link to={routes.front.settings}>Settings</Link>
+          <Link to={routes.front.logout}>Logout</Link>
+        </DropdownMenu>
+        <div className='menu-separator'>|</div>
+        <DropdownMenu label='Database'>
+          <a
+            href='#'
+            onClick={() =>
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.createDatabase(),
+              })
+            }
+          >
+            New Database
+          </a>
+          <Link to={routes.front.listDatabases}>Show Databases</Link>
+        </DropdownMenu>
+        <div className='menu-separator'>|</div>
+        <DropdownMenu label='Tables'>
+          <a
+            href='#'
+            onClick={() => {
+              dbSelected &&
+                dialogStoreActions.openDialog({
+                  payload: dialogFactories.createTable(dbSelected),
+                });
+            }}
+            data-disabled={!dbSelected}
+          >
+            New Table
+          </a>
+          {/* <Link to={routes.front.newDatabase}>New Table</Link> */}
+          <Link to={routes.front.listTables}>Show Tables</Link>
+        </DropdownMenu>
+      </div>
+    </Auth>
+  );
+};
 
 const AuthSideContent = () => (
   <Auth>
@@ -80,7 +95,7 @@ export const RootLayout = () => {
   return (
     <>
       <div className='app'>
-        <HeartbeatMonitor />
+        <AliveMonitor />
         <NavigationDebugger />
         {online && (
           <>

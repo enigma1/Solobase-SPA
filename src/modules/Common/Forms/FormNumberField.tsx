@@ -57,7 +57,7 @@ export const FormNumberField = <T extends FieldValues>({
             type='number'
             min={min}
             max={max}
-            className='w-full mt-2 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className='w-full input'
             onChange={(e) => {
               const value = e.target.value;
               const numericValue = value === '' ? undefined : Number(value);

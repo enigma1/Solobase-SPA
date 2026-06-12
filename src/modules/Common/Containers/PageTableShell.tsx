@@ -8,6 +8,7 @@ import {
   LayersMinusIcon,
   RouteOffIcon,
   TableColumnsSplitIcon,
+  MapPlusIcon,
 } from 'lucide-react';
 import { compactTable } from '>/services/utils';
 import type { UiTableStore } from '>/services/stores';
@@ -16,6 +17,7 @@ export type PageTableShellActions = {
   onDiscardEdits?: () => void;
   onSave?: () => void;
   onDownload?: () => void;
+  onCreate?: () => void;
   onDelete?: () => void;
   onFilterColumns?: () => void;
 };
@@ -40,8 +42,14 @@ export const PageTableShell = ({
   }));
 
   const shellActions = actions ?? {};
-  const { onDiscardEdits, onSave, onDownload, onDelete, onFilterColumns } =
-    shellActions;
+  const {
+    onDiscardEdits,
+    onSave,
+    onDownload,
+    onCreate,
+    onDelete,
+    onFilterColumns,
+  } = shellActions;
   const [isPacked, setIsPacked] = useState(false);
 
   return (
@@ -49,6 +57,12 @@ export const PageTableShell = ({
       <div className='page-toolbar'>
         <div className='page-title'>{title}</div>
         <div className='page-actions'>
+          {onCreate && (
+            <button className='btn' onClick={onCreate} title='Create New Entry'>
+              <MapPlusIcon size={24} />
+            </button>
+          )}
+
           {onDownload && (
             <button
               className={`btn-secondary ${hasSelects && 'icon-warn'}`}
@@ -81,6 +95,7 @@ export const PageTableShell = ({
               <CaptionsIcon size={24} />
             </button>
           )}
+
           {onDelete && hasSelects && (
             <button
               className='btn icon-critical'

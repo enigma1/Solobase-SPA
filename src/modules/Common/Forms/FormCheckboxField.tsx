@@ -66,16 +66,6 @@ export const FormCheckboxField = <T extends FieldValues>({
             id={id ?? name}
           />
         );
-        // const checkbox = (
-        //   <input
-        //     id={id ?? name}
-        //     type='checkbox'
-        //     checked={!!field.value}
-        //     onChange={(e) => field.onChange(e.target.checked)}
-        //     className='check'
-        //     title={name}
-        //   />
-        // );
 
         if (!label) return checkbox;
 

@@ -7,6 +7,7 @@ import { TableShape } from '>/types';
 import { StorageEngineMeta } from '>/services/api';
 
 type TableBasicsFormProps = {
+  mode: 'create' | 'edit';
   form: UseFormReturn<TableShape>;
   dbCharsets: string[];
   collationsByCharset: Record<string, { collations: string[] }>;
@@ -20,6 +21,7 @@ type TableBasicsFormProps = {
 };
 
 export const TableBasicsForm = ({
+  mode,
   form,
   dbCharsets,
   collationsByCharset,
@@ -67,13 +69,15 @@ export const TableBasicsForm = ({
     <>
       <div className='area-container'>
         <div className='area-spacer'>
-          <h1 className='area-title'>Create Table Basics</h1>
+          <h1 className='area-title'>
+            {mode === 'create' ? 'Create Table Basics' : `Editing ${values[0]}`}
+          </h1>
           <div className='area-actions'>
             <button
               type='button'
               className='btn-secondary'
               onClick={onSetDefaults}
-              title='Set Defaults'
+              title='Set Server Defaults'
             >
               <SquareActivityIcon size={24} />
             </button>

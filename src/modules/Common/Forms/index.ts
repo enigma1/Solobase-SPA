@@ -2,3 +2,6 @@ export * from './FormNumberField';
 export * from './FormCheckboxField';
 export * from './FormInputField';
 export * from './FormSwitchField';
+export * from './FormTextAreaField';
+export * from './FormJsonField';
+export * from './FormCellField';

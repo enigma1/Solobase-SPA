@@ -16,12 +16,12 @@ import {
   getMutationResult,
 } from './defs';
 import { useAccountStore } from '>/services/stores';
+import { defaultResponse } from '>/services/utils';
 import { createMutationHook } from './mutationBuilder';
 
 const dbDefaults = {
+  ...defaultResponse,
   database: undefined,
-  ok: false,
-  message: 'default',
 };
 export const useEditDatabaseMutation = createMutationHook(
   dbApi.editDatabase,
@@ -41,24 +41,21 @@ export const useCreateDatabaseMutation = createMutationHook(
 export const useDeleteDatabasesMutation = createMutationHook(
   dbApi.deleteDatabases,
   {
+    ...defaultResponse,
     databases: [],
-    ok: false,
-    message: 'default',
   },
 );
 
 export const useDeleteTablesMutation = createMutationHook(dbApi.deleteTables, {
+  ...defaultResponse,
   database: undefined,
   tables: [],
-  ok: false,
-  message: 'default',
 });
 
 const tableDefaults = {
+  ...defaultResponse,
   database: undefined,
   table: undefined,
-  ok: false,
-  message: 'default',
 };
 
 export const useCreateTableMutation = createMutationHook(
@@ -68,6 +65,11 @@ export const useCreateTableMutation = createMutationHook(
 
 export const useEditTableMutation = createMutationHook(
   dbApi.editTable,
+  tableDefaults,
+);
+
+export const useCreateDataRowsMutation = createMutationHook(
+  dbApi.createDataRows,
   tableDefaults,
 );
 

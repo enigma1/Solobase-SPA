@@ -1,0 +1,24 @@
+[data-theme="medley"] {
+  --tone-0: oklch(0.30 0.07 350);
+  --tone-1: oklch(0.35 0.07 280);
+  --tone-2: oklch(0.35 0.07 210);
+  --tone-3: oklch(0.40 0.07 160);
+  --tone-4: oklch(0.45 0.07 50);
+  --tone-5: oklch(0.7 0.02 220);
+  --tone-6: oklch(0.8 0.03 220);
+  --tone-7: oklch(0.85 0.04 220);
+  --tone-8: oklch(0.5 0.02 125);
+  --tone-9: oklch(0.78 0.042 210);
+  --tone-10: oklch(0.85 0.045 215);
+  --tone-11: oklch(0.96.048 225);
+
+  --overlay: rgb(5 20 35 / 0.35);
+
+  --action: oklch(0.86 0.07 50);
+  --effect: oklch(0.67 0.10 190);
+
+  --separator:
+    color-mix(in oklch,
+      var(--tone-10) 30%,
+      var(--tone-8));
+}

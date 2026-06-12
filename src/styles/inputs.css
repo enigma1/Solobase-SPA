@@ -104,6 +104,7 @@
 
   .check-label {
     @apply flex items-center gap-2 cursor-pointer text-sm;
+    white-space: nowrap;
     color: var(--color-text);
   }
 

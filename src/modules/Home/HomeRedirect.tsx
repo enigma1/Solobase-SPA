@@ -31,6 +31,7 @@ export const HomeRedirect = () => {
   const handleLogin = (e: MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     dialogStoreActions.openDialog({
+      anonymous: true,
       payload: {
         caption: 'Enter your credentials',
         component: <Login />,

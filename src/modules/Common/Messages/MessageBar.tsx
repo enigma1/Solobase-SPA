@@ -47,29 +47,34 @@ export const MessageBar = ({
 
   if (!msg || (!isPermanent && !visible)) return null;
 
-  // Tailwind classes for different message types
+  // CSS styles for different message types
   const typeStyles = {
     error: {
-      color: 'var(--color-error)',
-      backgroundColor: 'var(--color-error-bg)',
+      color: 'var(--color-text)',
+      backgroundColor:
+        'linear-gradient(75deg in oklch, var(--color-error-bg) 25%, var(--color-srf-elevated) 100%)',
     },
     warn: {
-      color: 'var(--color-warn)',
-      backgroundColor: 'var(--color-warn-bg)',
+      color: 'var(--color-text)',
+      backgroundColor:
+        'linear-gradient(75deg in oklch, var(--color-warn-bg) 25%, var(--color-srf-elevated) 100%)',
     },
     info: {
-      color: 'var(--color-info)',
-      backgroundColor: 'var(--color-info-bg)',
+      color: 'var(--color-text)',
+      backgroundColor:
+        'linear-gradient(75deg in oklch, var(--color-info-bg) 25%, var(--color-srf-elevated) 100%)',
     },
     success: {
-      color: 'var(--color-success)',
-      backgroundColor: 'var(--color-success-bg)',
+      color: 'var(--color-text)',
+      background:
+        'linear-gradient(75deg in oklch, var(--color-success-bg) 25%, var(--color-srf-elevated) 100%)',
     },
   };
 
-  // Tailwind for the animation (using the custom fade-out animation)
+  // Animation (using the custom fade-out animation)
   const animationClasses = duration
-    ? 'opacity-100 animate-fade-out'
+    ? // ? 'opacity-100 animate-fade-out'
+      'opacity-100'
     : 'opacity-100';
 
   return (

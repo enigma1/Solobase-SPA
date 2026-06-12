@@ -1,15 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { SquareActivityIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useForm, Controller, FieldErrors, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { queryKeys, useDatabaseServerInfo } from '>/services/queryHooks';
 import { useModal } from '>/services/hooks';
-import {
-  FormTextField,
-  ScreenLoader,
-  ComboBox,
-  DialogContent,
-} from '>/modules';
+import { ScreenLoader, DialogContent } from '>/modules';
 import { emptyTableColumn, emptyTableColumnKey } from '>/services/utils';
 import {
   SqlColumns,
@@ -22,7 +16,7 @@ import {
 import { TableBasicsForm } from './TableBasicsForm';
 import { TableColumnsForm } from './TableColumnsForm';
 import { TableKeysForm } from './TableKeysForm';
-import { TableReview } from './TableReview';
+import { TableReview } from './TableReviewForm';
 
 type ButtonsGroupState = Partial<Record<string, ButtonStatus>>;
 type TableFormStep = 'basics' | 'columns' | 'keys' | 'review';
@@ -39,12 +33,16 @@ type TableFormProps = {
   };
   onSubmit: (data: TableShape) => void;
   wizardHandlers: WizardHandlers;
+  database: string;
+  mode?: 'create' | 'edit';
 };
 
 export const TableForm = ({
+  database,
   initialValues = {},
   onSubmit,
   wizardHandlers,
+  mode = 'create',
 }: TableFormProps) => {
   const [step, setStep] = useState<TableFormStep>('basics');
   const nextStep = (current: TableFormStep): TableFormStep => {
@@ -56,6 +54,23 @@ export const TableForm = ({
     return stepOrder[Math.max(idx - 1, 0)];
   };
 
+  const colsWithUids = useMemo(
+    () =>
+      (initialValues.cols ?? []).map((col) => ({
+        ...col,
+        uid: crypto.randomUUID(),
+      })),
+    [initialValues.cols],
+  );
+
+  const keysWithUids = useMemo(
+    () =>
+      (initialValues.keys ?? []).map((key) => ({
+        ...key,
+        uid: crypto.randomUUID(),
+      })),
+    [initialValues.keys],
+  );
   const queryClient = useQueryClient();
   const { collationsByCharset, engines, defaults, isFetching, isSuccess } =
     useDatabaseServerInfo(({ state, query }) => ({
@@ -74,8 +89,8 @@ export const TableForm = ({
       charset: initialValues.charset ?? defaults.charset,
       engine: initialValues.engine ?? defaults.engine,
       collation: initialValues.collation ?? defaults.collation,
-      cols: initialValues.cols ? initialValues.cols : [emptyTableColumn()],
-      keys: initialValues.keys ? initialValues.keys : [emptyTableColumnKey()],
+      cols: colsWithUids.length ? colsWithUids : [emptyTableColumn()],
+      keys: keysWithUids.length ? keysWithUids : [emptyTableColumnKey()],
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -125,7 +140,9 @@ export const TableForm = ({
   useEffect(() => {
     wizardHandlers.next = goNextStep;
     wizardHandlers.previous = goPrevStep;
-    wizardHandlers.finish = handleSubmit(onSubmit);
+    wizardHandlers.finish = handleSubmit((values) =>
+      onSubmit({ ...values, database }),
+    );
 
     return () => {
       wizardHandlers.next = undefined;
@@ -174,6 +191,7 @@ export const TableForm = ({
       >
         {step === 'basics' && (
           <TableBasicsForm
+            mode={mode}
             onValidation={onValidation}
             form={form}
             engines={engines}
@@ -202,7 +220,11 @@ export const TableForm = ({
           <TableKeysForm onValidation={onValidation} form={form} />
         )}
         {step === 'review' && (
-          <TableReview onValidation={onValidation} form={form} />
+          <TableReview
+            database={database}
+            onValidation={onValidation}
+            form={form}
+          />
         )}
       </form>
     </>

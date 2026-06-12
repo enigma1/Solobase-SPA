@@ -1,24 +1,66 @@
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys, useEditTableMutation } from '>/services/queryHooks';
-import { messageStoreActions, useAccountStore } from '>/services/stores';
+import { messageStoreActions } from '>/services/stores';
+import { useTableDetailsHook } from '>/services/queryHooks';
 import { ScreenLoader } from '>/modules';
 import { TableShape, WizardHandlers } from '>/types';
 import { TableForm } from './TableForm';
 
-type TableEditProps = TableShape & {
+type TableEditProps = {
   database: string;
+  table: string;
   wizardHandlers: WizardHandlers;
 };
 
 export const TableEdit = ({
   database,
   table,
-  engine,
-  charset,
-  collation,
   wizardHandlers,
 }: TableEditProps) => {
   const queryClient = useQueryClient();
+
+  const request = { database, table };
+  const {
+    engine,
+    collation,
+    charset,
+    cols,
+    keys,
+    isFetching,
+    isSuccess,
+    isError,
+  } = useTableDetailsHook(request, ({ state, query }) => ({
+    collation: state.collation,
+    engine: state.engine,
+    charset: state.charset,
+    cols: state.cols,
+    keys: state.keys,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+  }));
+
+  const originalTable = {
+    database,
+    table,
+    engine,
+    charset,
+    collation,
+    cols,
+    keys,
+  };
+
+  const formDefaults = {
+    database,
+    table,
+    engine,
+    charset,
+    collation,
+    cols,
+    keys,
+  };
+
   const editTableCallbacks = {
     onSuccess: (data: any) => {
       if (data.ok) {
@@ -56,24 +98,27 @@ export const TableEdit = ({
     editTableCallbacks,
   );
 
-  const onDbSubmit = async (values: TableShape) => {
+  const onSubmit = async (values: TableShape) => {
+    console.log('values to update', values);
     mutate({
-      database,
-      table: values.table,
-      engine: values.engine,
-      charset: values.charset,
-      collation: values.collation,
+      original: originalTable,
+      modified: {
+        ...values,
+        database,
+      },
     });
   };
 
-  const isBusy = isPending;
-
+  const isBusy = isPending || isFetching;
   if (isBusy) return <ScreenLoader />;
+
   return (
     <TableForm
+      mode='edit'
+      database={database}
       wizardHandlers={wizardHandlers}
-      initialValues={{ table, engine, collation, charset }}
-      onSubmit={onDbSubmit}
+      initialValues={formDefaults}
+      onSubmit={onSubmit}
     />
   );
 };

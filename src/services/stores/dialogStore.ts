@@ -6,7 +6,7 @@ const initialState: DialogStore = {
 };
 
 const baseStore = makeStore<DialogStore>(() => ({ ...initialState }));
-const { setAuto } = baseStore;
+const { get, setAuto } = baseStore;
 
 export type DialogStoreActions = {
   openDialog: (dialog: DialogState) => void;

@@ -23,15 +23,7 @@ type TableKeysFormProps = {
 
 export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const {
-    clearErrors,
-    setValues,
-    setValue,
-    control,
-
-    formState: { errors },
-  } = form;
-
+  const { control } = form;
   const keys =
     useWatch({
       control,
@@ -115,6 +107,9 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
               <Controller
                 name={`keys.${index}.type`}
                 control={control}
+                rules={{
+                  required: 'Key type is required',
+                }}
                 render={({ field, fieldState }) => (
                   <FormFieldWrapper
                     label='Key Type:'
@@ -150,6 +145,15 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
                     />
                   </FormFieldWrapper>
                 )}
+                rules={{
+                  required: 'Column is required for assigned key',
+                  validate: (v) => {
+                    return (
+                      (Array.isArray(v) && v.length > 0) ||
+                      'At least one column must be assigned'
+                    );
+                  },
+                }}
               />
             </div>
           );

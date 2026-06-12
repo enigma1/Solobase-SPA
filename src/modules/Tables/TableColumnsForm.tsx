@@ -1,23 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   FormProvider,
   UseFormReturn,
-  Controller,
   useWatch,
   useFieldArray,
 } from 'react-hook-form';
-import { SquareActivityIcon, Trash2Icon, ListPlusIcon } from 'lucide-react';
-import { FormTextField, ComboBox } from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+import { SquareActivityIcon, ListPlusIcon } from 'lucide-react';
 import {
   tableColumnTypes,
   emptyTableColumn,
   isColumnParameterValid,
-  hasDuplicatedValues,
   isDuplicatedValue,
   MAX_TABLE_COLUMNS,
 } from '>/services/utils';
 import { SqlColumns, TableShape } from '>/types';
+import { TableColumnEntry } from './TableColumnEntry';
 
 type ColumnBasics = Pick<SqlColumns, 'field' | 'type'>;
 type TableColumnsFormProps = {
@@ -34,21 +31,27 @@ export const TableColumnsForm = ({
   defaults,
 }: TableColumnsFormProps) => {
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
-
-  const {
-    getValues,
-    clearErrors,
-    setValue,
-    control,
-    formState: { errors },
-  } = form;
-
+  const columnsSnapshotRef = useRef<string>('');
+  const { clearErrors, setValue, control } = form;
+  const columns = useWatch({ control, name: 'cols' });
   const { fields, insert, append, remove } = useFieldArray({
     control,
     name: 'cols',
   });
 
-  const columns = useWatch({ control, name: 'cols' });
+  useEffect(() => {
+    const serialized = JSON.stringify(columns ?? []);
+
+    if (!columnsSnapshotRef.current) {
+      columnsSnapshotRef.current = serialized;
+      return;
+    }
+
+    if (columnsSnapshotRef.current !== serialized) {
+      setValue('keys', []);
+      columnsSnapshotRef.current = serialized;
+    }
+  }, [columns, setValue]);
 
   useEffect(() => {
     onValidation(fields.length > 0 && form.formState.isValid);
@@ -75,9 +78,9 @@ export const TableColumnsForm = ({
       },
       {
         shouldValidate: true,
+        shouldDirty: true,
       },
     );
-
     clearErrors(`cols.${idx}`);
   };
 
@@ -116,122 +119,16 @@ export const TableColumnsForm = ({
       </div>
       <div className='area-content'>
         {fields.map((field, index) => {
-          const columnType = columns?.[index]?.type;
-          const typeMeta = tableColumnTypes
-            .flatMap((g) => g.options)
-            .find((o) => o.value === columnType);
-
-          const bg = index % 2 ? 'odd' : 'even';
           return (
-            <div
-              key={field.uid}
-              className={`area-item separate ${bg} ${activeColumnId === field.uid ? 'active' : ''}`}
-              onClick={() => setActiveColumnId(field.uid)}
-            >
-              <div className='flex items-center justify-between mb-2'>
-                <span className='text-xs font-semibold text-muted'>
-                  Column {index + 1}
-                </span>
-                <button
-                  type='button'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const isActive = field.uid === activeColumnId;
-                    remove(index);
-                    if (!isActive) return;
-
-                    const next = fields.filter((_, i) => i !== index);
-                    setActiveColumnId(next[0]?.uid ?? null);
-                  }}
-                >
-                  <Trash2Icon size={18} />
-                </button>
-              </div>
-              <FormTextField
-                id={`table-name-${index}`}
-                name={`cols.${index}.field`}
-                label='Field Name:'
-                control={control}
-                rules={{
-                  required: 'A column name is required',
-                  minLength: { value: 1, message: 'min 1 character' },
-                  maxLength: { value: 64, message: 'max 64 characters' },
-                  validate: {
-                    isString: (v) =>
-                      typeof v === 'string' || 'Must be a string',
-                    noNullBytes: (v) =>
-                      (typeof v === 'string' && !/\u0000/.test(v)) ||
-                      'Invalid characters',
-                    noWhitespaceEdges: (v) =>
-                      (typeof v === 'string' && !/^\s|\s$/.test(v)) ||
-                      'No lead/trail spaces',
-                    isUnique: (v) => {
-                      const cols = getValues('cols');
-                      const isDuplicated = isDuplicatedValue({
-                        entries: cols,
-                        prop: 'field',
-                        value: v,
-                        index,
-                      });
-
-                      return !isDuplicated || 'Column name must be unique';
-                    },
-                  },
-                }}
+            <FormProvider key={field.uid} {...form}>
+              <TableColumnEntry
+                uid={field.uid}
+                index={index}
+                active={activeColumnId === field.uid}
+                onSelect={() => setActiveColumnId(field.uid)}
+                onRemove={() => remove(index)}
               />
-              <Controller
-                name={`cols.${index}.type`}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <FormFieldWrapper
-                    label='Type:'
-                    htmlFor={`table-type-${index}`}
-                    $status={fieldState.error ? 'error' : undefined}
-                    $notice={fieldState.error?.message}
-                  >
-                    <ComboBox
-                      id={`table-type-${index}`}
-                      value={field.value}
-                      onChange={(v) => {
-                        field.onChange(v);
-                        const params =
-                          typeMeta?.params?.reduce(
-                            (acc, p) => ({
-                              ...acc,
-                              [p]: '',
-                            }),
-                            {},
-                          ) ?? {};
-
-                        setValue(`cols.${index}.params`, params);
-                      }}
-                      $groups={tableColumnTypes}
-                    />
-                  </FormFieldWrapper>
-                )}
-              />
-              {typeMeta?.params?.map((param) => {
-                const label = `${param.replace(/\s*\*$/, '')}:`;
-                const currentValue = columns?.[index]?.params?.[param];
-                if (currentValue === undefined) {
-                  setValue(`cols.${index}.params.${param}`, '');
-                }
-                return (
-                  <FormTextField
-                    key={param}
-                    id={`cols-${index}-${param}`}
-                    name={`cols.${index}.params.${param}`}
-                    label={label}
-                    control={control}
-                    rules={{
-                      validate: {
-                        isValid: (v) => isColumnParameterValid(param, v),
-                      },
-                    }}
-                  />
-                );
-              })}
-            </div>
+            </FormProvider>
           );
         })}
       </div>

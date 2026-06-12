@@ -7,10 +7,12 @@ import {
   FetchDatabasesResponse,
   SessionRestoreResponse,
   BasicRowsShape,
+  GetTableDetailsResponse,
+  GetTableColumnsInfoResponse,
 } from '>/services/api';
-import { getSingleColumnFromResult } from '>/services/utils';
+import { getSingleColumnFromResult, defaultResponse } from '>/services/utils';
 import { DataHookProps, HookStore } from './defs';
-import { DbQueryData } from '>/types';
+import { BaseTableData } from '>/types';
 
 type RestoreHookProps = DataHookProps<SessionRestoreResponse>;
 export const useSessionRestore = <TSelected = RestoreHookProps>(
@@ -24,6 +26,7 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
   );
 
   const initialData: SessionRestoreResponse = {
+    ...defaultResponse,
     username: '',
     schemas: {
       rows: [],
@@ -81,10 +84,11 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
   selector?: (args: DatabaseHookProps) => TSelected,
 ) => {
   const initialData = {
+    ...defaultResponse,
     rows: [],
     cols: {},
     columnsOrder: [],
-  } satisfies DbQueryData;
+  } satisfies BaseTableData;
 
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
   // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
@@ -126,6 +130,7 @@ export const useDatabaseServerInfo = <TSelected = DatabaseServerInfoHookProps>(
 ) => {
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
   const initialData = {
+    ...defaultResponse,
     collationsByCharset: {},
     engines: [],
     defaults: {
@@ -147,6 +152,88 @@ export const useDatabaseServerInfo = <TSelected = DatabaseServerInfoHookProps>(
     refetchOnWindowFocus: false,
     // placeholderData: keepPreviousData,
     initialData,
+  });
+
+  const data = q.data ?? initialData;
+  const args = {
+    api: {} as {},
+    state: data,
+    query: q,
+  };
+  return selector ? selector(args) : (args as TSelected);
+};
+
+type TableDetailsHookProps = DataHookProps<GetTableDetailsResponse>;
+export const useTableDetailsHook = <TSelected = TableDetailsHookProps>(
+  request: { database: string; table: string },
+  selector?: (args: TableDetailsHookProps) => TSelected,
+) => {
+  const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
+
+  const initialData = {
+    ...defaultResponse,
+    database: request.database,
+    table: request.table,
+    charset: '',
+    collation: '',
+    engine: '',
+    cols: [],
+    keys: [],
+  } satisfies GetTableDetailsResponse;
+
+  const q = useQuery<GetTableDetailsResponse, Error>({
+    queryKey: queryKeys.tableDetails(request.database, request.table),
+    // select: (data) => data.databases, // transform to string[] for easier usage
+    queryFn: async () => {
+      const data = await dbApi.getTableDetails(request);
+      return data;
+    },
+    staleTime: STALE_TIME,
+    enabled: isAuthenticated && !!request.database && !!request.table,
+    retry: 1,
+    refetchOnWindowFocus: false,
+    // placeholderData: keepPreviousData,
+    // initialData,
+  });
+
+  const data = q.data ?? initialData;
+  const args = {
+    api: {} as {},
+    state: data,
+    query: q,
+  };
+  return selector ? selector(args) : (args as TSelected);
+};
+
+type TableColumnsInfoHookProps = DataHookProps<GetTableColumnsInfoResponse>;
+export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
+  request: { database: string; table: string },
+  selector?: (args: TableColumnsInfoHookProps) => TSelected,
+) => {
+  const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
+
+  const initialData = {
+    ...defaultResponse,
+    database: request.database,
+    table: request.table,
+    rows: [],
+    cols: {},
+    columnsOrder: [],
+  } satisfies GetTableColumnsInfoResponse;
+
+  const q = useQuery<GetTableColumnsInfoResponse, Error>({
+    queryKey: queryKeys.tableColumnsInfo(request.database, request.table),
+    // select: (data) => data.databases, // transform to string[] for easier usage
+    queryFn: async () => {
+      const data = await dbApi.getTableColumnsInfo(request);
+      return data;
+    },
+    staleTime: STALE_TIME,
+    enabled: isAuthenticated && !!request.database && !!request.table,
+    retry: 1,
+    refetchOnWindowFocus: false,
+    // placeholderData: keepPreviousData,
+    // initialData,
   });
 
   const data = q.data ?? initialData;

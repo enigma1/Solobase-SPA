@@ -55,6 +55,16 @@ export const queryKeys = {
   session: () => ['session'],
   databases: () => ['databases'],
   databaseServerInfo: () => ['database-server-info'],
+  tableDetails: (db: string | null, table: string | null) => [
+    'table-details',
+    db,
+    table,
+  ],
+  tableColumnsInfo: (db: string | null, table: string | null) => [
+    'columns-info',
+    db,
+    table,
+  ],
   tables: (db: string | null) => ['tables', db],
   rows: (db: string | null, table: string | null) => ['table-rows', db, table],
   query: (db: string | null, id: string | null) => ['query', db, id],

@@ -59,14 +59,16 @@ export const Sidebar = () => {
       getRoute: () => routes.front.dbView,
       component: <DatabasesSideList />,
       icon: (
-        <DatabaseIcon
-          size={20}
-          onClick={() => {
-            dialogStoreActions.openDialog({
-              payload: dialogFactories.createDatabase(),
-            });
-          }}
-        />
+        <span title='Create Database'>
+          <DatabaseIcon
+            size={20}
+            onClick={() => {
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.createDatabase(),
+              });
+            }}
+          />
+        </span>
       ),
     },
     {
@@ -76,34 +78,16 @@ export const Sidebar = () => {
         activeTable ? routes.front.tableView : routes.front.listTables,
       component: <TablesSideList />,
       icon: dbSelected ? (
-        <FileStackIcon
-          size={20}
-          onClick={() => {
-            const handlers: WizardHandlers = {};
-            dialogStoreActions.openDialog({
-              payload: {
-                initialSize: 'lg',
-                caption: 'Database Forms',
-                component: (
-                  <TableNew wizardHandlers={handlers} database={dbSelected} />
-                ),
-                variant: 'success',
-                actions: dialogActions.wizard({
-                  onNext: () => {
-                    handlers.next?.();
-                  },
-                  onPrevious: () => {
-                    handlers.previous?.();
-                  },
-                  onFinish: () => {
-                    handlers.finish?.();
-                    dialogStoreActions.closeDialog();
-                  },
-                }),
-              },
-            });
-          }}
-        />
+        <span title='Create Table'>
+          <FileStackIcon
+            size={20}
+            onClick={() => {
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.createTable(dbSelected),
+              });
+            }}
+          />
+        </span>
       ) : (
         <CircleSlash2Icon size={20} />
       ),

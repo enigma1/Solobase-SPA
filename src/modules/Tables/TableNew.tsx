@@ -51,17 +51,17 @@ export const TableNew = ({ database, wizardHandlers }: TableNewProps) => {
   );
 
   const onNewSubmit = async (values: TableShape) => {
-    mutate({
-      database,
-      table: values.table,
-      engine: values.engine,
-      charset: values.charset,
-      collation: values.collation,
-    });
+    mutate(values);
   };
 
   const isBusy = isPending;
 
   if (isBusy) return <ScreenLoader />;
-  return <TableForm wizardHandlers={wizardHandlers} onSubmit={onNewSubmit} />;
+  return (
+    <TableForm
+      database={database}
+      wizardHandlers={wizardHandlers}
+      onSubmit={onNewSubmit}
+    />
+  );
 };

@@ -17,6 +17,8 @@ import {
   FetchDatabaseInfoResponse,
   UpdateRowsRequest,
   UpdateRowsResponse,
+  CreateDataRowsRequest,
+  CreateDataRowsResponse,
   SelectDatabaseRequest,
   SelectDatabaseResponse,
   CreateDatabaseRequest,
@@ -33,8 +35,12 @@ import {
   DeleteTablesResponse,
   ExportDatabasesRequest,
   ExportDatabasesResponse,
+  GetTableDetailsRequest,
+  GetTableDetailsResponse,
+  GetTableColumnsInfoRequest,
+  GetTableColumnsInfoResponse,
 } from './dbApiTypes';
-import { DbTable, PrimeObject } from '>/types';
+import { PrimeObject } from '>/types';
 
 apiClient.interceptors.response.use(
   (response) => response,
@@ -55,6 +61,8 @@ const apiCall = <T>(fn: () => Promise<any>, unwrap = true) =>
   });
 
 const ping = () => apiCall<{ ok: true }>(() => apiClient.get('/api/active'));
+const checkSession = () =>
+  apiCall<SessionRestoreResponse>(() => apiClient.get('/api/check-session'));
 
 const sessionRestore = () =>
   apiCall<SessionRestoreResponse>(() => apiClient.get('/auth/presence'));
@@ -71,10 +79,26 @@ const runQuery = (data: RunQueryRequest, signal?: AbortSignal) =>
 const fetchDatabases = () =>
   apiCall<FetchDatabasesResponse>(() => apiClient.get('/db/fetch-databases'));
 
+const getTableDetails = (data: GetTableDetailsRequest) =>
+  apiCall<GetTableDetailsResponse>(() =>
+    apiClient.post('/db/get-table-details', data),
+  );
+
+const getTableColumnsInfo = (data: GetTableColumnsInfoRequest) =>
+  apiCall<GetTableColumnsInfoResponse>(() =>
+    apiClient.post('/db/get-table-columns-info', data),
+  );
+
 const fetchTables = (data: FetchTablesRequest) =>
   apiCall<FetchTablesResponse>(() => apiClient.post('/db/fetch-tables', data));
+
 const fetchRows = (data: FetchRowsRequest) =>
   apiCall<FetchRowsResponse>(() => apiClient.post('/db/fetch-rows', data));
+
+const createDataRows = (data: CreateDataRowsRequest) =>
+  apiCall<CreateDataRowsResponse>(() =>
+    apiClient.post('/db/create-data-rows', data),
+  );
 
 const updateRows = (data: UpdateRowsRequest) =>
   apiCall<UpdateRowsResponse>(() => apiClient.post('/db/update-rows', data));
@@ -134,6 +158,9 @@ const loadSettings = () =>
 
 export const dbApi = {
   ping,
+  checkSession,
+  getTableDetails,
+  getTableColumnsInfo,
   fetchDatabaseInfo,
   sessionRestore,
   login,
@@ -143,6 +170,7 @@ export const dbApi = {
   fetchDatabases,
   fetchTables,
   fetchRows,
+  createDataRows,
   runQuery,
   updateRows,
   selectDatabase,

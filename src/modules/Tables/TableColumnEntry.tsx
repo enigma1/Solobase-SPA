@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Trash2Icon } from 'lucide-react';
-import { FormTextField, ComboBox } from '>/modules';
+import { FormTextField, FormCheckboxField, ComboBox } from '>/modules';
 import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
 import {
   tableColumnTypes,
@@ -24,7 +24,7 @@ export const TableColumnEntry = ({
   uid,
   index,
 }: TableColumnEntryProps) => {
-  const { control, setValue, getValues } = useFormContext<TableShape>();
+  const { control, setValue, getValues, watch } = useFormContext<TableShape>();
 
   const cols =
     useWatch({
@@ -41,10 +41,20 @@ export const TableColumnEntry = ({
     name: `cols.${currentIndex}.type`,
   });
 
-  const typeMeta = useMemo(() => {
-    return tableColumnTypes
-      .flatMap((g) => g.options)
-      .find((o) => o.value === columnType);
+  const autoIncrement = useWatch({
+    control,
+    name: `cols.${currentIndex}.autoIncrement`,
+  });
+
+  const { typeMeta, groupMeta } = useMemo(() => {
+    const group = tableColumnTypes.find((g) =>
+      g.options.some((o) => o.value === columnType),
+    );
+
+    return {
+      typeMeta: group?.options.find((o) => o.value === columnType),
+      groupMeta: group?.meta,
+    };
   }, [columnType]);
 
   const params =
@@ -60,8 +70,36 @@ export const TableColumnEntry = ({
       typeMeta.params.map((p) => [p, params[p] ?? '']),
     );
 
-    setValue(`cols.${currentIndex}.params`, next);
+    setValue(`cols.${currentIndex}.params`, next, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   }, [typeMeta, currentIndex]);
+
+  useEffect(() => {
+    if (autoIncrement) {
+      setValue(`cols.${currentIndex}.defaultValue`, undefined, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      setValue(`cols.${currentIndex}.nullable`, false);
+    }
+  }, [autoIncrement]);
+
+  // useEffect(() => {
+  //   const sub = watch((values, { name }) => {
+  //     const cols = values.cols;
+
+  //     cols?.forEach((col, i) => {
+  //       if (col.autoIncrement && col.defaultValue) {
+  //         setValue(`cols.${i}.defaultValue`, undefined);
+  //       }
+  //     });
+  //   });
+
+  //   return () => sub.unsubscribe();
+  // }, []);
 
   const bg = index % 2 ? 'odd' : 'even';
   return (
@@ -117,6 +155,9 @@ export const TableColumnEntry = ({
       <Controller
         name={`cols.${currentIndex}.type`}
         control={control}
+        rules={{
+          required: 'Column type is required',
+        }}
         render={({ field, fieldState }) => (
           <FormFieldWrapper
             label='Type:'
@@ -162,6 +203,43 @@ export const TableColumnEntry = ({
           />
         );
       })}
+
+      <div className='flex flex-wrap gap-x-4 gap-y-2 my-2 mt-4'>
+        {groupMeta?.hasUnsigned && (
+          <FormCheckboxField
+            name={`cols.${index}.unsigned`}
+            control={control}
+            label='Unsigned'
+          />
+        )}
+
+        {groupMeta?.hasAutoIncrement && (
+          <FormCheckboxField
+            name={`cols.${index}.autoIncrement`}
+            control={control}
+            label='Auto Increment'
+          />
+        )}
+
+        <FormCheckboxField
+          name={`cols.${index}.nullable`}
+          control={control}
+          label='Allow NULL'
+        />
+      </div>
+      <FormTextField
+        id={`cols-${index}-default`}
+        name={`cols.${index}.defaultValue`}
+        control={control}
+        label='Default Value:'
+      />
+
+      <FormTextField
+        id={`cols-${index}-comment`}
+        name={`cols.${index}.comment`}
+        control={control}
+        label='Comment:'
+      />
     </div>
   );
 };

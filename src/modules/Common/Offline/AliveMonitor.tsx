@@ -1,17 +1,26 @@
 import { useEffect } from 'react';
 import { onlineManager } from '@tanstack/react-query';
 import { dbApi } from '>/services/api/dbApi';
-import { accountStoreActions } from '>/services/stores';
+import { accountStoreActions, messageStoreActions } from '>/services/stores';
 
-export const HeartbeatMonitor = () => {
+export const AliveMonitor = () => {
   useEffect(() => {
     let cancelled = false;
     let failures = 0;
 
     const check = async () => {
       try {
-        await dbApi.ping();
-
+        const rsp = await dbApi.checkSession();
+        const isAuthenticated = accountStoreActions.getAuthenticated();
+        if (rsp.ok === false && isAuthenticated) {
+          accountStoreActions.setAuthenticated(false);
+          messageStoreActions.addMessage({
+            content: {
+              text: 'Invalid Session Detected - Please login again',
+              duration: 3000,
+            },
+          });
+        }
         if (cancelled) return;
 
         failures = 0;

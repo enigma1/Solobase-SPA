@@ -1,8 +1,12 @@
 import { useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAccountStore, tablesDataStoreActions } from '>/services/stores';
+import {
+  useAccountStore,
+  tablesDataStoreActions,
+  dialogStoreActions,
+} from '>/services/stores';
 import { queryKeys, useTablesHook } from '>/services/queryHooks';
-import { EmptyPage, ScreenLoader } from '>/modules';
+import { EmptyPage, ScreenLoader, dialogFactories } from '>/modules';
 import type { ViewRow, Scalar } from '>/types';
 import { TablesList } from './TablesList';
 
@@ -49,6 +53,12 @@ export const TablesMainView = () => {
     });
   }, [dbSelected, activeTable]);
 
+  const handleCreateTable = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.createTable(dbSelected),
+    });
+  };
+
   if (isFetching) return <ScreenLoader />;
   return (
     <>
@@ -61,7 +71,8 @@ export const TablesMainView = () => {
         />
       ) : (
         <EmptyPage
-          note={`${dbSelected ? 'No Tables in database: ' + dbSelected : 'No database selected'}`}
+          onCreate={handleCreateTable}
+          note={`${dbSelected ? 'No Tables in database [' + dbSelected + ']' : 'No database selected'}`}
         />
       )}
     </>

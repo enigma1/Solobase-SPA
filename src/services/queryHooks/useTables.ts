@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { dbApi, FetchTablesResponse } from '>/services/api';
+import { dbApi, FetchTablesResponse, BasicResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
-import { DbTable, DbQueryData } from '>/types';
+import { defaultResponse } from '>/services/utils';
+import { BaseTableData } from '>/types';
 import { queryKeys, STALE_TIME, DataHookProps } from './defs';
 
 type TablesHookProps = DataHookProps<FetchTablesResponse>;
@@ -10,10 +11,11 @@ export const useTablesHook = <TSelected = TablesHookProps>(
   selector?: (args: TablesHookProps) => TSelected,
 ) => {
   const initialData = {
+    ...defaultResponse,
     rows: [],
     cols: {},
     columnsOrder: [],
-  } satisfies DbQueryData;
+  } satisfies BaseTableData & BasicResponse;
 
   const { dbSelected, isAuthenticated } = useAccountStore(({ state }) => ({
     dbSelected: state.dbSelected,

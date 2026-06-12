@@ -1,25 +1,8 @@
-import { InputHTMLAttributes, useState } from 'react';
+import { useState } from 'react';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { FormFieldWrapper } from './FormCommon';
-import {
-  FieldValues,
-  RegisterOptions,
-  Path,
-  Control,
-  Controller,
-} from 'react-hook-form';
-import { StatusType } from '>/types';
-
-type FormInputFieldProps<T extends FieldValues> = {
-  id?: string;
-  name: Path<T>;
-  control: Control<T>;
-  label: string;
-  type?: 'text' | 'password' | 'email';
-  $status?: StatusType;
-  rules?: RegisterOptions<T, Path<T>>;
-  endAdornment?: React.ReactNode;
-} & Omit<InputHTMLAttributes<HTMLInputElement>, 'name'>;
+import { FieldValues, Controller } from 'react-hook-form';
+import { FormCommonFieldProps } from './commonTypes';
 
 export const FormInputField = <T extends FieldValues>({
   id,
@@ -31,7 +14,7 @@ export const FormInputField = <T extends FieldValues>({
   $status,
   endAdornment,
   ...rest
-}: FormInputFieldProps<T> & { type?: string }) => {
+}: FormCommonFieldProps<T> & { type?: string }) => {
   return (
     <Controller
       name={name}
@@ -47,6 +30,7 @@ export const FormInputField = <T extends FieldValues>({
           <div className='field-control'>
             <input
               {...field}
+              value={field.value ?? ''}
               {...rest}
               id={id}
               type={type}
@@ -63,11 +47,11 @@ export const FormInputField = <T extends FieldValues>({
 };
 
 export const FormTextField = <T extends FieldValues>(
-  props: Omit<FormInputFieldProps<T>, 'type'>,
+  props: Omit<FormCommonFieldProps<T>, 'type'>,
 ) => <FormInputField {...props} type='text' />;
 
 export const FormPasswordField = <T extends FieldValues>(
-  props: Omit<FormInputFieldProps<T>, 'type'>,
+  props: Omit<FormCommonFieldProps<T>, 'type'>,
 ) => {
   const [visible, setVisible] = useState(false);
 
@@ -92,5 +76,5 @@ export const FormPasswordField = <T extends FieldValues>(
 
 // For future expansion
 export const FormEmailField = <T extends FieldValues>(
-  props: Omit<FormInputFieldProps<T>, 'type'>,
+  props: Omit<FormCommonFieldProps<T>, 'type'>,
 ) => <FormInputField {...props} type='email' />;
