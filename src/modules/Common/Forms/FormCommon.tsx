@@ -7,7 +7,7 @@ type FootNoticeProps = {
 export const FootNotice = ({ $status, $notice }: FootNoticeProps) => {
   if (!$status || !$notice || typeof $notice != 'string') return null;
 
-  return <div className={`field-${$status}`}>{$notice}</div>;
+  return <div className={`text-sm field-${$status}`}>{$notice}</div>;
 };
 
 type FieldWrapperProps = FootNoticeProps & {

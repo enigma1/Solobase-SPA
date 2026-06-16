@@ -15,7 +15,7 @@ import {
   useUtilitiesStore,
   useDatabasesStore,
   messageStoreActions,
-  createUiTableStore,
+  createFactoryTableStore,
   dialogStoreActions,
 } from '>/services/stores';
 import {
@@ -25,11 +25,11 @@ import {
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
-import { SqlColumnsShape, SqlRow, ScalarObject } from '>/types';
+import { ViewRow, SqlColumnsShape, SqlRow, ScalarObject } from '>/types';
 import {
   ScreenLoader,
   EffectiveTableWrapper,
-  TableContainer,
+  SqlTableContainer,
   PageTableShell,
   DatabaseEdit,
   DialogContent,
@@ -40,11 +40,6 @@ import {
   DatabaseExportPreview,
   DatabasesDeletePreview,
 } from './DatabasesPreviews';
-
-type ViewRow<T> = {
-  row: T;
-  uiKey: number;
-};
 
 type DatabasesListProps = {
   rows: ViewRow<SqlRow>[];
@@ -60,7 +55,7 @@ export const DatabasesList = ({
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const tableStore = useMemo(() => createUiTableStore(), []);
+  const tableStore = useMemo(() => createFactoryTableStore(), []);
   const queryClient = useQueryClient();
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
@@ -319,7 +314,7 @@ export const DatabasesList = ({
     <>
       <PageTableShell
         store={tableStore}
-        title={`Databases: ${rows.length > 0 ? rows.length : 'None'}`}
+        title={`Databases: ${rows.length}`}
         tableRef={tableRef}
         actions={shellHandlers}
       />
@@ -328,7 +323,7 @@ export const DatabasesList = ({
         resizeLineRef={resizeLineRef}
         tableRef={tableRef}
       >
-        <TableContainer
+        <SqlTableContainer
           cols={cols}
           rows={rows}
           columnsOrder={columnsOrder}

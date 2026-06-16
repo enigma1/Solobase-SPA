@@ -183,50 +183,44 @@ export const TableForm = ({
   }
 
   return (
-    <>
-      <form
-        className='space-y-4 flex flex-1 flex-col min-h-0'
-        // onSubmit={handleSubmit(onSubmit)}
-        // onClick={() => clearErrors()}
-      >
-        {step === 'basics' && (
-          <TableBasicsForm
-            mode={mode}
-            onValidation={onValidation}
-            form={form}
-            engines={engines}
-            dbCharsets={dbCharsets}
-            collationsByCharset={collationsByCharset}
-            defaults={{
-              charset: defaults.charset,
-              collation: defaults.collation,
-              engine: defaults.engine,
-            }}
-          />
-        )}
-        {step === 'columns' && (
-          <TableColumnsForm
-            defaults={{
-              column: {
-                field: 'id',
-                type: 'INT',
-              },
-            }}
-            onValidation={onValidation}
-            form={form}
-          />
-        )}
-        {step === 'keys' && (
-          <TableKeysForm onValidation={onValidation} form={form} />
-        )}
-        {step === 'review' && (
-          <TableReview
-            database={database}
-            onValidation={onValidation}
-            form={form}
-          />
-        )}
-      </form>
-    </>
+    <form className='space-y-4 flex flex-1 flex-col min-h-0'>
+      {step === 'basics' && (
+        <TableBasicsForm
+          mode={mode}
+          onValidation={onValidation}
+          form={form}
+          engines={engines}
+          dbCharsets={dbCharsets}
+          collationsByCharset={collationsByCharset}
+          defaults={{
+            charset: defaults.charset,
+            collation: defaults.collation,
+            engine: defaults.engine,
+          }}
+        />
+      )}
+      {step === 'columns' && (
+        <TableColumnsForm
+          defaults={{
+            column: {
+              field: 'id',
+              type: 'INT',
+            },
+          }}
+          onValidation={onValidation}
+          form={form}
+        />
+      )}
+      {step === 'keys' && (
+        <TableKeysForm onValidation={onValidation} form={form} />
+      )}
+      {step === 'review' && (
+        <TableReview
+          database={database}
+          onValidation={onValidation}
+          form={form}
+        />
+      )}
+    </form>
   );
 };

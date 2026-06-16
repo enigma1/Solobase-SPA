@@ -51,7 +51,10 @@
       border-color: var(--color-success);
       background-color: var(--color-success-bg);
     }
+  }
 
+  .input-group {
+    @apply flex gap-2 pt-2;
   }
 
   .field-control {

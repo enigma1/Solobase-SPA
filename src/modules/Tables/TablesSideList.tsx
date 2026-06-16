@@ -24,17 +24,22 @@ export const TablesSideList = () => {
     markEditedRow: api.markEditedRow,
   }));
 
-  const { tables, tablesCount, isFetching, isSuccess } = useTablesHook(
-    ({ api, query }) => ({
+  const { tables, tablesCount, isFetching, isSuccess, isLoading } =
+    useTablesHook(({ api, query }) => ({
       tables: api.getTablesNames(),
       tablesCount: api.getTablesCount(),
       isFetching: query.isFetching,
       isSuccess: query.isSuccess,
-    }),
-  );
+      isLoading: query.isLoading,
+    }));
 
   const handleSwitchTable = (name: string) => {
-    if (name === activeTable) return;
+    if (name === activeTable) {
+      if (location.pathname !== routes.front.tableView) {
+        navigate(routes.front.tableView);
+      }
+      return;
+    }
     if (!isObjectEmpty(editedRow)) {
       dialogStoreActions.openDialog({
         payload: {
@@ -66,11 +71,10 @@ export const TablesSideList = () => {
     }
   };
 
-  const isBusy = isFetching;
-  if (isBusy) return <ScreenLoader />;
-
+  const isBusy = isLoading;
   return (
     <>
+      {isBusy && <ScreenLoader />}
       <div className='side-list'>
         {isSuccess ? (
           tablesCount > 0 ? (

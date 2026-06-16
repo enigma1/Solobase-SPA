@@ -7,7 +7,7 @@ import {
   useDialogStore,
   useTablesDataStore,
   useMessageStore,
-  createUiTableStore,
+  createFactoryTableStore,
 } from '>/services/stores';
 import {
   queryKeys,
@@ -34,7 +34,7 @@ type CollectionViewProps = {
 export const CollectionView = (props: CollectionViewProps) => {
   const restrictedFields = ['_id'];
   const { rows, activeTable, dbSelected } = props;
-  const tableStore = useMemo(() => createUiTableStore(), []);
+  const tableStore = useMemo(() => createFactoryTableStore(), []);
 
   const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
     editedRow: state.editedRow as Record<string, CollectionRow>,

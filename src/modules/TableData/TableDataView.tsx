@@ -3,13 +3,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { routes } from '>/config';
 import { queryKeys, useTableDataHook } from '>/services/queryHooks';
-import { useAccountStore, tablesDataStoreActions } from '>/services/stores';
+import {
+  useAccountStore,
+  tablesDataStoreActions,
+  dialogStoreActions,
+} from '>/services/stores';
 import {
   CollectionView,
   CollectionViewType,
   SqlView,
   ScreenLoader,
   EmptyPage,
+  EmptyListing,
+  dialogFactories,
 } from '>/modules';
 import { SqlColumnsShape, SqlRow, CollectionRow } from '>/types/dbTables';
 
@@ -76,12 +82,26 @@ export const TableDataView = () => {
     return null;
   }
 
+  const onCreate = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.createDataRows({
+        database: dbSelected,
+        table: activeTable,
+      }),
+    });
+  };
+
   if (isBusy) {
     return <ScreenLoader />;
   }
 
   if (rows.length === 0) {
-    return <EmptyPage note={`No available rows in ${activeTable}`} />;
+    return (
+      <EmptyListing
+        onCreate={onCreate}
+        note={`No available rows in ${activeTable}`}
+      />
+    );
   }
 
   return type === 'collection' ? (

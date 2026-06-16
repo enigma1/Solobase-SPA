@@ -1,8 +1,9 @@
 import { JSONObject } from 'type-plus';
-import { PrimeObject } from './common';
+import { Scalar, ScalarObject, PrimeObject, PrimeRow } from './common';
 
 export type DataEditorType =
   | 'input'
+  | 'number'
   | 'textarea'
   | 'json'
   | 'boolean'
@@ -28,9 +29,6 @@ export type CollectionColumns = {
   _id: string;
   doc: JSONObject;
 };
-
-export type Scalar = Date | bigint | boolean | null | number | string;
-export type ScalarObject = Record<string, Scalar>;
 
 export type CollectionRow = { _id: string } & PrimeObject<JSONObject>;
 export type SqlRow = Scalar[];
@@ -79,6 +77,7 @@ export type TableShapeKey = {
 };
 
 export type TableShapeColumn = {
+  signature?: string;
   uid: string;
   field: string;
   type: string;

@@ -46,6 +46,7 @@ type FormCheckboxFieldProps<T extends FieldValues> = {
   control: Control<T>;
   label?: string;
   id?: string;
+  onValueChange?: (checked: boolean, field: any) => void;
 };
 
 export const FormCheckboxField = <T extends FieldValues>({
@@ -53,16 +54,21 @@ export const FormCheckboxField = <T extends FieldValues>({
   control,
   label,
   id,
+  onValueChange,
 }: FormCheckboxFieldProps<T>) => {
   return (
     <Controller
       name={name}
       control={control}
       render={({ field }) => {
+        const handleChange = (checked: boolean) => {
+          onValueChange?.(checked, field);
+          field.onChange(checked);
+        };
         const checkbox = (
           <Checkbox
             checked={!!field.value}
-            onChange={field.onChange}
+            onChange={handleChange}
             id={id ?? name}
           />
         );

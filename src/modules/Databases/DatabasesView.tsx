@@ -10,17 +10,25 @@ type ViewRow<T> = {
 };
 
 export const DatabasesMainView = () => {
-  const { rows, cols, columnsOrder, isSuccess, isError, isLoading } =
-    useDatabases(({ state, query }) => {
-      return {
-        rows: state.rows,
-        cols: state.cols,
-        columnsOrder: state.columnsOrder,
-        isSuccess: query.isSuccess,
-        isError: query.isError,
-        isLoading: query.isLoading,
-      };
-    });
+  const {
+    rows,
+    cols,
+    columnsOrder,
+    isSuccess,
+    isError,
+    isLoading,
+    isFetching,
+  } = useDatabases(({ state, query }) => {
+    return {
+      rows: state.rows,
+      cols: state.cols,
+      columnsOrder: state.columnsOrder,
+      isSuccess: query.isSuccess,
+      isError: query.isError,
+      isLoading: query.isLoading,
+      isFetching: query.isFetching,
+    };
+  });
 
   const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
@@ -28,8 +36,11 @@ export const DatabasesMainView = () => {
       uiKey: idx,
     }));
   }, [rows]);
+
+  const isBusy = isFetching;
   return (
     <>
+      {isBusy && <ScreenLoader />}
       {isSuccess &&
         (rows.length > 0 ? (
           <DatabasesList
@@ -40,7 +51,6 @@ export const DatabasesMainView = () => {
         ) : (
           <EmptyPage note='No Databases found' />
         ))}
-      {isLoading && <ScreenLoader />}
     </>
   );
 };

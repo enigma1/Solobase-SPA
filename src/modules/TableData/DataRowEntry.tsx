@@ -42,7 +42,7 @@ import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
 import { AnyControlField } from '>/modules/Common/Forms/commonTypes';
 
 import { DataCell, DataEditorType, SqlColumnsShape } from '>/types';
-import { CreateDataRowsForm } from './commonTypes';
+import { CreateDataRowsForm, DataRowForm } from './commonTypes';
 
 type RenderEditorProps = {
   field: AnyControlField;
@@ -52,7 +52,7 @@ type RenderEditorProps = {
 const renderEditor = ({ field, fieldState, editorType }: RenderEditorProps) => {
   switch (editorType) {
     case 'textarea':
-      return <textarea className='textarea' {...field} />;
+      return <textarea className='text-dialog-area resize-y' {...field} />;
 
     case 'json':
       return (
@@ -74,6 +74,17 @@ const renderEditor = ({ field, fieldState, editorType }: RenderEditorProps) => {
         />
       );
 
+    case 'number':
+      return (
+        <input
+          {...field}
+          type='number'
+          value={field.value ?? ''}
+          className='w-full input'
+          data-status={!!fieldState.error ? 'error' : undefined}
+        />
+      );
+
     default:
       return (
         <input
@@ -87,34 +98,25 @@ const renderEditor = ({ field, fieldState, editorType }: RenderEditorProps) => {
 };
 
 type DataRowEntryProps = {
-  uid: string;
   rowIndex: number;
+  row: DataRowForm;
   cols: SqlColumnsShape;
   columnsOrder: string[];
-  active: boolean;
-  defaults: DataCell[];
 };
 export const DataRowEntry = ({
-  uid,
   rowIndex,
+  row,
   cols,
   columnsOrder,
-  active,
-  defaults,
 }: DataRowEntryProps) => {
-  const [activeEditor, setActiveEditor] = useState<{
-    rowId: string;
-    columnName: string;
-    mode: 'input' | 'textarea' | 'json';
-  } | null>(null);
+  // const [activeEditor, setActiveEditor] = useState<{
+  //   rowId: string;
+  //   columnName: string;
+  //   mode: 'input' | 'textarea' | 'json';
+  // } | null>(null);
 
   const { control, register, setValue, watch, getValues } =
     useFormContext<CreateDataRowsForm>();
-
-  const row = useWatch({
-    control,
-    name: `rowsData.${rowIndex}`,
-  });
 
   // const {
   //   control,
@@ -136,7 +138,6 @@ export const DataRowEntry = ({
       {columnsOrder.map((columnName, columnIndex) => {
         const col = cols[columnName];
         const cell = row.values[columnIndex];
-
         const rules = buildRulesFromColumn(col);
 
         return (

@@ -1,50 +1,44 @@
-import { makeStore, makeFactoryStore } from '>/services/utils/emitter';
+import { makeFactoryStore } from '>/services/utils/emitter';
 
 type WithUiKey = {
   uiKey: number;
 };
-type UiTableState = {
+type FactoryTableState = {
   selectedRows: Set<number>;
 };
 
-export type UiTableActions = {
+export type FactoryTableActions = {
   initialize: () => void;
   clearSelected: () => void;
   setAllRows: (rows: WithUiKey[]) => void;
   setSelectedRow: (row: number, active: boolean) => void;
 };
 
-// export type UiTableStore = UiTableState & UiTableActions;
-
-// const initialState: UiTableState = {
-//   selectedRows: new Set<number>(),
-// };
-
-export type UiTableStore = {
-  useStore: <
+export type FactoryTableStore = {
+  useFactoryTableStore: <
     TSelected = {
-      state: UiTableState;
-      api: UiTableActions;
+      state: FactoryTableState;
+      api: FactoryTableActions;
     },
   >(
     selector?: (args: {
-      state: UiTableState;
-      api: UiTableActions;
+      state: FactoryTableState;
+      api: FactoryTableActions;
     }) => TSelected,
   ) => TSelected;
-  api: UiTableActions;
-  get: () => UiTableState;
+  api: FactoryTableActions;
+  get: () => FactoryTableState;
 };
 
 // const baseStore = makeFactoryStore<UiTableState>(() => initialState);
-export const createUiTableStore = () => {
-  const baseStore = makeFactoryStore<UiTableState>(() => ({
+export const createFactoryTableStore = () => {
+  const baseStore = makeFactoryStore<FactoryTableState>(() => ({
     selectedRows: new Set<number>(),
   }))();
 
   const { get, set, setAuto } = baseStore;
 
-  const api: UiTableActions = {
+  const api: FactoryTableActions = {
     initialize: () => {
       set(() => ({
         selectedRows: new Set(),
@@ -80,11 +74,11 @@ export const createUiTableStore = () => {
   };
 
   type SelectorProps = {
-    state: UiTableState;
-    api: UiTableActions;
+    state: FactoryTableState;
+    api: FactoryTableActions;
   };
 
-  const useStore = <TSelected = SelectorProps>(
+  const useFactoryTableStore = <TSelected = SelectorProps>(
     selector?: (args: SelectorProps) => TSelected,
   ): TSelected => {
     const state = baseStore();
@@ -104,7 +98,7 @@ export const createUiTableStore = () => {
   // const {useStore, api} = store
   // or const prop = store.get().stateProperty
   return {
-    useStore,
+    useFactoryTableStore,
     get,
     api,
   };

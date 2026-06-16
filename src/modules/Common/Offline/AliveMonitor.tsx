@@ -41,7 +41,7 @@ export const AliveMonitor = () => {
 
     check();
 
-    const id = setInterval(check, 10000);
+    const id = setInterval(check, 30000);
 
     return () => {
       cancelled = true;

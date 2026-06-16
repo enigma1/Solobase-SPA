@@ -29,8 +29,9 @@ const unknownResponseError = (response: any) => {
     name: 'ApiError',
     type: 'server',
     status: response?.status,
+    error: response?.error,
     message: response?.message ?? 'Unknown response received from server',
-    data: response,
+    // data: response,
   };
 };
 
@@ -45,6 +46,7 @@ export const apiErrorResolver = async (e: unknown) => {
     throw networkError;
   }
   if (hasObjectProps(e, ['response'])) {
+    console.log('axios-error', e.response);
     const axiosError = e as any;
 
     const status = axiosError.response?.status;
@@ -55,7 +57,8 @@ export const apiErrorResolver = async (e: unknown) => {
     }
     throw unknownResponseError({
       status,
-      message: data?.error ?? data?.message,
+      error: data?.error ?? 'No specifics given',
+      message: data?.message ?? 'No details available',
     });
   }
   if (e instanceof Error) {

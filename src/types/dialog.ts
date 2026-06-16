@@ -39,6 +39,10 @@ export type WizardHandlers = {
   finish?: () => void;
 };
 
+export type CommonDialogHandlers = {
+  confirm: () => void;
+};
+
 export type DialogMap<T extends { type: string; payload: unknown }> = {
   [K in T['type']]: (
     payload: Extract<T, { type: K }>['payload'],

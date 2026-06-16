@@ -3,7 +3,7 @@ export * from './Common';
 export * from './Navigation';
 export * from './Empty';
 export * from './Guards';
-export * from './Query';
+export * from './Queries';
 export * from './Home';
 export * from './Tables';
 export * from './TableData';

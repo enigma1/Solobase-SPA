@@ -1,4 +1,4 @@
-import { Scalar } from '>/types/dbTables';
+import { Scalar } from '>/types';
 
 export type Result<T> =
   | { success: true; data: T }

@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useRef, useMemo, useEffect } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { dbApi, FetchTablesResponse, BasicResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
 import { defaultResponse } from '>/services/utils';
@@ -28,6 +28,9 @@ export const useTablesHook = <TSelected = TablesHookProps>(
   const q = useQuery<FetchTablesResponse, Error>({
     queryKey: queryKeys.tables(database),
     queryFn: async () => {
+      // const delay = (ms: number) =>
+      //   new Promise((resolve) => setTimeout(resolve, ms));
+      // await delay(5000);
       if (!database) return { ...initialData };
       const data = await dbApi.fetchTables({ database });
       return data;
@@ -37,9 +40,11 @@ export const useTablesHook = <TSelected = TablesHookProps>(
     retry: 1,
     refetchOnWindowFocus: false,
     initialData,
+    // placeholderData: keepPreviousData,
   });
 
   const data = q.data ?? initialData;
+
   // state object
   const api = useMemo(() => {
     const nameIndex = data.columnsOrder.indexOf('TABLE_NAME');

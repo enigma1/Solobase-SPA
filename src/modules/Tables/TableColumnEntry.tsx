@@ -1,12 +1,19 @@
 import { useEffect, useMemo } from 'react';
-import { useFormContext, useWatch, Controller } from 'react-hook-form';
+import {
+  useFormContext,
+  useWatch,
+  useFieldArray,
+  Controller,
+} from 'react-hook-form';
 import { Trash2Icon } from 'lucide-react';
 import { FormTextField, FormCheckboxField, ComboBox } from '>/modules';
 import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
 import {
   tableColumnTypes,
+  flatColumnTypeSet,
   isColumnParameterValid,
   isDuplicatedValue,
+  normalizeColumnParameter,
 } from '>/services/utils';
 import { TableShape } from '>/types';
 
@@ -24,7 +31,8 @@ export const TableColumnEntry = ({
   uid,
   index,
 }: TableColumnEntryProps) => {
-  const { control, setValue, getValues, watch } = useFormContext<TableShape>();
+  const { control, setValue, setValues, getValues, watch } =
+    useFormContext<TableShape>();
 
   const cols =
     useWatch({
@@ -41,10 +49,10 @@ export const TableColumnEntry = ({
     name: `cols.${currentIndex}.type`,
   });
 
-  const autoIncrement = useWatch({
-    control,
-    name: `cols.${currentIndex}.autoIncrement`,
-  });
+  // const autoIncrement = useWatch({
+  //   control,
+  //   name: `cols.${currentIndex}.autoIncrement`,
+  // });
 
   const { typeMeta, groupMeta } = useMemo(() => {
     const group = tableColumnTypes.find((g) =>
@@ -66,40 +74,67 @@ export const TableColumnEntry = ({
   useEffect(() => {
     if (!typeMeta?.params) return;
 
-    const next = Object.fromEntries(
-      typeMeta.params.map((p) => [p, params[p] ?? '']),
-    );
+    const result = getValues(`cols.${currentIndex}.params`);
+    if (!result) return;
 
-    setValue(`cols.${currentIndex}.params`, next, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    let changed = false;
+
+    for (const p of typeMeta.params) {
+      const key = normalizeColumnParameter(p);
+      const existingValue = params?.[key] ?? '';
+
+      if (result[key] !== existingValue) {
+        result[key] = existingValue;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      setValue(`cols.${currentIndex}.params`, result, {
+        shouldValidate: false,
+        shouldDirty: false,
+      });
+    }
   }, [typeMeta, currentIndex]);
 
-  useEffect(() => {
-    if (autoIncrement) {
-      setValue(`cols.${currentIndex}.defaultValue`, undefined, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+  const enableAutoIncrement = (index: number) => {
+    setValues((form) => ({
+      ...form,
+      cols: form.cols.map((c, i) => ({
+        ...c,
+        autoIncrement: i === index,
+        nullable: i === index ? false : c.nullable,
+        defaultValue: i === index ? undefined : c.defaultValue,
+      })),
+    }));
+  };
 
-      setValue(`cols.${currentIndex}.nullable`, false);
-    }
-  }, [autoIncrement]);
-
-  // useEffect(() => {
-  //   const sub = watch((values, { name }) => {
-  //     const cols = values.cols;
-
-  //     cols?.forEach((col, i) => {
-  //       if (col.autoIncrement && col.defaultValue) {
-  //         setValue(`cols.${i}.defaultValue`, undefined);
-  //       }
-  //     });
-  //   });
-
-  //   return () => sub.unsubscribe();
-  // }, []);
+  type ResetOnTypeChangeProps = {
+    type: string;
+    params: Record<string, string | number> | undefined;
+    index: number;
+  };
+  const resetOnTypeChange = ({
+    type,
+    params,
+    index,
+  }: ResetOnTypeChangeProps) => {
+    setValues((form) => ({
+      ...form,
+      cols: form.cols.map((c, i) =>
+        i === index
+          ? {
+              ...c,
+              type,
+              params,
+              autoIncrement: false,
+              defaultValue: undefined,
+              unsigned: false,
+            }
+          : c,
+      ),
+    }));
+  };
 
   const bg = index % 2 ? 'odd' : 'even';
   return (
@@ -157,47 +192,56 @@ export const TableColumnEntry = ({
         control={control}
         rules={{
           required: 'Column type is required',
+          validate: (value) => {
+            const exists = flatColumnTypeSet.has(String(value));
+            return exists || 'A valid column type must be selected';
+          },
         }}
-        render={({ field, fieldState }) => (
-          <FormFieldWrapper
-            label='Type:'
-            htmlFor={`table-type-${index}`}
-            $status={fieldState.error ? 'error' : undefined}
-            $notice={fieldState.error?.message}
-          >
-            <ComboBox
-              id={`table-type-${index}`}
-              value={field.value}
-              onChange={(v) => {
-                field.onChange(v);
-                const params =
-                  typeMeta?.params?.reduce(
-                    (acc, p) => ({
-                      ...acc,
-                      [p]: '',
-                    }),
-                    {},
-                  ) ?? {};
+        render={({ field, fieldState }) => {
+          return (
+            <FormFieldWrapper
+              label='Type:'
+              htmlFor={`table-type-${index}`}
+              $status={fieldState.error ? 'error' : undefined}
+              $notice={fieldState.error?.message}
+            >
+              <ComboBox
+                id={`table-type-${index}`}
+                value={field.value}
+                onChange={(v) => {
+                  const params =
+                    typeMeta?.params?.reduce(
+                      (acc, p) => ({
+                        ...acc,
+                        [p]: '',
+                      }),
+                      {},
+                    ) ?? {};
 
-                setValue(`cols.${currentIndex}.params`, params);
-              }}
-              $groups={tableColumnTypes}
-            />
-          </FormFieldWrapper>
-        )}
+                  resetOnTypeChange({
+                    index: currentIndex,
+                    type: v as string,
+                    params,
+                  });
+                }}
+                $groups={tableColumnTypes}
+              />
+            </FormFieldWrapper>
+          );
+        }}
       />
-      {typeMeta?.params?.map((param) => {
-        const label = `${param.replace(/\s*\*$/, '')}:`;
+      {typeMeta?.params?.map((p) => {
+        const param = normalizeColumnParameter(p);
         return (
           <FormTextField
-            key={param}
+            key={`cols-${index}-${param}`}
             id={`cols-${index}-${param}`}
             name={`cols.${currentIndex}.params.${param}`}
-            label={label}
+            label={`${p}: `}
             control={control}
             rules={{
               validate: {
-                isValid: (v) => isColumnParameterValid(param, v),
+                isValid: (v) => isColumnParameterValid(p, v),
               },
             }}
           />
@@ -217,6 +261,13 @@ export const TableColumnEntry = ({
           <FormCheckboxField
             name={`cols.${index}.autoIncrement`}
             control={control}
+            onValueChange={(checked) => {
+              if (checked) {
+                enableAutoIncrement(index);
+              } else {
+                setValue(`cols.${index}.autoIncrement`, false);
+              }
+            }}
             label='Auto Increment'
           />
         )}
@@ -224,6 +275,12 @@ export const TableColumnEntry = ({
         <FormCheckboxField
           name={`cols.${index}.nullable`}
           control={control}
+          onValueChange={(checked) => {
+            setValue(`cols.${index}.nullable`, checked);
+            if (checked) {
+              setValue(`cols.${index}.autoIncrement`, false);
+            }
+          }}
           label='Allow NULL'
         />
       </div>
@@ -231,6 +288,12 @@ export const TableColumnEntry = ({
         id={`cols-${index}-default`}
         name={`cols.${index}.defaultValue`}
         control={control}
+        onValueChange={(value) => {
+          setValue(`cols.${index}.defaultValue`, value);
+          if (value.length > 0) {
+            setValue(`cols.${index}.autoIncrement`, false);
+          }
+        }}
         label='Default Value:'
       />
 

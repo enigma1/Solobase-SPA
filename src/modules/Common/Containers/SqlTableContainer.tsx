@@ -1,11 +1,16 @@
 import { useMemo, type RefObject } from 'react';
 import { SquarePenIcon, PencilLineIcon } from 'lucide-react';
-import { SqlColumnsShape, SqlRow } from '>/types/dbTables';
 import { useColumnResize } from '>/services/hooks';
+import type { FactoryTableStore } from '>/services/stores';
+import {
+  ViewRow,
+  ScalarObject,
+  Scalar,
+  SqlColumnsShape,
+  SqlRow,
+} from '>/types';
+import { getMergedSqlColumnData } from '>/services/utils';
 import { Checkbox } from '>/modules';
-import { getMergedColumnData } from '>/services/utils';
-import { ViewRow, ScalarObject, Scalar } from '>/types';
-import type { UiTableStore } from '>/services/stores';
 
 type EditHandlerProps = {
   row: Scalar[];
@@ -14,12 +19,12 @@ type EditHandlerProps = {
   colName: string;
 };
 
-type TableContainerProps = {
+type SqlTableContainerProps = {
   rows: ViewRow<SqlRow>[];
   cols: SqlColumnsShape;
   activeCols: string[];
   columnsOrder: string[];
-  store: UiTableStore;
+  store: FactoryTableStore;
   outerRef: RefObject<HTMLDivElement | null>;
   tableRef: React.RefObject<HTMLTableElement | null>;
   resizeLineRef: RefObject<HTMLDivElement | null>;
@@ -28,7 +33,7 @@ type TableContainerProps = {
   onEditRow?: (uid: number) => void;
 };
 
-export const TableContainer = ({
+export const SqlTableContainer = ({
   cols,
   rows,
   columnsOrder,
@@ -40,18 +45,20 @@ export const TableContainer = ({
   editedRow,
   onEditCell,
   onEditRow,
-}: TableContainerProps) => {
+}: SqlTableContainerProps) => {
   // const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const { useStore } = store;
+  const { useFactoryTableStore } = store;
   const columnIndices = useMemo(
     () => Object.fromEntries(columnsOrder.map((name, idx) => [name, idx])),
     [columnsOrder],
   );
 
-  const { setSelectedRow, selectedRows } = useStore(({ state, api }) => ({
-    setSelectedRow: api.setSelectedRow,
-    selectedRows: state.selectedRows,
-  }));
+  const { setSelectedRow, selectedRows } = useFactoryTableStore(
+    ({ state, api }) => ({
+      setSelectedRow: api.setSelectedRow,
+      selectedRows: state.selectedRows,
+    }),
+  );
 
   const { colWidths, startResize } = useColumnResize(
     columnsOrder,
@@ -88,7 +95,7 @@ export const TableContainer = ({
       <tbody>
         {rows.map((oRow, idx) => {
           const uid = oRow.uiKey;
-          const row = getMergedColumnData(oRow.row, editedRow[uid]);
+          const row = getMergedSqlColumnData(oRow.row, editedRow[uid]);
           const rowBg = editedRow[uid]
             ? 'changed'
             : idx % 2 === 0

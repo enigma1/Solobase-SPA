@@ -12,22 +12,30 @@ import { TablesList } from './TablesList';
 
 export const TablesMainView = () => {
   const queryClient = useQueryClient();
-  const { dbSelected, activeTable } = useAccountStore(({ state, api }) => ({
+  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
   }));
 
-  const { rows, cols, columnsOrder, isSuccess, isError, isFetching } =
-    useTablesHook(({ state, query }) => {
-      return {
-        rows: state.rows,
-        cols: state.cols,
-        columnsOrder: state.columnsOrder,
-        isSuccess: query.isSuccess,
-        isError: query.isError,
-        isFetching: query.isFetching,
-      };
-    });
+  const {
+    rows,
+    cols,
+    columnsOrder,
+    isSuccess,
+    isError,
+    isFetching,
+    isFetched,
+  } = useTablesHook(({ state, query }) => {
+    return {
+      rows: state.rows,
+      cols: state.cols,
+      columnsOrder: state.columnsOrder,
+      isSuccess: query.isSuccess,
+      isError: query.isError,
+      isFetching: query.isFetching,
+      isFetched: query.isFetched,
+    };
+  });
 
   const viewRows: ViewRow<Scalar[]>[] = useMemo(() => {
     return rows.map((row, idx) => ({
@@ -59,22 +67,25 @@ export const TablesMainView = () => {
     });
   };
 
-  if (isFetching) return <ScreenLoader />;
+  const isBusy = isFetching;
+  if (!dbSelected || (isFetched && rows.length === 0)) {
+    return (
+      <EmptyPage
+        onCreate={handleCreateTable}
+        note={`${dbSelected ? 'No Tables in database [' + dbSelected + ']' : 'No database selected'}`}
+      />
+    );
+  }
+
   return (
     <>
-      {dbSelected && isSuccess && rows.length > 0 ? (
-        <TablesList
-          dbSelected={dbSelected}
-          rows={viewRows}
-          cols={cols}
-          columnsOrder={columnsOrder}
-        />
-      ) : (
-        <EmptyPage
-          onCreate={handleCreateTable}
-          note={`${dbSelected ? 'No Tables in database [' + dbSelected + ']' : 'No database selected'}`}
-        />
-      )}
+      {isBusy && <ScreenLoader />}
+      <TablesList
+        dbSelected={dbSelected}
+        rows={viewRows}
+        cols={cols}
+        columnsOrder={columnsOrder}
+      />
     </>
   );
 };

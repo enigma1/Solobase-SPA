@@ -6,7 +6,7 @@ import {
   useTablesStore,
   useDialogStore,
   messageStoreActions,
-  createUiTableStore,
+  createFactoryTableStore,
   dialogStoreActions,
 } from '>/services/stores';
 import type {
@@ -19,7 +19,7 @@ import type {
 import {
   PageTableShell,
   EffectiveTableWrapper,
-  TableContainer,
+  SqlTableContainer,
   ScreenLoader,
   Checkbox,
   DialogContent,
@@ -29,7 +29,7 @@ import {
   getSingleColumnFromResult,
   getColumnsFromResult,
   getColumnsFromRow,
-  getMergedColumnData,
+  getMergedSqlColumnData,
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
@@ -53,7 +53,7 @@ export const TablesList = ({
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-  const tableStore = useMemo(() => createUiTableStore(), []);
+  const tableStore = useMemo(() => createFactoryTableStore(), []);
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
@@ -233,7 +233,7 @@ export const TablesList = ({
         resizeLineRef={resizeLineRef}
         tableRef={tableRef}
       >
-        <TableContainer
+        <SqlTableContainer
           cols={cols}
           rows={rows}
           columnsOrder={columnsOrder}

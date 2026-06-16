@@ -6,10 +6,30 @@ import {
   TableEdit,
   FilterColumns,
   CreateDataRows,
+  QueryRequestArea,
 } from '>/modules';
-import { DialogPayload, WizardHandlers } from '>/types';
+import { DialogPayload, WizardHandlers, CommonDialogHandlers } from '>/types';
 
 export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
+  makeQuery: () => {
+    const handlers: CommonDialogHandlers = {
+      confirm: () => {},
+    };
+    const payload: DialogPayload = {
+      initialSize: 'md',
+      caption: 'Database Forms',
+      component: <QueryRequestArea formHandlers={handlers} />,
+      variant: 'info',
+      actions: dialogActions.enabledConfirmCancel({
+        onConfirm: () => {
+          handlers.confirm();
+          dialogStoreActions.closeDialog();
+        },
+      }),
+    };
+    return payload;
+  },
+
   createDatabase: () => ({
     caption: 'Database Forms',
     component: <DatabaseNew />,
@@ -58,26 +78,45 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
           handlers.previous?.();
         },
         onFinish: () => {
-          handlers.finish?.();
           dialogStoreActions.closeDialog();
+          handlers.finish?.();
         },
       }),
     };
     return payload;
   },
 
-  insertDataRows: ({
+  createDataRows: ({
     database,
     table,
   }: {
     database: string;
     table: string;
   }) => {
+    const handlers: WizardHandlers = {};
     const payload: DialogPayload = {
       initialSize: 'lg',
       caption: 'Database Forms',
-      component: <CreateDataRows database={database} table={table} />,
+      component: (
+        <CreateDataRows
+          wizardHandlers={handlers}
+          database={database}
+          table={table}
+        />
+      ),
       variant: 'success',
+      actions: dialogActions.wizard({
+        onNext: () => {
+          handlers.next?.();
+        },
+        onPrevious: () => {
+          handlers.previous?.();
+        },
+        onFinish: () => {
+          dialogStoreActions.closeDialog();
+          handlers.finish?.();
+        },
+      }),
     };
     return payload;
   },

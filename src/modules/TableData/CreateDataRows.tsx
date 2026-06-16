@@ -1,37 +1,35 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Trash2Icon, ListPlusIcon, SquareActivityIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  FormProvider,
-  useForm,
-  useFieldArray,
-  Controller,
-  FieldErrors,
-  useWatch,
-} from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import { messageStoreActions } from '>/services/stores';
 import {
   queryKeys,
   useCreateDataRowsMutation,
   useTableColumnsInfoHook,
 } from '>/services/queryHooks';
-import { messageStoreActions } from '>/services/stores';
-import { FormTextField, ScreenLoader, ComboBox } from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
-import { CreateDataRowsRequest, BasicRowsShape } from '>/services/api';
-import {
-  MAX_INSERT_DATA_ROWS,
-  emptyDataRow,
-  transformColumnsToDefaults,
-} from '>/services/utils';
-import { DataRowEntry } from './DataRowEntry';
+import { useModal } from '>/services/hooks';
+import { ScreenLoader } from '>/modules';
+import { emptyDataRow } from '>/services/utils';
+import { WizardHandlers, ButtonStatus } from '>/types';
+import { DataRowsForm } from './DataRowsForm';
+import { DataRowsReview } from './DataRowsReview';
 import { CreateDataRowsForm } from './commonTypes';
+
+type ButtonsGroupState = Partial<Record<string, ButtonStatus>>;
+type TableFormStep = 'insert' | 'review';
+const stepOrder: TableFormStep[] = ['insert', 'review'];
 
 type CreateDataRowsProps = {
   database: string;
   table: string;
+  wizardHandlers: WizardHandlers;
 };
-export const CreateDataRows = ({ database, table }: CreateDataRowsProps) => {
-  const [activeRowUid, setActiveRowUid] = useState<string | null>(null);
+export const CreateDataRows = ({
+  wizardHandlers,
+  database,
+  table,
+}: CreateDataRowsProps) => {
+  const [step, setStep] = useState<TableFormStep>('insert');
 
   const request = { database, table };
   const { cols, columnsOrder, isFetching, isSuccess } = useTableColumnsInfoHook(
@@ -45,31 +43,82 @@ export const CreateDataRows = ({ database, table }: CreateDataRowsProps) => {
     }),
   );
 
+  const nextStep = (current: TableFormStep): TableFormStep => {
+    const idx = stepOrder.indexOf(current);
+    return stepOrder[Math.min(idx + 1, stepOrder.length - 1)];
+  };
+  const prevStep = (current: TableFormStep): TableFormStep => {
+    const idx = stepOrder.indexOf(current);
+    return stepOrder[Math.max(idx - 1, 0)];
+  };
+
+  const { setButtonsStatuses } = useModal();
+  const updateButtons = (step: TableFormStep, valid: boolean) => {
+    const isFirstStep = step === stepOrder[0];
+    const isLastStep = step === stepOrder[stepOrder.length - 1];
+
+    const buttonsState: ButtonsGroupState = {
+      previous: !isFirstStep ? undefined : 'hidden',
+      next: isLastStep ? 'hidden' : valid ? undefined : 'disabled',
+      finish: isLastStep ? undefined : 'hidden',
+    };
+    setButtonsStatuses(buttonsState);
+  };
+
+  // const onValidation = (valid: boolean) => updateButtons(step, valid);
+
+  const goPrevStep = () => {
+    const prev = prevStep(step);
+    setStep(prev);
+    // updateButtons(prev, true);
+  };
+
+  const goNextStep = () => {
+    const next = nextStep(step);
+    setStep(next);
+    //updateButtons(next, false);
+  };
+
+  useEffect(() => {
+    wizardHandlers.next = goNextStep;
+    wizardHandlers.previous = goPrevStep;
+    wizardHandlers.finish = handleSubmit((data) => onSubmit(data));
+
+    return () => {
+      wizardHandlers.next = undefined;
+      wizardHandlers.previous = undefined;
+      wizardHandlers.finish = undefined;
+    };
+  }, [step]);
+
   useEffect(() => {
     if (isSuccess) {
       form.reset({
-        rowsData: [],
+        rowsData: [emptyDataRow(cols)],
       });
     }
   }, [isSuccess, cols, columnsOrder]);
 
-  const rowDefaults = useMemo(() => transformColumnsToDefaults(cols), [cols]);
   const form = useForm<CreateDataRowsForm>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       rowsData: [],
     },
   });
 
-  const { control, clearErrors, handleSubmit } = form;
+  const {
+    handleSubmit,
+    formState: { isValid, errors },
+  } = form;
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'rowsData',
-  });
+  useEffect(() => {
+    updateButtons(step, isValid);
+  }, [isValid, step]);
 
   const queryClient = useQueryClient();
 
-  const createDatabaseCallbacks = {
+  const createDataRowsCallbacks = {
     onSuccess: (data: any) => {
       if (data.ok) {
         queryClient.invalidateQueries({
@@ -78,13 +127,13 @@ export const CreateDataRows = ({ database, table }: CreateDataRowsProps) => {
         });
         messageStoreActions.addMessage({
           type: 'success',
-          content: { text: 'Database created successfully', duration: 3000 },
+          content: { text: 'Data rows created successfully', duration: 3000 },
         });
       } else {
         messageStoreActions.addMessage({
           content: {
             type: 'warn',
-            text: data.message ?? 'Could not create database',
+            text: data.message ?? 'Could not create all rows',
             duration: 3000,
           },
         });
@@ -92,7 +141,7 @@ export const CreateDataRows = ({ database, table }: CreateDataRowsProps) => {
     },
     onError: (error: any) => {
       messageStoreActions.addMessage({
-        content: { text: 'Failed to create database', duration: 3000 },
+        content: { text: 'Failed to create data rows', duration: 3000 },
       });
     },
   };
@@ -103,28 +152,14 @@ export const CreateDataRows = ({ database, table }: CreateDataRowsProps) => {
       mutate: api.mutate,
       response: state,
     }),
-    createDatabaseCallbacks,
+    createDataRowsCallbacks,
   );
 
-  // const setEditorMode = () => {};
-  const onSelectRow = (rowId: string) => {
-    setActiveRowUid(rowId);
-  };
+  // const onSelectRow = (rowId: string) => {
+  //   setActiveRowUid(rowId);
+  // };
 
-  const onRemove = (index: number) => {
-    remove(index);
-  };
-
-  const onApplyDefaults = () => {};
-
-  const canAddRow = fields.length < MAX_INSERT_DATA_ROWS;
-
-  const onAddRow = () => {
-    const item = emptyDataRow(cols);
-    append(item);
-  };
-
-  const onSubmit = async (data: CreateDataRowsForm) => {
+  const onSubmit = (data: CreateDataRowsForm) => {
     const rows = data.rowsData.map((row) =>
       row.values.map((cell) => cell.value),
     );
@@ -142,211 +177,18 @@ export const CreateDataRows = ({ database, table }: CreateDataRowsProps) => {
   if (isBusy) return <ScreenLoader />;
 
   return (
-    <div className='area-container'>
-      <div className='area-spacer'>
-        <h1 className='area-title'>Insert Data Rows</h1>
-        <div className='area-actions'>
-          <button
-            type='button'
-            className='btn'
-            onClick={onAddRow}
-            title='Add new Row'
-            disabled={!canAddRow}
-          >
-            <ListPlusIcon size={24} />
-          </button>
-          <button
-            type='button'
-            className='btn-secondary'
-            onClick={onApplyDefaults}
-            title='Set Defaults on the active data row'
-          >
-            <SquareActivityIcon size={24} />
-          </button>
-        </div>
-      </div>
-      <div className='area-content'>
-        <FormProvider {...form}>
-          <form
-            className='space-y-4'
-            onSubmit={handleSubmit(onSubmit)}
-            onClick={() => clearErrors()}
-          >
-            {fields.map((field, index) => {
-              const bg = index % 2 ? 'odd' : 'even';
-              return (
-                <div
-                  key={field.id}
-                  className={`area-item separate ${bg} ${
-                    activeRowUid === field.uid ? 'active' : ''
-                  }`}
-                >
-                  <div className='flex items-center justify-between mb-2'>
-                    <span className='text-xs font-semibold text-muted'>
-                      Row {index + 1}
-                    </span>
-
-                    <button
-                      type='button'
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRemove(index);
-                      }}
-                    >
-                      <Trash2Icon size={18} />
-                    </button>
-                  </div>
-                  <DataRowEntry
-                    uid={field.uid}
-                    rowIndex={index}
-                    cols={cols}
-                    columnsOrder={columnsOrder}
-                    active={activeRowUid === field.uid}
-                    defaults={rowDefaults}
-                  />
-                </div>
-              );
-            })}
-          </form>
-        </FormProvider>
-      </div>
-    </div>
+    <form className='space-y-4 flex flex-1 flex-col min-h-0'>
+      {step === 'insert' && (
+        <DataRowsForm form={form} cols={cols} columnsOrder={columnsOrder} />
+      )}
+      {step === 'review' && (
+        <DataRowsReview
+          database={database}
+          table={table}
+          form={form}
+          columnsOrder={columnsOrder}
+        />
+      )}
+    </form>
   );
-
-  // return (
-  //   <div className='area-container'>
-  //     <div className='area-spacer'>
-  //       <h1 className='area-title'>Insert Data Rows</h1>
-  //       <div className='area-actions'>
-  //         <button
-  //           className='btn-secondary'
-  //           onClick={onAddRow}
-  //           title='Insert a row in this table'
-  //         >
-  //           <ListPlusIcon size={24} />
-  //         </button>
-  //         <button
-  //           className='btn-secondary'
-  //           onClick={onSetDefaults}
-  //           title='Set Data Row Defaults'
-  //         >
-  //           <SquareActivityIcon size={24} />
-  //         </button>
-  //       </div>
-  //     </div>
-  //     <div className='area-content'>
-  //       <form
-  //         className='space-y-4'
-  //         onSubmit={handleSubmit(onSubmit)}
-  //         onClick={() => clearErrors()}
-  //       >
-  //         {fields.map((field, index) => {
-  //           const bg = index % 2 ? 'odd' : 'even';
-  //           const isActive =
-  //             activeCell?.rowId === rowField.id &&
-  //             activeCell?.columnName === columnName;
-
-  //           return (
-  //             <div
-  //               key={field.id}
-  //               className={`area-item separate ${bg} ${
-  //                 activeRow === field.id ? 'active' : ''
-  //               }`}
-  //               onClick={() => setActiveRow(field.id)}
-  //               onFocus={() => {
-  //                 setActiveCell({
-  //                   rowId: rowField.id,
-  //                   columnName,
-  //                 });
-
-  //                 setEditorMode('input');
-  //               }}
-  //             >
-  //               <div className='flex items-center justify-between mb-2'>
-  //                 <span className='text-xs font-semibold text-muted'>
-  //                   Row {index + 1}
-  //                 </span>
-
-  //                 <button
-  //                   type='button'
-  //                   onClick={(e) => {
-  //                     e.stopPropagation();
-  //                     onRemove(field.id);
-  //                   }}
-  //                 >
-  //                   <Trash2Icon size={18} />
-  //                 </button>
-  //               </div>
-
-  //               <div className='flex gap-2 items-start'>
-  //                 <div className='flex-1'>
-  //                   <Controller
-  //                     name={`rows.${index}.value`}
-  //                     control={control}
-  //                     render={({ field }) => {
-  //                       const currentMode =
-  //                         activeRow === field.id ? editorMode : 'input';
-  //                       switch (currentMode) {
-  //                         case 'textarea':
-  //                           return (
-  //                             <textarea
-  //                               value={field.value ?? ''}
-  //                               onChange={(e) => field.onChange(e.target.value)}
-  //                             />
-  //                           );
-
-  //                         case 'json':
-  //                           return (
-  //                             <ReactJsonView
-  //                               src={field.value ?? {}}
-  //                               onEdit={(edit) =>
-  //                                 field.onChange(edit.updated_src)
-  //                               }
-  //                               onAdd={(edit) =>
-  //                                 field.onChange(edit.updated_src)
-  //                               }
-  //                               onDelete={(edit) =>
-  //                                 field.onChange(edit.updated_src)
-  //                               }
-  //                             />
-  //                           );
-
-  //                         default:
-  //                           return (
-  //                             <input {...field} value={field.value ?? ''} />
-  //                           );
-  //                       }
-  //                     }}
-  //                   />
-  //                 </div>
-
-  //                 <button
-  //                   type='button'
-  //                   onClick={(e) => {
-  //                     e.stopPropagation();
-  //                     setEditorMode(
-  //                       editorMode === 'textarea' ? 'input' : 'textarea',
-  //                     );
-  //                   }}
-  //                 >
-  //                   <TypeIcon size={18} />
-  //                 </button>
-
-  //                 <button
-  //                   type='button'
-  //                   onClick={(e) => {
-  //                     e.stopPropagation();
-  //                     setEditorMode(editorMode === 'json' ? 'input' : 'json');
-  //                   }}
-  //                 >
-  //                   <FileBracesCornerIcon size={18} />
-  //                 </button>
-  //               </div>
-  //             </div>
-  //           );
-  //         })}
-  //       </form>
-  //     </div>
-  //   </div>
-  // );
 };

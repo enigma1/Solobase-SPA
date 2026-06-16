@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { CogIcon, LogOutIcon, DatabaseSearchIcon } from 'lucide-react';
-import { useAccountStore } from '>/services/stores';
-import { ComboBox, Auth, QueryInput } from '>/modules';
+import { useAccountStore, dialogStoreActions } from '>/services/stores';
+import {
+  ComboBox,
+  Auth,
+  QueryInput,
+  DialogContent,
+  dialogFactories,
+} from '>/modules';
+import { dialogActions } from '>/services/utils';
 import { handleLogout } from '>/modules/Account';
 import { routes, themes } from '>/config';
 
@@ -18,40 +25,12 @@ export const AuthNavigationLinks = () => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const handleQueryExecute = () => {};
-  // const handleQueryExecute = () => {
-  //                 openDialog({
-  //               type: 'runQuery',
-  //               payload: {
-  //                 database: dbSelected,
-  //                 onExecute: (newQuery: Scalar) => {
-  //                   closeDialog();
-  //           const newId = addQuery({
-  //             query: variables.query,
-  //             modified: data.query,
-  //             database: dbSelected,
-  //           });
-  //           setQuerySelection(newId);
-  //           queryClient.setQueryData(
-  //             queryKeys.query(variables.database, newId),
-  //             data,
-  //           );
+  const handleQueryExecute = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.makeQuery(),
+    });
+  };
 
-  //                   markEditedRow((previousState) => {
-  //                     const prevRow =
-  //                       (previousState as Record<number, ScalarObject>)[rId] || {};
-  //                     const updatedRow = { ...prevRow };
-  //                     updatedRow[cId] = newValue;
-  //                     return {
-  //                       ...previousState,
-  //                       [rId]: updatedRow,
-  //                     };
-  //                   });
-  //                 },
-  //               },
-  //             });
-
-  // }
   return (
     <>
       <Auth>

@@ -42,7 +42,8 @@ export const dialogActions = {
       onClick: onConfirm,
     },
   ],
-  withEnableConfirmCancel: ({
+
+  enabledConfirmCancel: ({
     onConfirm,
     onCancel,
   }: ConfirmProps): DialogAction[] => [
@@ -59,6 +60,7 @@ export const dialogActions = {
       status: 'disabled',
     },
   ],
+
   wizard: ({
     onNext,
     onPrevious,

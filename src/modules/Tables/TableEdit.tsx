@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys, useEditTableMutation } from '>/services/queryHooks';
 import { messageStoreActions } from '>/services/stores';
@@ -63,11 +62,12 @@ export const TableEdit = ({
 
   const editTableCallbacks = {
     onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tableDetails(request.database, request.table),
+        exact: true,
+      });
+
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.tables(database),
-          exact: true,
-        });
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: `Table changed in ${database}`, duration: 5000 },

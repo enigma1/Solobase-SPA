@@ -2,6 +2,7 @@ import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
 import { dialogStoreActions } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import { DialogContent } from '>/modules';
+import { ApiError } from '>/types';
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -21,12 +22,14 @@ export const queryClient = new QueryClient({
   }),
   mutationCache: new MutationCache({
     onError: (error) => {
+      console.log('MutationCache', error);
       dialogStoreActions.openDialog({
         payload: {
           caption: 'Action Failed',
           component: (
             <DialogContent note='Action Request Error'>
-              {(error as Error).message}
+              <h3>{(error as ApiError).error}</h3>
+              <p className='text-sm'>{(error as ApiError).message}</p>
             </DialogContent>
           ),
           actions: dialogActions.ack(),

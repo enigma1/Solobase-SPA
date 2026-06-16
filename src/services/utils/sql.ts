@@ -108,6 +108,31 @@ export const tableColumnTypes = [
   },
 ];
 
+export const flatColumnTypeSet = new Set(
+  tableColumnTypes.flatMap((group) =>
+    group.options.map((option) => option.value.toUpperCase()),
+  ),
+);
+
+const getVarcharLength = (type: string) => {
+  const match = type.match(/varchar\((\d+)\)/i);
+  return match ? Number(match[1]) : null;
+};
+
+const isTextarea = (type: string) => {
+  if (type.includes('text')) return true;
+
+  const len = getVarcharLength(type);
+  if (len && len > 255) return true; // or 128/255 threshold depending on UX
+
+  return false;
+};
+
+const isInteger = (type: string) =>
+  /(^|[^a-z])int|bigint|smallint|tinyint/i.test(type);
+const isBoolean = (type: string) => /bool|boolean/i.test(type);
+const isDate = (type: string) => /date|datetime|timestamp/i.test(type);
+
 export const buildRulesFromColumn = (col: SqlColumns) => {
   const rules: any = {};
 
@@ -151,28 +176,28 @@ const defaultValueForColumn = (column: SqlColumns): DataCell => {
     };
   }
 
-  if (column.defaultValue != null) {
+  if (isTextarea(type)) {
     return {
-      editorType: 'input',
-      value: column.defaultValue,
+      editorType: 'textarea',
+      value: column.defaultValue === null ? '' : column.defaultValue,
     };
   }
 
-  if (type.includes('int')) {
-    return { editorType: 'input', value: null };
+  if (isInteger(type)) {
+    return { editorType: 'number', value: null };
   }
 
-  if (type.includes('bool')) {
+  if (isBoolean(type)) {
     return { editorType: 'input', value: false };
   }
 
-  if (type.includes('date')) {
+  if (isDate(type)) {
     return { editorType: 'input', value: null };
   }
 
   return {
     editorType: 'input',
-    value: '',
+    value: column.defaultValue === null ? '' : column.defaultValue,
   };
 };
 
@@ -214,13 +239,13 @@ export const tableColumnKeyList = [
 // Merge column data given the original row array and edited columns array
 // Edited columns will become the update values
 // and everything else becomes a "where" condition because is untouched
-export const getMergedColumnData = (
+export const getMergedSqlColumnData = (
   row: SqlRow,
   editedColumns?: ScalarObject,
-): SqlRow => {
+) => {
   if (!editedColumns) return row;
 
-  const mergedData: SqlRow = [...row];
+  const mergedData = [...row];
   Object.entries(editedColumns).forEach(([index, value]) => {
     mergedData[Number(index)] = value;
   });

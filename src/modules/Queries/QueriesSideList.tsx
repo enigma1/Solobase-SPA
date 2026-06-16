@@ -8,7 +8,7 @@ import {
 } from '>/services/stores';
 import { DialogRenderer } from '>/modules/Common';
 
-export const QueryList = () => {
+export const QueriesSideList = () => {
   const queryClient = useQueryClient();
 
   const { setQuerySelection, getQuery, queryIds, queriesObj } = useHistoryStore(

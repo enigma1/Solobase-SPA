@@ -1,14 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PrimeObject } from '>/types';
 import { dbApi } from '>/services/api/dbApi';
-import {
-  CreateDatabaseRequest,
-  CreateDatabaseResponse,
-  LoginRequest,
-  LoginResponse,
-  UpdateRowsRequest,
-  UpdateRowsResponse,
-} from '>/services/api';
+import { LoginRequest, LoginResponse } from '>/services/api';
 import {
   queryKeys,
   MutationCallbacks,
@@ -68,10 +61,11 @@ export const useEditTableMutation = createMutationHook(
   tableDefaults,
 );
 
-export const useCreateDataRowsMutation = createMutationHook(
-  dbApi.createDataRows,
-  tableDefaults,
-);
+export const useRawQueryMutation = createMutationHook(dbApi.runRawQuery, {
+  ...defaultResponse,
+  rows: [],
+  database: undefined,
+});
 
 export const useLoginMutation = <
   TSelected = ReturnType<typeof createMutationHook>,
@@ -103,89 +97,25 @@ export const useLoginMutation = <
   return mutation;
 };
 
-// export const useLogoutMutation = () => {
-//   const queryClient = useQueryClient();
-//   const initializeStore = useAccountStore(({ api }) => api.initialize);
+// export const useInsertRowsMutation = createMutationHook(dbApi.insertDataRows, {
+//   ...tableDefaults,
+//   rows: [],
+// });
 
-//   return useMutation({
-//     mutationFn: () => dbApi.logout(),
+export const useCreateDataRowsMutation = createMutationHook(
+  dbApi.createDataRows,
+  tableDefaults,
+);
 
-//     onSuccess: () => {
-//       // 1. Remove session query cache
-//       queryClient.removeQueries({ queryKey: queryKeys.session() });
-
-//       // 2. Reset your store
-//       initializeStore();
-//     },
-
-//     onError: (error) => {
-//       console.error('Logout failed', error);
-//     },
-//   });
-// };
-
-// type UpdateRowsProps = {
-//   resetEditedRows?: () => void;
-// };
-// export const useUpdateRowsMutation = (props: UpdateRowsProps) => {
-//   const { resetEditedRows } = props;
-//   const queryClient = useQueryClient();
-//   const addMessage = useMessageStore(({ api }) => api.addMessage);
-//   const dbSelected = useAccountStore(({ state }) => state.dbSelected);
-//   const { activeTable } = useTablesDataStore(({ state }) => ({
-//     activeTable: state.activeTable,
-//   }));
-
-//   return useMutation({
-//     mutationFn: (data: UpdateRowsRequest) => dbApi.updateRows(data),
-
-//     onSuccess: () => {
-//       // Remove rows from query cache
-//       queryClient.removeQueries({
-//         queryKey: queryKeys.rows(dbSelected, activeTable),
-//       });
-//       // reset local edited state if provided
-//       resetEditedRows?.();
-//       addMessage({
-//         type: 'success',
-//         content: { text: `Rows saved successfully`, duration: 3000 },
-//       });
-//     },
-
-//     onError: (error) => {
-//       console.error('Update rows failed', error);
-//       addMessage({
-//         content: { text: `Failed to save changes`, duration: 3000 },
-//       });
-//     },
-//   });
-// };
-
-export const useUpdateRowsMutation = createMutationHook(dbApi.updateRows, {
+export const useDeleteRowsMutation = createMutationHook(dbApi.deleteDataRows, {
+  ...tableDefaults,
   rows: [],
 });
 
-// export const useUpdateRowsMutation2 = <
-//   TSelected = MutationHookProps<UpdateRowsResponse>,
-// >(
-//   selector?: (args: MutationHookProps<UpdateRowsResponse>) => TSelected,
-//   callbacks?: MutationCallbacks<UpdateRowsResponse, UpdateRowsRequest>,
-// ) => {
-//   const { onSuccess, onError } = callbacks || {};
-
-//   const mutation = useMutation({
-//     mutationFn: (data: UpdateRowsRequest) => dbApi.updateRows(data),
-//     onSuccess,
-//     onError,
-//   });
-
-//   const state = mutation.data ?? { rows: [] };
-//   const args = {
-//     ...getMutationResult<UpdateRowsResponse, UpdateRowsRequest>(mutation),
-//     state,
-//   };
-//   return selector ? selector(args) : (args as TSelected);
-// };
+export const useUpdateRowsMutation = createMutationHook(dbApi.updateDataRows, {
+  ...tableDefaults,
+  rows: [],
+});
 
 type SettingsMutationProps = MutationHookProps<void, PrimeObject>;
 export const useSettingsMutation = <TSelected = SettingsMutationProps>(

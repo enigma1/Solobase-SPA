@@ -50,6 +50,15 @@ export type RunQueryRequest = {
   database?: string;
 };
 
+export type RunRawQueryRequest = {
+  query: string;
+  database?: string;
+};
+
+export type RunRawQueryResponse = BasicResponse & {
+  rows?: unknown[];
+};
+
 export type FetchDatabasesResponse = BasicResponse & BasicRowsShape;
 
 export type FetchTablesRequest = {
@@ -84,15 +93,33 @@ type ChangedRow = {
   rowIndex?: number; // optional original row index as it was fetched
 };
 
-export type UpdateRowsRequest = {
+export type UpdateDataRowsRequest = {
   dataRows: ChangedRow[]; // All changed rows
   table: string; // Table being edited
   command?: string; // original SQL command
 };
 
-export type UpdateRowsResponse = BasicResponse & {
+export type UpdateDataRowsResponse = BasicResponse & {
   rows: TableDataRow[];
 };
+
+export type DeleteDataRowsRequest = {
+  database: string;
+  table: string; // Table being edited
+  rows: SqlRow[];
+};
+export type DeleteDataRowsResponse = BasicResponse & {
+  rows: TableDataRow[];
+};
+
+// export type InsertDataRowsRequest = {
+//   dataRows: ChangedRow[]; // All changed rows
+//   table: string; // Table being edited
+//   rows: SqlRow[];
+// };
+// export type InsertDataRowsResponse = BasicResponse & {
+//   rows: TableDataRow[];
+// };
 
 export type RunQueryResponse = BasicRowsShape & {
   query: string;

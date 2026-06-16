@@ -11,7 +11,7 @@ import {
   MapPlusIcon,
 } from 'lucide-react';
 import { compactTable } from '>/services/utils';
-import type { UiTableStore } from '>/services/stores';
+import type { FactoryTableStore } from '>/services/stores';
 
 export type PageTableShellActions = {
   onDiscardEdits?: () => void;
@@ -24,7 +24,7 @@ export type PageTableShellActions = {
 
 type PageTableShellProps = {
   title: ReactNode;
-  store: UiTableStore;
+  store: FactoryTableStore;
   actions?: PageTableShellActions;
   tableRef?: React.RefObject<HTMLTableElement | null>;
 };
@@ -35,11 +35,13 @@ export const PageTableShell = ({
   actions,
   title,
 }: PageTableShellProps) => {
-  const { useStore } = store;
-  const { hasSelects, clearSelected } = useStore(({ state, api }) => ({
-    hasSelects: state.selectedRows.size > 0,
-    clearSelected: api.clearSelected,
-  }));
+  const { useFactoryTableStore } = store;
+  const { hasSelects, clearSelected } = useFactoryTableStore(
+    ({ state, api }) => ({
+      hasSelects: state.selectedRows.size > 0,
+      clearSelected: api.clearSelected,
+    }),
+  );
 
   const shellActions = actions ?? {};
   const {

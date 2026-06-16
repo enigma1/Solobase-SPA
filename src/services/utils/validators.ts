@@ -1,11 +1,9 @@
-import { FieldValues } from 'react-hook-form';
+export const normalizeColumnParameter = (p: string) =>
+  p.replace(/\s*\*$/, '').trim();
 
 export const isColumnParameterValid = (param: string, value: unknown) => {
   const required = param.endsWith('*');
-  const name = param
-    .replace(/\s*\*$/, '')
-    .trim()
-    .toLowerCase();
+  const name = normalizeColumnParameter(param);
 
   const isEmpty =
     value === undefined ||
@@ -17,9 +15,9 @@ export const isColumnParameterValid = (param: string, value: unknown) => {
   }
 
   switch (name) {
-    case 'length':
-    case 'precision':
-    case 'scale': {
+    case 'Length':
+    case 'Precision':
+    case 'Scale': {
       const num = Number(value);
       if (!Number.isInteger(num)) {
         return 'Must be an integer';
@@ -30,7 +28,7 @@ export const isColumnParameterValid = (param: string, value: unknown) => {
       return true;
     }
 
-    case 'values': {
+    case 'Values': {
       return (
         (typeof value === 'string' &&
           value

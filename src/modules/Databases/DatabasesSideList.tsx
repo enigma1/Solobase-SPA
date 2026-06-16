@@ -100,26 +100,29 @@ export const DatabasesSideList = () => {
     mutate({ name: dbName });
   };
   const isBusy = isFetching;
-  if (isBusy) return <ScreenLoader />;
+
   return (
-    <div className='side-list'>
-      {dbList.length > 0 ? (
-        dbList.map((db, idx) => {
-          const isSelected = dbSelected === db;
-          return (
-            <button
-              key={`${name}-${idx}`}
-              className='side-list-item'
-              data-active={isSelected}
-              onClick={() => handleDbChange(db)}
-            >
-              {db}
-            </button>
-          );
-        })
-      ) : (
-        <div className='side-list-empty'>No Databases</div>
-      )}
-    </div>
+    <>
+      {isBusy && <ScreenLoader />}
+      <div className='side-list'>
+        {dbList.length > 0 ? (
+          dbList.map((db, idx) => {
+            const isSelected = dbSelected === db;
+            return (
+              <button
+                key={`${name}-${idx}`}
+                className='side-list-item'
+                data-active={isSelected}
+                onClick={() => handleDbChange(db)}
+              >
+                {db}
+              </button>
+            );
+          })
+        ) : (
+          <div className='side-list-empty'>No Databases</div>
+        )}
+      </div>
+    </>
   );
 };

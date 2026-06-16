@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { dbApi, FetchDatabaseInfoResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
 import { queryKeys, STALE_TIME } from './defs';
@@ -110,7 +110,7 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
 
   const api = useMemo(() => {
     return {
-      getDbNames: () =>
+      getDbNames: (): string[] =>
         getSingleColumnFromResult(data.rows, data.columnsOrder, 'SCHEMA_NAME'),
     };
   }, [data.rows, data.columnsOrder]);

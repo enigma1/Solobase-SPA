@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { FormFieldWrapper } from './FormCommon';
 import { FieldValues, Controller } from 'react-hook-form';
@@ -13,6 +13,7 @@ export const FormInputField = <T extends FieldValues>({
   type = 'text',
   $status,
   endAdornment,
+  onValueChange,
   ...rest
 }: FormCommonFieldProps<T> & { type?: string }) => {
   return (
@@ -20,28 +21,36 @@ export const FormInputField = <T extends FieldValues>({
       name={name}
       control={control}
       rules={rules}
-      render={({ field, fieldState }) => (
-        <FormFieldWrapper
-          label={label}
-          htmlFor={id}
-          $notice={fieldState.error?.message}
-          $status={fieldState.error?.message ? 'error' : undefined}
-        >
-          <div className='field-control'>
-            <input
-              {...field}
-              value={field.value ?? ''}
-              {...rest}
-              id={id}
-              type={type}
-              className='w-full input'
-              data-status={!!fieldState.error ? 'error' : undefined}
-            />
+      render={({ field, fieldState }) => {
+        const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+          const v = e.currentTarget.value;
+          onValueChange?.(v, field);
+          field.onChange(v);
+        };
+        return (
+          <FormFieldWrapper
+            label={label}
+            htmlFor={id}
+            $notice={fieldState.error?.message}
+            $status={fieldState.error?.message ? 'error' : undefined}
+          >
+            <div className='field-control'>
+              <input
+                {...field}
+                value={field.value ?? ''}
+                onChange={handleChange}
+                {...rest}
+                id={id}
+                type={type}
+                className='w-full input'
+                data-status={!!fieldState.error ? 'error' : undefined}
+              />
 
-            {endAdornment && endAdornment}
-          </div>
-        </FormFieldWrapper>
-      )}
+              {endAdornment && endAdornment}
+            </div>
+          </FormFieldWrapper>
+        );
+      }}
     />
   );
 };

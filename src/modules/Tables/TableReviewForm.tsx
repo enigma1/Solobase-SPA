@@ -16,16 +16,11 @@ export const TableReview = ({
 }: TableColumnsFormProps) => {
   const { getValues } = form;
 
-  // const values = useWatch({
-  //   control: form.control,
-  // });
-
   const values = getValues();
   useEffect(() => {
     onValidation(true);
   }, []);
 
-  console.log('preview values', values);
   return (
     <div className='area-container'>
       <div className='area-spacer'>

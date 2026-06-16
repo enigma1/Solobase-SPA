@@ -9,14 +9,20 @@ import {
   LoginResponse,
   RunQueryRequest,
   RunQueryResponse,
+  RunRawQueryRequest,
+  RunRawQueryResponse,
   FetchDatabasesResponse,
   FetchTablesRequest,
   FetchTablesResponse,
   FetchRowsRequest,
   FetchRowsResponse,
   FetchDatabaseInfoResponse,
-  UpdateRowsRequest,
-  UpdateRowsResponse,
+  // InsertDataRowsRequest,
+  // InsertDataRowsResponse,
+  DeleteDataRowsRequest,
+  DeleteDataRowsResponse,
+  UpdateDataRowsRequest,
+  UpdateDataRowsResponse,
   CreateDataRowsRequest,
   CreateDataRowsResponse,
   SelectDatabaseRequest,
@@ -76,6 +82,10 @@ const runQuery = (data: RunQueryRequest, signal?: AbortSignal) =>
   apiCall<RunQueryResponse>(() =>
     apiClient.post('/db/run-query', data, { signal }),
   );
+
+const runRawQuery = (data: RunRawQueryRequest) =>
+  apiCall<RunRawQueryResponse>(() => apiClient.post('/db/run-raw-query', data));
+
 const fetchDatabases = () =>
   apiCall<FetchDatabasesResponse>(() => apiClient.get('/db/fetch-databases'));
 
@@ -100,11 +110,22 @@ const createDataRows = (data: CreateDataRowsRequest) =>
     apiClient.post('/db/create-data-rows', data),
   );
 
-const updateRows = (data: UpdateRowsRequest) =>
-  apiCall<UpdateRowsResponse>(() => apiClient.post('/db/update-rows', data));
+// const insertDataRows = (data: InsertDataRowsRequest) =>
+//   apiCall<InsertDataRowsResponse>(() =>
+//     apiClient.post('/db/insert-data-rows', data),
+//   );
+
+const deleteDataRows = (data: DeleteDataRowsRequest) =>
+  apiCall<DeleteDataRowsResponse>(() =>
+    apiClient.post('/db/delete-data-rows', data),
+  );
+const updateDataRows = (data: UpdateDataRowsRequest) =>
+  apiCall<UpdateDataRowsResponse>(() =>
+    apiClient.post('/db/update-data-rows', data),
+  );
 
 const exportDatabase = () =>
-  apiCall<UpdateRowsResponse>(() => apiClient.get('/db/export-database'));
+  apiCall<void>(() => apiClient.get('/db/export-database'));
 
 const exportDatabases = (data: ExportDatabasesRequest) =>
   apiCall(
@@ -170,9 +191,12 @@ export const dbApi = {
   fetchDatabases,
   fetchTables,
   fetchRows,
-  createDataRows,
   runQuery,
-  updateRows,
+  runRawQuery,
+  // insertDataRows,
+  createDataRows,
+  deleteDataRows,
+  updateDataRows,
   selectDatabase,
   exportDatabase,
   createDatabase,

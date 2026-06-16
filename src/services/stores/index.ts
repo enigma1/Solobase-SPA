@@ -5,5 +5,5 @@ export * from './dialogStore';
 export * from './historyStore';
 export * from './accountStore';
 export * from './databasesStore';
-export * from './uiTableStore';
+export * from './factoryTableStore';
 export * from './utilitiesStore';

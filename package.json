@@ -1,20 +1,17 @@
 {
   "author": "Mark Samios",
+  "name": "Solobase-SPA",
+  "version": "0.0.22",
   "license": "GPL-3.0",
-  "name": "Database-Manager-SPA",
-  "description": "Custom MySQL Database manager JS/React-query/tailwindcss front-end",
+  "description": "Solobase Single Page Administration of MySQL Databases",
   "keywords": [
-    "react",
-    "react-query",
-    "react-hook-form",
-    "vite",
-    "typescript",
-    "tailwindcss",
     "database",
-    "manager",
-    "mysql"
+    "management",
+    "admin",
+    "mysql",
+    "queries",
+    "sql"
   ],
-  "version": "0.0.3",
   "type": "module",
   "dependencies": {
     "@floating-ui/react-dom": "^2.1.8",
@@ -31,7 +28,7 @@
     "polished": "^4.3.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-hook-form": "^7.74.0",
+    "react-hook-form": "^7.79.0",
     "react-router-dom": "^7.14.2",
     "web-vitals": "^5.2.0",
     "zod": "^4.4.1"

@@ -39,8 +39,40 @@ export const TableColumnsForm = ({
     name: 'cols',
   });
 
+  // useEffect(() => {
+  //   const persistentColumns = (columns ?? []).filter((c) => c.signature);
+  //   const serialized = JSON.stringify(persistentColumns);
+
+  //   if (!columnsSnapshotRef.current) {
+  //     columnsSnapshotRef.current = serialized;
+  //     return;
+  //   }
+
+  //   if (columnsSnapshotRef.current !== serialized) {
+  //     setValue('keys', []);
+  //     const hasAutoIncrement = columns.some((c) => c.autoIncrement);
+
+  //     if (hasAutoIncrement) {
+  //       const nextColumns = columns.map((c) => ({
+  //         ...c,
+  //         autoIncrement: false,
+  //       }));
+
+  //       columnsSnapshotRef.current = JSON.stringify(nextColumns);
+
+  //       setValue('cols', nextColumns, {
+  //         shouldDirty: true,
+  //         shouldValidate: true,
+  //       });
+  //     } else {
+  //       columnsSnapshotRef.current = serialized;
+  //     }
+  //   }
+  // }, [columns, setValue]);
+
   useEffect(() => {
-    const serialized = JSON.stringify(columns ?? []);
+    const persistentColumns = columns.filter((c) => c.signature);
+    const serialized = JSON.stringify(persistentColumns);
 
     if (!columnsSnapshotRef.current) {
       columnsSnapshotRef.current = serialized;
@@ -54,6 +86,7 @@ export const TableColumnsForm = ({
   }, [columns, setValue]);
 
   useEffect(() => {
+    console.log('effect-trigger', form.formState.isValid, fields.length);
     onValidation(fields.length > 0 && form.formState.isValid);
   }, [fields, form.formState.isValid]);
 
@@ -118,19 +151,20 @@ export const TableColumnsForm = ({
         </div>
       </div>
       <div className='area-content'>
-        {fields.map((field, index) => {
-          return (
-            <FormProvider key={field.uid} {...form}>
+        <FormProvider {...form}>
+          {fields.map((field, index) => {
+            return (
               <TableColumnEntry
+                key={field.uid}
                 uid={field.uid}
                 index={index}
                 active={activeColumnId === field.uid}
                 onSelect={() => setActiveColumnId(field.uid)}
                 onRemove={() => remove(index)}
               />
-            </FormProvider>
-          );
-        })}
+            );
+          })}
+        </FormProvider>
       </div>
     </div>
   );

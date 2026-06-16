@@ -18,4 +18,5 @@ export type FormCommonFieldProps<T extends FieldValues> = {
   $status?: StatusType;
   rules?: RegisterOptions<T, Path<T>>;
   endAdornment?: React.ReactNode;
+  onValueChange?: (value: string, field: any) => void;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'name'>;

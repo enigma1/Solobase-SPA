@@ -21,7 +21,7 @@ import {
   dialogStoreActions,
 } from '>/services/stores';
 import { WizardHandlers } from '>/types';
-import { QueryList } from '>/modules/Query';
+import { QueriesSideList } from '</src/modules/Queries';
 import { useTablesHook } from '>/services/queryHooks';
 import { dialogActions } from '>/services/utils';
 
@@ -74,8 +74,13 @@ export const Sidebar = () => {
     {
       id: 'sideTables',
       getTitle: () => `Tables: ${getTablesCount()}`,
-      getRoute: () =>
-        activeTable ? routes.front.tableView : routes.front.listTables,
+      getRoute: () => {
+        if (activeTable && expandedSection === 'sideTables') {
+          return routes.front.listTables;
+        } else {
+          return activeTable ? routes.front.tableView : routes.front.listTables;
+        }
+      },
       component: <TablesSideList />,
       icon: dbSelected ? (
         <span title='Create Table'>
@@ -96,7 +101,7 @@ export const Sidebar = () => {
       id: 'sideQueries',
       getTitle: () => `Queries: ${queryIds.length}`,
       getRoute: () => routes.front.queryView,
-      component: <QueryList />,
+      component: <QueriesSideList />,
       icon: <ChevronsLeftRightEllipsisIcon size={20} />,
     },
 

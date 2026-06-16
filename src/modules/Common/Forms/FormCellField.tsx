@@ -10,6 +10,7 @@ import {
 import { FormCommonFieldProps, AnyControlField } from './commonTypes';
 
 type FormCellFieldProps<T extends FieldValues> = FormCommonFieldProps<T> & {
+  onSelect?: () => void;
   renderEditor: (props: {
     field: AnyControlField;
     fieldState: ControllerFieldState;
@@ -22,6 +23,7 @@ export const FormCellField = <T extends FieldValues>({
   label,
   rules,
   renderEditor,
+  onSelect,
 }: FormCellFieldProps<T>) => {
   return (
     <Controller
@@ -34,7 +36,7 @@ export const FormCellField = <T extends FieldValues>({
           $notice={fieldState.error?.message}
           $status={fieldState.error ? 'error' : undefined}
         >
-          <div className='field-control'>
+          <div onFocus={onSelect} className='field-control'>
             {renderEditor({ field, fieldState })}
           </div>
         </FormFieldWrapper>

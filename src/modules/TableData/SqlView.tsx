@@ -11,17 +11,18 @@ import {
   useUtilitiesStore,
   useTablesDataStore,
   useMessageStore,
-  createUiTableStore,
+  createFactoryTableStore,
   dialogStoreActions,
 } from '>/services/stores';
 import {
   MutationCallbacks,
   queryKeys,
   useUpdateRowsMutation,
+  useDeleteRowsMutation,
 } from '>/services/queryHooks';
 import { dialogActions, makeColumnsActive } from '>/services/utils';
 import {
-  TableContainer,
+  SqlTableContainer,
   EffectiveTableWrapper,
   ScreenLoader,
   PageTableShell,
@@ -31,10 +32,13 @@ import {
   dialogFactories,
 } from '>/modules';
 import {
-  UpdateRowsRequest,
-  UpdateRowsResponse,
+  UpdateDataRowsRequest,
+  UpdateDataRowsResponse,
+  DeleteDataRowsRequest,
+  DeleteDataRowsResponse,
 } from '>/services/api/dbApiTypes';
 import { updateRowsSqlTransformer } from './helpers';
+import { DataRowsDeletePreview } from './DataRowsPreview';
 
 type TableViewProps = {
   rows: ViewRow<SqlRow>[];
@@ -54,7 +58,11 @@ export const SqlView = ({
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const tableStore = useMemo(() => createUiTableStore(), []);
+  const tableStore = useMemo(() => createFactoryTableStore(), []);
+  const rowMap = useMemo(
+    () => new Map(rows.map((r) => [r.uiKey, r.row])),
+    [rows],
+  );
 
   const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
     hiddenColumns: state.hiddenColumns,
@@ -85,7 +93,7 @@ export const SqlView = ({
         content: { text: `Failed to save SQL changes`, duration: 5000 },
       });
     },
-  } as MutationCallbacks<UpdateRowsResponse, UpdateRowsRequest>;
+  } as MutationCallbacks<UpdateDataRowsResponse, UpdateDataRowsRequest>;
 
   const { mutate, isPending, isError, isSuccess } = useUpdateRowsMutation(
     ({ api, query }) => ({
@@ -95,6 +103,42 @@ export const SqlView = ({
       mutate: api.mutate,
     }),
     callbacks,
+  );
+
+  const deleteCallbacks = {
+    onSuccess: () => {
+      // Remove rows from query cache
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.rows(dbSelected, activeTable),
+      });
+      // reset local edited state if provided
+      markEditedRow({});
+      addMessage({
+        type: 'success',
+        content: { text: `Rows saved successfully`, duration: 3000 },
+      });
+    },
+
+    onError: (error) => {
+      addMessage({
+        content: { text: `Failed to save SQL changes`, duration: 5000 },
+      });
+    },
+  } as MutationCallbacks<DeleteDataRowsResponse, DeleteDataRowsRequest>;
+
+  const {
+    mutate: mutateDelete,
+    isPending: isDeletePending,
+    isError: isDeleteError,
+    isSuccess: isDeleteSuccess,
+  } = useDeleteRowsMutation(
+    ({ api, query }) => ({
+      isPending: query.isPending,
+      isError: query.isError,
+      isSuccess: query.isSuccess,
+      mutate: api.mutate,
+    }),
+    deleteCallbacks,
   );
 
   const handleEditClick = ({
@@ -133,7 +177,7 @@ export const SqlView = ({
             />
           </DialogContent>
         ),
-        actions: dialogActions.withEnableConfirmCancel({
+        actions: dialogActions.enabledConfirmCancel({
           onConfirm: () => {
             dialogStoreActions.closeDialog();
             saveChanges(valueRef.current);
@@ -168,8 +212,6 @@ export const SqlView = ({
     });
   };
 
-  const handleDownloadTable = () => {};
-
   const handleSaveRows = () => {
     const rowsTransformed = updateRowsSqlTransformer({
       componentShape: editedRow,
@@ -181,7 +223,40 @@ export const SqlView = ({
   };
 
   const handleDeleteRows = () => {
-    const selRows = tableStore.get().selectedRows;
+    const sRows = tableStore.get().selectedRows;
+    if (sRows.size === 0) {
+      return;
+    }
+
+    const rowEntries: SqlRow[] = [];
+
+    for (const id of sRows) {
+      const row = rowMap.get(id);
+      if (row) rowEntries.push(row);
+    }
+
+    dialogStoreActions.openDialog({
+      payload: {
+        caption: 'Delete Data Rows',
+        variant: 'error',
+        component: (
+          <DataRowsDeletePreview
+            rows={rowEntries}
+            columnsOrder={columnsOrder}
+          />
+        ),
+        actions: dialogActions.confirmCancel({
+          onConfirm: () => {
+            dialogStoreActions.closeDialog();
+            mutateDelete({
+              database: dbSelected,
+              table: activeTable,
+              rows: rowEntries,
+            });
+          },
+        }),
+      },
+    });
   };
 
   const handleSelectedExports = () => {
@@ -190,7 +265,7 @@ export const SqlView = ({
 
   const handleCreateRows = () => {
     dialogStoreActions.openDialog({
-      payload: dialogFactories.insertDataRows({
+      payload: dialogFactories.createDataRows({
         database: dbSelected,
         table: activeTable,
       }),
@@ -217,8 +292,7 @@ export const SqlView = ({
   //   };
   // }, []);
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
-
-  const isBusy = isPending;
+  const isBusy = isPending || isDeletePending;
 
   if (isBusy) return <ScreenLoader />;
   return (
@@ -234,7 +308,7 @@ export const SqlView = ({
         resizeLineRef={resizeLineRef}
         tableRef={tableRef}
       >
-        <TableContainer
+        <SqlTableContainer
           cols={cols}
           rows={rows}
           columnsOrder={columnsOrder}

@@ -24,16 +24,17 @@ type TableKeysFormProps = {
 export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const { control } = form;
-  const keys =
-    useWatch({
-      control,
-      name: 'keys',
-    }) ?? [];
+
+  const keys = useWatch({
+    control,
+    name: 'keys',
+  });
 
   const columns = useWatch({
     control,
     name: 'cols',
   });
+
   const { fields, insert, append, remove } = useFieldArray({
     control,
     name: 'keys',
@@ -83,6 +84,7 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
       </div>
       <div className='area-content'>
         {fields.map((field, index) => {
+          const keyType = keys[index]?.type;
           const bg = index % 2 ? 'odd' : 'even';
           return (
             <div
@@ -154,6 +156,13 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
                     );
                   },
                 }}
+              />
+              <FormTextField
+                id={`key-name-${index}`}
+                name={`keys.${index}.name`}
+                control={control}
+                label='Key Name:'
+                disabled={keyType === 'PRIMARY'}
               />
             </div>
           );
