@@ -10,7 +10,7 @@ import {
   SqlRow,
 } from '>/types';
 import { getMergedSqlColumnData } from '>/services/utils';
-import { Checkbox } from '>/modules';
+import { CheckboxField } from '>/modules';
 
 type EditHandlerProps = {
   row: Scalar[];
@@ -22,15 +22,15 @@ type EditHandlerProps = {
 type SqlTableContainerProps = {
   rows: ViewRow<SqlRow>[];
   cols: SqlColumnsShape;
-  activeCols: string[];
   columnsOrder: string[];
+  activeCols: string[];
   store: FactoryTableStore;
   outerRef: RefObject<HTMLDivElement | null>;
   tableRef: React.RefObject<HTMLTableElement | null>;
   resizeLineRef: RefObject<HTMLDivElement | null>;
-  editedRow: Record<number, ScalarObject>;
+  editedRow?: Record<string, ScalarObject>;
   onEditCell?: (props: EditHandlerProps) => void;
-  onEditRow?: (uid: number) => void;
+  onEditRow?: (uid: string) => void;
 };
 
 export const SqlTableContainer = ({
@@ -95,8 +95,10 @@ export const SqlTableContainer = ({
       <tbody>
         {rows.map((oRow, idx) => {
           const uid = oRow.uiKey;
-          const row = getMergedSqlColumnData(oRow.row, editedRow[uid]);
-          const rowBg = editedRow[uid]
+          const row = editedRow
+            ? getMergedSqlColumnData(oRow.row, editedRow[uid])
+            : oRow.row;
+          const rowBg = editedRow?.[uid]
             ? 'changed'
             : idx % 2 === 0
               ? 'even'
@@ -105,7 +107,8 @@ export const SqlTableContainer = ({
             <tr key={`row-${uid}-${idx}`} className={`${rowBg}`}>
               <td className='align-middle'>
                 <div className='flex items-center gap-2'>
-                  <Checkbox
+                  <CheckboxField
+                    wrapLayout='stack'
                     checked={selectedRows.has(uid)}
                     onChange={(checked) => {
                       setSelectedRow(uid, checked);
@@ -151,7 +154,7 @@ export const SqlTableContainer = ({
                       onClick={() =>
                         onEditCell({
                           row: [...row],
-                          rId: uid,
+                          rId: Number(uid),
                           cId: colIndex,
                           colName,
                         })

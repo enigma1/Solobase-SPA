@@ -1,7 +1,7 @@
 import { useMemo, type RefObject } from 'react';
 import { SquarePenIcon, PencilLineIcon } from 'lucide-react';
 import { useColumnResize } from '>/services/hooks';
-import { Checkbox } from '>/modules';
+import { CheckboxField } from '>/modules';
 import { getMergedSimpleColumnData } from '>/services/utils';
 import { ViewRow, ScalarObject, Scalar, PrimeRow } from '>/types';
 import type { FactoryTableStore } from '>/services/stores';
@@ -21,9 +21,9 @@ type SimpleTableContainerProps = {
   outerRef: RefObject<HTMLDivElement | null>;
   tableRef: React.RefObject<HTMLTableElement | null>;
   resizeLineRef: RefObject<HTMLDivElement | null>;
-  editedRow?: Record<number, ScalarObject>;
+  editedRow?: Record<string, ScalarObject>;
   onEditCell?: (props: EditHandlerProps) => void;
-  onEditRow?: (uid: number) => void;
+  onEditRow?: (uid: string) => void;
 };
 
 export const SimpleTableContainer = ({
@@ -84,7 +84,9 @@ export const SimpleTableContainer = ({
       <tbody>
         {rows.map((oRow, idx) => {
           const uid = oRow.uiKey;
-          const row = getMergedSimpleColumnData(oRow.row, editedRow?.[uid]);
+          const row = editedRow
+            ? getMergedSimpleColumnData(oRow.row, editedRow[uid])
+            : oRow.row;
           const rowBg = editedRow?.[uid]
             ? 'changed'
             : idx % 2 === 0
@@ -94,7 +96,8 @@ export const SimpleTableContainer = ({
             <tr key={`row-${uid}-${idx}`} className={`${rowBg}`}>
               <td className='align-middle'>
                 <div className='flex items-center gap-2'>
-                  <Checkbox
+                  <CheckboxField
+                    wrapLayout='stack'
                     checked={selectedRows.has(uid)}
                     onChange={(checked) => {
                       setSelectedRow(uid, checked);
@@ -140,7 +143,7 @@ export const SimpleTableContainer = ({
                       onClick={() =>
                         onEditCell({
                           row: [...row],
-                          rId: uid,
+                          rId: Number(uid),
                           cId: colIndex,
                           colName,
                         })

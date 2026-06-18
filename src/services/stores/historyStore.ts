@@ -25,52 +25,11 @@ const initialState: HistoryState = {
 const baseStore = makeStore<HistoryState>(() => initialState);
 const { get, setAuto } = baseStore;
 export type HistoryActions = {
-  addQuery: ({
-    query,
-    modified,
-    database,
-  }: {
-    query: string;
-    modified?: string;
-    database: string;
-  }) => string;
-  getQuery: (id?: string) => Readonly<QueryEntry> | null;
-  addSearch: (search: string) => void;
-  setQuerySelection: (id: string | null) => void;
-  removeQuery: (id: string) => void;
   updateOriginal: ({ id, original }: { id: string; original: string }) => void;
   updateModified: ({ id, modified }: { id: string; modified: string }) => void;
 };
 
 const actions: HistoryActions = {
-  getQuery: (id) => {
-    const state = get();
-    const queryId = id ?? state.selectedQuery;
-    return queryId ? state.queriesObj[queryId] : null;
-  },
-  addQuery: ({ query, modified, database }) => {
-    const trimmedQuery = trimString(query);
-    const existingEntry = Object.values(get().queriesObj).find(
-      (q) => q.original === trimmedQuery && q.database === database,
-    );
-    if (existingEntry) {
-      return existingEntry.id;
-    }
-    const newId = crypto.randomUUID();
-    setAuto((state) => ({
-      queriesObj: {
-        ...state.queriesObj,
-        [newId]: {
-          database,
-          id: newId,
-          original: trimmedQuery,
-          modified: modified ?? null,
-        },
-      },
-      queryIds: [...state.queryIds, newId],
-    }));
-    return newId;
-  },
   updateOriginal: ({ id, original }) => {
     setAuto((state) => ({
       queriesObj: {
@@ -89,24 +48,6 @@ const actions: HistoryActions = {
         },
       },
     }));
-  },
-  addSearch: (search) => {
-    setAuto((state) => ({
-      searches: [...state.searches, search],
-    }));
-  },
-  setQuerySelection: (id: string | null) => {
-    setAuto({ selectedQuery: id });
-  },
-  removeQuery: (id: string) => {
-    setAuto((state) => {
-      const { [id]: removed, ...rest } = state.queriesObj;
-      return {
-        queriesObj: rest,
-        queryIds: state.queryIds.filter((qid) => qid !== id),
-        ...(state.selectedQuery === id && { selectedQuery: null }),
-      };
-    });
   },
 };
 

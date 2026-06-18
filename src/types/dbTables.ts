@@ -92,3 +92,5 @@ export type TableShape = TableShapeBasics & {
   keys: TableShapeKey[];
   cols: TableShapeColumn[];
 };
+
+export type GroupByModes = 'default' | 'legacy' | 'strict';

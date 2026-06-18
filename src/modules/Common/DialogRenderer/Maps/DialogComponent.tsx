@@ -23,7 +23,7 @@ export const DialogComponent = ({ payload, onClose }: DialogComponentProps) => {
   const [buttonsStatus, setButtonsStatus] =
     useState<Record<string, ButtonStatus>>(initialStatuses);
 
-  //Setup Setters
+  // Setup Setters
   const setButtonStatus = (id: string, status?: ButtonStatus) => {
     setButtonsStatus((prev) => {
       const next = { ...prev };

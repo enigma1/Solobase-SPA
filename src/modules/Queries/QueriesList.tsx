@@ -1,37 +1,10 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { dbApi } from '>/services/api';
 import {
-  dbApi,
-  DeleteDatabasesRequest,
-  ExportDatabasesRequest,
-  ExportDatabasesResponse,
-} from '>/services/api';
-import {
-  queryKeys,
-  useDeleteDatabasesMutation,
-  useDatabaseServerInfo,
-} from '>/services/queryHooks';
-import {
-  useUtilitiesStore,
-  useDatabasesStore,
-  messageStoreActions,
   createFactoryTableStore,
   dialogStoreActions,
+  useQueriesStore,
 } from '>/services/stores';
-import {
-  getColumnsFromRow,
-  getSingleColumnFromResult,
-  createFileSaveUrl,
-  dialogActions,
-  makeColumnsActive,
-} from '>/services/utils';
-import {
-  ViewRow,
-  PrimeRow,
-  SqlColumnsShape,
-  SqlRow,
-  ScalarObject,
-} from '>/types';
 import {
   ScreenLoader,
   EffectiveTableWrapper,
@@ -40,25 +13,67 @@ import {
   DatabaseEdit,
   DialogContent,
   FilterColumns,
+  EmptyListing,
+  dialogFactories,
 } from '>/modules';
+import { dialogActions } from '>/services/utils';
+import { QueriesDeletePreview } from './QueriesPreviews';
 
-type QueriesListProps = {
-  rows: ViewRow<PrimeRow>[];
-  columnsOrder: string[];
-};
-
-export const QueriesList = ({ rows, columnsOrder }: QueriesListProps) => {
+export const QueriesList = () => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const tableStore = useMemo(() => createFactoryTableStore(), []);
+  const { queries, getQueriesCount } = useQueriesStore(({ state, api }) => ({
+    getQueriesCount: api.getQueriesCount,
+    queries: state.queries,
+  }));
 
-  const handleDeleteQueries = () => {};
-  const handleCreateQueries = () => {};
-  const onEditRow = () => {};
+  const columnsOrder = ['title', 'query', 'database'];
+  const rows = Object.values(queries).map((q, idx) => {
+    return {
+      row: [q.title, q.query, q.database ?? 'N/A'],
+      uiKey: q.title,
+    };
+  });
+
+  const handleCreateQuery = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.makeQuery(),
+    });
+  };
+
+  const handleDeleteQueries = () => {
+    if (getQueriesCount() === 0) return;
+
+    dialogStoreActions.openDialog({
+      payload: {
+        caption: 'SQL Queries',
+        variant: 'warn',
+        component: (
+          <QueriesDeletePreview
+            rows={rows.map((r) => r.row)}
+            columnsOrder={columnsOrder}
+          />
+        ),
+        actions: dialogActions.confirmCancel({
+          onConfirm: () => {
+            dialogStoreActions.closeDialog();
+          },
+        }),
+      },
+    });
+  };
+
+  const onEditRow = (id: string) => {
+    if (!queries[id]) return;
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.editQuery(queries[id].title),
+    });
+  };
 
   const shellHandlers = {
-    onCreate: handleCreateQueries,
+    onCreate: handleCreateQuery,
     onDelete: handleDeleteQueries,
     // onFilterColumns: () => {
     //   makeColumnsActive(columnsOrder);
@@ -66,11 +81,21 @@ export const QueriesList = ({ rows, columnsOrder }: QueriesListProps) => {
   };
 
   const activeCols = columnsOrder;
+
+  if (rows.length === 0) {
+    return (
+      <EmptyListing
+        onCreate={handleCreateQuery}
+        note={`No queries are currently set`}
+      />
+    );
+  }
+
   return (
     <>
       <PageTableShell
         store={tableStore}
-        title={`Databases: ${rows.length}`}
+        title={`Queries: ${rows.length}`}
         tableRef={tableRef}
         actions={shellHandlers}
       />

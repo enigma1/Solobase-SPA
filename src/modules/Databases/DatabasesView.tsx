@@ -1,13 +1,8 @@
 import { useMemo } from 'react';
 import { useDatabases, useDatabaseServerInfo } from '>/services/queryHooks';
-import { SqlColumnsShape, SqlRow } from '>/types';
+import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 import { ScreenLoader, EmptyPage } from '>/modules';
 import { DatabasesList } from './DatabasesList';
-
-type ViewRow<T> = {
-  row: T;
-  uiKey: number;
-};
 
 export const DatabasesMainView = () => {
   const {
@@ -33,7 +28,7 @@ export const DatabasesMainView = () => {
   const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
       row,
-      uiKey: idx,
+      uiKey: idx.toString(),
     }));
   }, [rows]);
 

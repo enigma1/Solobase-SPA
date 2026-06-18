@@ -9,6 +9,16 @@
     background: linear-gradient(54deg in oklch, var(--color-srf) 39%, var(--color-srf-dim) 100%);
   }
 
+  .page-section {
+    @apply flex flex-col justify-center px-3 py-2;
+    background-color: var(--color-srf);
+
+    &.liner {
+      @apply flex flex-row justify-start gap-2 items-center border-t;
+      border-color: var(--color-border);
+    }
+  }
+
   .page-title {
     @apply flex items-center gap-1 text-lg font-medium;
     color: var(--color-text);

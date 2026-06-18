@@ -21,7 +21,7 @@ import {
   EffectiveTableWrapper,
   SqlTableContainer,
   ScreenLoader,
-  Checkbox,
+  CheckboxField,
   DialogContent,
   dialogFactories,
 } from '>/modules';
@@ -133,7 +133,7 @@ export const TablesList = ({
     });
   };
 
-  const onEditRow = (uid: number) => {
+  const onEditRow = (uid: string) => {
     const row = rowMap.get(uid);
     if (!row) return;
 

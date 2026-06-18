@@ -1,17 +1,17 @@
 import { makeFactoryStore } from '>/services/utils/emitter';
 
 type WithUiKey = {
-  uiKey: number;
+  uiKey: string;
 };
 type FactoryTableState = {
-  selectedRows: Set<number>;
+  selectedRows: Set<string>;
 };
 
 export type FactoryTableActions = {
   initialize: () => void;
   clearSelected: () => void;
   setAllRows: (rows: WithUiKey[]) => void;
-  setSelectedRow: (row: number, active: boolean) => void;
+  setSelectedRow: (row: string, active: boolean) => void;
 };
 
 export type FactoryTableStore = {
@@ -33,7 +33,7 @@ export type FactoryTableStore = {
 // const baseStore = makeFactoryStore<UiTableState>(() => initialState);
 export const createFactoryTableStore = () => {
   const baseStore = makeFactoryStore<FactoryTableState>(() => ({
-    selectedRows: new Set<number>(),
+    selectedRows: new Set<string>(),
   }))();
 
   const { get, set, setAuto } = baseStore;
@@ -52,7 +52,7 @@ export const createFactoryTableStore = () => {
     },
 
     setAllRows: (rows: WithUiKey[]) => {
-      const selectedRows = new Set<number>(rows.map((r) => r.uiKey));
+      const selectedRows = new Set<string>(rows.map((r) => r.uiKey));
       setAuto({ selectedRows });
     },
 

@@ -1,20 +1,41 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DeleteIcon, RotateCcwIcon } from 'lucide-react';
-import { messageStoreActions, dialogStoreActions } from '>/services/stores';
+import {
+  messageStoreActions,
+  dialogStoreActions,
+  queriesStoreActions,
+} from '>/services/stores';
 import { useModal } from '>/services/hooks';
 import { useDatabases, useRawQueryMutation } from '>/services/queryHooks';
-import { ScreenLoader, ComboBox, Checkbox } from '>/modules';
+import {
+  ScreenLoader,
+  ComboBox,
+  CheckboxField,
+  TextAreaField,
+  InputField,
+} from '>/modules';
 import { routes } from '>/config';
-import { CommonDialogHandlers } from '>/types';
+import { GroupByModes, CommonDialogHandlers } from '>/types';
 
+const groupByModes: { label: string; value: GroupByModes }[] = [
+  { label: 'Server Default', value: 'default' },
+  { label: 'Legacy GroupBy', value: 'legacy' },
+  { label: 'Strict GroupBy', value: 'strict' },
+];
 type QueryRequestAreaProps = {
   formHandlers: CommonDialogHandlers;
+  queryTitle?: string;
 };
-export const QueryRequestArea = ({ formHandlers }: QueryRequestAreaProps) => {
+
+export const QueryRequestArea = ({
+  formHandlers,
+  queryTitle = '',
+}: QueryRequestAreaProps) => {
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
+  const [title, setTitle] = useState<string>(queryTitle);
   const [query, setQuery] = useState<string>('');
-  const [saveQuery, setSaveQuery] = useState<boolean>(false);
+  const [groupByMode, setGroupByMode] = useState<GroupByModes>('default');
   const { setButtonStatus } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,50 +50,18 @@ export const QueryRequestArea = ({ formHandlers }: QueryRequestAreaProps) => {
     };
   });
 
-  const rawQueryCallbacks = {
-    onSuccess: (data: any) => {
-      if (data.ok) {
-        messageStoreActions.addMessage({
-          type: 'success',
-          content: { text: data.message, duration: 5000 },
-        });
-      } else {
-        messageStoreActions.addMessage({
-          content: {
-            type: 'warn',
-            text: data.message ?? 'Could not execute query',
-            duration: 3000,
-          },
-        });
-      }
-      navigate(routes.front.queryView);
-    },
-    onError: (error: any) => {
-      messageStoreActions.addMessage({
-        content: {
-          text: error.message ?? 'Failed to execture query',
-          duration: 5000,
-        },
-      });
-    },
-  };
-
-  const { mutate, isPending, response } = useRawQueryMutation(
-    ({ api, state, query }) => ({
-      isPending: query.isPending,
-      mutate: api.mutate,
-      response: state,
-    }),
-    rawQueryCallbacks,
-  );
-
   const onConfirm = () => {
     const values = {
+      title,
       query,
       database: selectedDatabase.length > 0 ? selectedDatabase : undefined,
+      groupByMode,
     };
-    console.log('values to send', values);
-    mutate(values);
+    queriesStoreActions.addQuery(values);
+    const sel = queriesStoreActions.getSelectedQuery();
+    if (location.pathname !== routes.front.queryView) {
+      navigate(routes.front.queryView);
+    }
   };
 
   const onClearArea = () => {
@@ -83,10 +72,20 @@ export const QueryRequestArea = ({ formHandlers }: QueryRequestAreaProps) => {
   };
 
   useEffect(() => {
+    if (queryTitle !== undefined) {
+      const existingSql = queriesStoreActions.getQuery(queryTitle);
+      if (existingSql) {
+        setQuery(existingSql.query);
+        existingSql.database && setSelectedDatabase(existingSql.database);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     formHandlers.confirm = onConfirm;
   }, [onConfirm]);
 
-  const isBusy = isFetching || isPending;
+  const isBusy = isFetching; //  || isPending;
 
   if (isBusy) {
     return <ScreenLoader />;
@@ -120,6 +119,20 @@ export const QueryRequestArea = ({ formHandlers }: QueryRequestAreaProps) => {
       </div>
       <div className='area-content'>
         <div className='flex flex-col space-y-1'>
+          <InputField
+            id='query-title'
+            label='Title:'
+            value={title}
+            title='When is named it will save the query'
+            onChange={(e) => {
+              const value = e.currentTarget.value;
+              // setSaveQuery(value.length > 0);
+              setTitle(value);
+              query.length >= 4 && setButtonStatus('confirm');
+            }}
+          />
+        </div>
+        <div className='flex flex-col space-y-1'>
           <label htmlFor='select-database'>Database:</label>
           <ComboBox
             id='select-database'
@@ -133,6 +146,31 @@ export const QueryRequestArea = ({ formHandlers }: QueryRequestAreaProps) => {
           />
         </div>
         <div className='flex flex-col space-y-1 w-full h-full'>
+          <TextAreaField
+            id='query-sql'
+            label='Query SQL:'
+            className='text-dialog-area resize-none input border'
+            wrapClass='h-full'
+            value={query}
+            onChange={(v) => {
+              const value = v.currentTarget.value;
+              const disabled = value.length < 4;
+              setButtonStatus('confirm', disabled ? 'disabled' : undefined);
+              setQuery(value);
+            }}
+          />
+        </div>
+        <div className='flex flex-col space-y-1'>
+          <label htmlFor='select-groupby-mode'>Query Group-By Mode:</label>
+          <ComboBox
+            id='select-groupby-mode'
+            value={groupByMode}
+            onChange={(v) => setGroupByMode(v as GroupByModes)}
+            $options={groupByModes.map((mode) => ({ ...mode }))}
+          />
+        </div>
+
+        {/* <div className='flex flex-col space-y-1 w-full h-full'>
           <label htmlFor='query-sql'>Query SQL:</label>
           <textarea
             id='query-sql'
@@ -140,22 +178,22 @@ export const QueryRequestArea = ({ formHandlers }: QueryRequestAreaProps) => {
             value={query}
             onChange={(v) => {
               const value = v.currentTarget.value;
-              const disabled = value.length === 0;
+              const disabled = value.length < 4;
               setButtonStatus('confirm', disabled ? 'disabled' : undefined);
               setQuery(value);
             }}
           />
         </div>
-      </div>
-      <div className='area-item space-y-1'>
-        <label className='check-label' htmlFor='save-query'>
-          <Checkbox
-            checked={saveQuery}
-            onChange={() => setSaveQuery(!saveQuery)}
-            id='save-query'
-          />
-          Save Query
-        </label>
+        <div className='area-item space-y-1'>
+          <label className='check-label' htmlFor='save-query'>
+            <CheckboxField
+              checked={legacyGroupBy}
+              onChange={() => setLegacyGroupBy(!legacyGroupBy)}
+              id='legacy-group-by'
+            />
+            Enable legacy ONLY_FULL_GROUP_BY
+          </label>
+        </div> */}
       </div>
     </div>
   );

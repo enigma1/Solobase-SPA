@@ -1,5 +1,5 @@
 import { DialogState } from '>/types';
-import { DialogComponent } from './CommonMap';
+import { DialogComponent } from './Maps/DialogComponent';
 
 export type DialogRendererProps = {
   dialog: DialogState | null;

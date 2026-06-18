@@ -230,49 +230,7 @@ export const DatabasesList = ({
     });
   };
 
-  // Filter Columns
-  // const handleColumnsActive = () => {
-  //   const valueRef = { current: { ...hiddenColumns } };
-  //   dialogStoreActions.openDialog({
-  //     payload: {
-  //       caption: 'Filter Columns',
-  //       initialSize: 'sm',
-  //       component: (
-  //         <FilterColumns
-  //           hiddenColumns={hiddenColumns}
-  //           columnsOrder={columnsOrder}
-  //           onChange={(col, hidden) => {
-  //             if (hidden) {
-  //               valueRef.current[col] = true;
-  //             } else {
-  //               delete valueRef.current[col];
-  //             }
-  //           }}
-  //         />
-  //       ),
-  //       actions: dialogActions.withEnableConfirmCancel({
-  //         onConfirm: () => {
-  //           setHiddenColumns(valueRef.current);
-  //           dialogStoreActions.closeDialog();
-  //         },
-  //       }),
-  //     },
-  //   });
-  // };
-
-  // const handleColumnsActive = () => {
-  //   dialogStoreActions.openDialog({
-  //     payload: dialogFactories.filterColumns({
-  //       filterProps: {
-  //         hiddenColumns,
-  //         columnsOrder,
-  //         onChange: onChangeColumnsActivePrefs,
-  //       },
-  //     }),
-  //   });
-  // };
-
-  const onEditRow = (uid: number) => {
+  const onEditRow = (uid: string) => {
     const row = rowMap.get(uid);
     if (!row) return;
     const fields = getColumnsFromRow(row, columnsOrder, [

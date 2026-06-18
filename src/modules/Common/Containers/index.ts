@@ -1,3 +1,4 @@
+export * from './TitleArea';
 export * from './PageTableShell';
 export * from './SqlTableContainer';
 export * from './SimpleTableContainer';

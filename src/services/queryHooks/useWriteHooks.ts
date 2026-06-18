@@ -1,7 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  MutationFunction,
+} from '@tanstack/react-query';
 import { PrimeObject } from '>/types';
 import { dbApi } from '>/services/api/dbApi';
-import { LoginRequest, LoginResponse } from '>/services/api';
+import {
+  LoginRequest,
+  LoginResponse,
+  RunRawQueryResponse,
+  RunRawQueryRequest,
+} from '>/services/api';
 import {
   queryKeys,
   MutationCallbacks,
@@ -61,10 +70,14 @@ export const useEditTableMutation = createMutationHook(
   tableDefaults,
 );
 
-export const useRawQueryMutation = createMutationHook(dbApi.runRawQuery, {
+export const useRawQueryMutation = createMutationHook<
+  MutationFunction<RunRawQueryResponse, RunRawQueryRequest>
+>(dbApi.runRawQuery, {
   ...defaultResponse,
+  mode: 'resultset',
+  cols: {},
   rows: [],
-  database: undefined,
+  columnsOrder: [],
 });
 
 export const useLoginMutation = <

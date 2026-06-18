@@ -14,7 +14,7 @@ import {
   useUpdateRowsMutation,
   MutationCallbacks,
 } from '>/services/queryHooks';
-import { UpdateRowsRequest, UpdateRowsResponse } from '>/services/api';
+import { UpdateDataRowsRequest, UpdateDataRowsResponse } from '>/services/api';
 import { DialogContent, ScreenLoader, PageTableShell } from '>/modules';
 import { PrimeObject, CollectionRow } from '>/types';
 import { updateRowsCollectionTransformer } from './helpers';
@@ -51,7 +51,10 @@ export const CollectionView = (props: CollectionViewProps) => {
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
 
-  const callbacks: MutationCallbacks<UpdateRowsResponse, UpdateRowsRequest> = {
+  const callbacks: MutationCallbacks<
+    UpdateDataRowsResponse,
+    UpdateDataRowsRequest
+  > = {
     onSuccess: () => {
       // Remove rows from query cache
       queryClient.removeQueries({

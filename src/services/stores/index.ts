@@ -7,3 +7,4 @@ export * from './accountStore';
 export * from './databasesStore';
 export * from './factoryTableStore';
 export * from './utilitiesStore';
+export * from './queriesStore';

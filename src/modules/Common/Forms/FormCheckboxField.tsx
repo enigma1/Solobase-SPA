@@ -1,26 +1,37 @@
 import { InputHTMLAttributes, useEffect, useRef } from 'react';
 import { FieldValues, Path, Control, Controller } from 'react-hook-form';
+import { CheckIcon, MinusIcon } from 'lucide-react';
+import { FormFieldWrapper } from './FormCommon';
 
-type CheckboxProps = Omit<
+type CheckboxFieldProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   'type' | 'checked' | 'onChange'
 > & {
+  label?: string;
+  notice?: string;
+  status?: 'error' | 'success';
   checked: boolean;
   onChange: (checked: boolean) => void;
   indeterminate?: boolean;
+  wrapLayout?: 'inline' | 'stack';
 };
 
-export const Checkbox = ({
+export const CheckboxField = ({
+  id,
+  label,
+  title,
+  notice,
+  status,
   checked,
   onChange,
+  wrapLayout = 'inline',
   indeterminate = false,
   disabled = false,
-  id,
-  title,
-  className,
-}: CheckboxProps) => {
+}: CheckboxFieldProps) => {
   const ref = useRef<HTMLInputElement | null>(null);
-
+  if ((id && !label) || (!id && label)) {
+    console.warn('CheckboxField: Wrong use having id without label');
+  }
   useEffect(() => {
     if (ref.current) {
       ref.current.indeterminate = indeterminate;
@@ -28,16 +39,33 @@ export const Checkbox = ({
   }, [indeterminate]);
 
   return (
-    <input
-      ref={ref}
-      type='checkbox'
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-      disabled={disabled}
-      id={id}
-      title={title}
-      className={className ?? 'check'}
-    />
+    <FormFieldWrapper
+      label={label ?? id}
+      wrapLayout={wrapLayout}
+      $notice={notice}
+      $status={status}
+    >
+      <input
+        ref={ref}
+        id={id}
+        type='checkbox'
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+        title={title}
+        className='sr-only'
+      />
+
+      <span
+        className='box'
+        onClick={() => {
+          if (!id && !label) ref.current?.click();
+        }}
+      >
+        {checked && <CheckIcon size={14} />}
+        {!checked && indeterminate && <MinusIcon size={14} />}
+      </span>
+    </FormFieldWrapper>
   );
 };
 
@@ -47,6 +75,7 @@ type FormCheckboxFieldProps<T extends FieldValues> = {
   label?: string;
   id?: string;
   onValueChange?: (checked: boolean, field: any) => void;
+  wrapLayout?: 'inline' | 'stack';
 };
 
 export const FormCheckboxField = <T extends FieldValues>({
@@ -55,6 +84,7 @@ export const FormCheckboxField = <T extends FieldValues>({
   label,
   id,
   onValueChange,
+  wrapLayout,
 }: FormCheckboxFieldProps<T>) => {
   return (
     <Controller
@@ -65,21 +95,15 @@ export const FormCheckboxField = <T extends FieldValues>({
           onValueChange?.(checked, field);
           field.onChange(checked);
         };
-        const checkbox = (
-          <Checkbox
+
+        return (
+          <CheckboxField
             checked={!!field.value}
             onChange={handleChange}
             id={id ?? name}
+            label={label}
+            wrapLayout={wrapLayout}
           />
-        );
-
-        if (!label) return checkbox;
-
-        return (
-          <label className='check-label' htmlFor={id ?? name}>
-            {checkbox}
-            {label}
-          </label>
         );
       }}
     />

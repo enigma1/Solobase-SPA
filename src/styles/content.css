@@ -1,0 +1,6 @@
+@layer components {
+  .stand {
+    @apply font-semibold text-sm;
+    color: var(--color-text);
+  }
+}

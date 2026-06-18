@@ -1,44 +1,7 @@
-import { ReactNode, useState, useEffect } from 'react';
-import {
-  TypeIcon,
-  FileBracesCornerIcon,
-  Trash2Icon,
-  ListPlusIcon,
-  SquareActivityIcon,
-} from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
-import {
-  FormProvider,
-  useForm,
-  useFieldArray,
-  Controller,
-  ControllerRenderProps,
-  FieldErrors,
-  useWatch,
-  useFormContext,
-  FieldValues,
-  ControllerFieldState,
-} from 'react-hook-form';
+import { useFormContext, ControllerFieldState } from 'react-hook-form';
 import ReactJsonView, { InteractionProps } from '@microlink/react-json-view';
-import {
-  queryKeys,
-  useCreateDatabaseMutation,
-  useDatabaseServerInfo,
-  useCreateDataRowsMutation,
-} from '>/services/queryHooks';
 import { buildRulesFromColumn } from '>/services/utils';
-import { messageStoreActions } from '>/services/stores';
-import {
-  FormTextField,
-  ScreenLoader,
-  ComboBox,
-  FormInputField,
-  FormJsonField,
-  FormTextAreaField,
-  FormCheckboxField,
-  FormCellField,
-} from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+import { FormCellField } from '>/modules';
 import { AnyControlField } from '>/modules/Common/Forms/commonTypes';
 
 import { DataCell, DataEditorType, SqlColumnsShape } from '>/types';

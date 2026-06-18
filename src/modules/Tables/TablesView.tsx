@@ -40,7 +40,7 @@ export const TablesMainView = () => {
   const viewRows: ViewRow<Scalar[]>[] = useMemo(() => {
     return rows.map((row, idx) => ({
       row,
-      uiKey: idx,
+      uiKey: idx.toString(),
     }));
   }, [rows]);
 

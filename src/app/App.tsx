@@ -14,6 +14,7 @@ import {
   RootLayout,
   AuthGuard,
   QueryView,
+  QueriesList,
   DatabasesMainView,
   DatabaseNew,
   SettingsView,
@@ -115,7 +116,10 @@ export const App = () => {
               path: routes.front.listTables,
               element: <TablesMainView />,
             },
-
+            {
+              path: routes.front.queriesList,
+              element: <QueriesList />,
+            },
             {
               path: routes.front.queryView,
               element: <QueryView />,

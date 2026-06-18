@@ -17,12 +17,7 @@ import {
   EmptyListing,
   dialogFactories,
 } from '>/modules';
-import { SqlColumnsShape, SqlRow, CollectionRow } from '>/types/dbTables';
-
-type ViewRow<T> = {
-  row: T;
-  uiKey: number;
-};
+import { SqlColumnsShape, SqlRow, CollectionRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
   const navigate = useNavigate();
@@ -50,7 +45,7 @@ export const TableDataView = () => {
   const viewRows: ViewRow<SqlRow | CollectionRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
       row,
-      uiKey: idx,
+      uiKey: idx.toString(),
     }));
   }, [rows]);
 

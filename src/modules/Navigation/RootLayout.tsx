@@ -61,6 +61,20 @@ const AuthMenu = () => {
           {/* <Link to={routes.front.newDatabase}>New Table</Link> */}
           <Link to={routes.front.listTables}>Show Tables</Link>
         </DropdownMenu>
+        <div className='menu-separator'>|</div>
+        <DropdownMenu label='Queries'>
+          <a
+            href='#'
+            onClick={() => {
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.makeQuery(),
+              });
+            }}
+          >
+            New Query
+          </a>
+          <Link to={routes.front.queriesList}>List Queries</Link>
+        </DropdownMenu>
       </div>
     </Auth>
   );

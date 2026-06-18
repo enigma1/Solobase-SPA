@@ -174,7 +174,7 @@
   }
 
   label {
-    @apply inline-block text-sm font-medium mb-1;
+    @apply inline-block text-sm font-medium;
     color: var(--color-text);
 
     &[data-status="error"] {

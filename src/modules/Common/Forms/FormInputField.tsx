@@ -4,13 +4,49 @@ import { FormFieldWrapper } from './FormCommon';
 import { FieldValues, Controller } from 'react-hook-form';
 import { FormCommonFieldProps } from './commonTypes';
 
+export type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  label?: string;
+  notice?: string;
+  status?: 'error' | 'success';
+  endAdornment?: React.ReactNode;
+};
+
+export const InputField = ({
+  id,
+  label,
+  notice,
+  status,
+  endAdornment,
+  value,
+  type,
+  ...props
+}: InputFieldProps) => (
+  <FormFieldWrapper
+    label={label}
+    htmlFor={id}
+    $notice={notice}
+    $status={status}
+  >
+    <div className='field-control'>
+      <input
+        {...props}
+        value={value ?? ''}
+        type={type ?? 'text'}
+        id={id}
+        className='w-full input'
+        data-status={status}
+      />
+      {endAdornment}
+    </div>
+  </FormFieldWrapper>
+);
+
 export const FormInputField = <T extends FieldValues>({
   id,
   name,
   control,
   label,
   rules,
-  type = 'text',
   $status,
   endAdornment,
   onValueChange,
@@ -28,27 +64,16 @@ export const FormInputField = <T extends FieldValues>({
           field.onChange(v);
         };
         return (
-          <FormFieldWrapper
+          <InputField
+            {...field}
+            {...rest}
+            id={id}
             label={label}
-            htmlFor={id}
-            $notice={fieldState.error?.message}
-            $status={fieldState.error?.message ? 'error' : undefined}
-          >
-            <div className='field-control'>
-              <input
-                {...field}
-                value={field.value ?? ''}
-                onChange={handleChange}
-                {...rest}
-                id={id}
-                type={type}
-                className='w-full input'
-                data-status={!!fieldState.error ? 'error' : undefined}
-              />
-
-              {endAdornment && endAdornment}
-            </div>
-          </FormFieldWrapper>
+            onChange={handleChange}
+            notice={fieldState.error?.message}
+            status={fieldState.error ? 'error' : undefined}
+            endAdornment={endAdornment}
+          />
         );
       }}
     />

@@ -9,6 +9,7 @@ import {
   RouteOffIcon,
   TableColumnsSplitIcon,
   MapPlusIcon,
+  DatabaseBackupIcon,
 } from 'lucide-react';
 import { compactTable } from '>/services/utils';
 import type { FactoryTableStore } from '>/services/stores';
@@ -71,7 +72,7 @@ export const PageTableShell = ({
               onClick={onDownload}
               title='Export Data from all or selected Rows'
             >
-              <DownloadIcon size={24} />
+              <DatabaseBackupIcon size={24} />
             </button>
           )}
           {hasSelects && (

@@ -17,8 +17,28 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
     };
     const payload: DialogPayload = {
       initialSize: 'md',
-      caption: 'Database Forms',
+      caption: 'SQL Queries',
       component: <QueryRequestArea formHandlers={handlers} />,
+      variant: 'info',
+      actions: dialogActions.enabledConfirmCancel({
+        onConfirm: () => {
+          handlers.confirm();
+          dialogStoreActions.closeDialog();
+        },
+      }),
+    };
+    return payload;
+  },
+  editQuery: (title: string) => {
+    const handlers: CommonDialogHandlers = {
+      confirm: () => {},
+    };
+    const payload: DialogPayload = {
+      initialSize: 'md',
+      caption: 'SQL Queries',
+      component: (
+        <QueryRequestArea queryTitle={title} formHandlers={handlers} />
+      ),
       variant: 'info',
       actions: dialogActions.enabledConfirmCancel({
         onConfirm: () => {
@@ -131,7 +151,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
     };
   }) => {
     const payload: DialogPayload = {
-      initialSize: 'sm',
+      initialSize: 'xs',
       caption: 'Preferences',
       component: <FilterColumns {...filterProps} />,
       variant: 'info',

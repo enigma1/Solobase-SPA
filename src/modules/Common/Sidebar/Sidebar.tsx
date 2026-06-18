@@ -11,6 +11,7 @@ import { routes } from '>/config';
 import {
   DatabaseNew,
   DatabasesSideList,
+  QueriesSideList,
   TableNew,
   TablesSideList,
   dialogFactories,
@@ -19,11 +20,11 @@ import {
   useHistoryStore,
   useAccountStore,
   dialogStoreActions,
+  queriesStoreActions,
 } from '>/services/stores';
-import { WizardHandlers } from '>/types';
-import { QueriesSideList } from '</src/modules/Queries';
 import { useTablesHook } from '>/services/queryHooks';
 import { dialogActions } from '>/services/utils';
+import { WizardHandlers } from '>/types';
 
 export const Sidebar = () => {
   const [expandedSection, setExpandedSection] = useState<string | null>(
@@ -39,10 +40,6 @@ export const Sidebar = () => {
 
   const { getTablesCount } = useTablesHook(({ api }) => ({
     getTablesCount: () => api.getTablesCount(),
-  }));
-
-  const { queryIds } = useHistoryStore(({ state }) => ({
-    queryIds: state.queryIds,
   }));
 
   type SideSectionItem = {
@@ -99,10 +96,19 @@ export const Sidebar = () => {
     },
     {
       id: 'sideQueries',
-      getTitle: () => `Queries: ${queryIds.length}`,
-      getRoute: () => routes.front.queryView,
+      getTitle: () => `Queries: ${queriesStoreActions.getQueriesCount()}`,
+      getRoute: () => routes.front.queriesList,
       component: <QueriesSideList />,
-      icon: <ChevronsLeftRightEllipsisIcon size={20} />,
+      icon: (
+        <ChevronsLeftRightEllipsisIcon
+          size={20}
+          onClick={() => {
+            dialogStoreActions.openDialog({
+              payload: dialogFactories.makeQuery(),
+            });
+          }}
+        />
+      ),
     },
 
     // ...(queries.length > 0

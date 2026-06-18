@@ -14,6 +14,7 @@ import {
   TableShape,
   TableData,
   TableBasics,
+  GroupByModes,
 } from '>/types';
 
 export type BasicResponse = {
@@ -53,11 +54,23 @@ export type RunQueryRequest = {
 export type RunRawQueryRequest = {
   query: string;
   database?: string;
+  groupByMode?: GroupByModes;
 };
 
-export type RunRawQueryResponse = BasicResponse & {
-  rows?: unknown[];
+type ResultSetResponse = BasicResponse & {
+  mode: 'resultset';
+  rows: Scalar[][];
+  columnsOrder: string[];
+  cols: SqlColumnsShape;
 };
+
+type CommandResponse = BasicResponse & {
+  mode: 'command';
+  resultInfo: {
+    affectedRows: number;
+  };
+};
+export type RunRawQueryResponse = ResultSetResponse | CommandResponse;
 
 export type FetchDatabasesResponse = BasicResponse & BasicRowsShape;
 

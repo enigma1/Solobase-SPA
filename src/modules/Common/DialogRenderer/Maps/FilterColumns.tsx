@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Checkbox } from '>/modules';
+import { CheckboxField } from '>/modules';
 import { useModal } from '>/services/hooks';
 
 type FilterColumnsProps = {
@@ -16,12 +16,13 @@ export const FilterColumns = ({
   const [localHiddenColumns, setLocalHiddenColumns] = useState(hiddenColumns);
   return (
     <div className='area-container'>
-      {columnsOrder.map((col, idx) => {
-        const bgStyle = idx % 2 ? 'odd' : 'even';
-        return (
-          <div key={`${col}-${idx}`} className={`area-item ${bgStyle}`}>
-            <label key={col} className='flex items-center gap-2'>
-              <Checkbox
+      <div className='area-listing'>
+        {columnsOrder.map((col, idx) => {
+          const bgStyle = idx % 2 ? 'odd' : 'even';
+          return (
+            <div key={`${col}-${idx}`} className={`area-item ${bgStyle}`}>
+              <CheckboxField
+                id={col}
                 checked={!Boolean(localHiddenColumns[col])}
                 onChange={(checked) => {
                   if (checked) {
@@ -37,11 +38,10 @@ export const FilterColumns = ({
                   onChange(col, !checked);
                 }}
               />
-              {col}
-            </label>
-          </div>
-        );
-      })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

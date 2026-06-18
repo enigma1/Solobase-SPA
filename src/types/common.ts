@@ -13,5 +13,5 @@ export type PrimeObject<
 
 export type ViewRow<T> = {
   row: T;
-  uiKey: number;
+  uiKey: string;
 };

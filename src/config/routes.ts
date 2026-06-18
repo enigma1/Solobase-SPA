@@ -1,5 +1,6 @@
 export const routes = {
   back: {
+    checkSession: '/api/check-session',
     login: '/auth/login',
     logout: '/auth/logout',
     fetchTables: '/db/fetch-tables',
@@ -22,6 +23,7 @@ export const routes = {
     login: '/login',
     // dashboard: '/dashboard',
     queryView: '/query-view',
+    queriesList: '/queries-list',
     tableView: '/table-view',
     newTable: '/new-table',
     dbView: '/database-view',
