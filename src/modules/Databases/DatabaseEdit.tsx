@@ -5,13 +5,14 @@ import { messageStoreActions, useAccountStore } from '>/services/stores';
 import { EditDatabaseRequest } from '>/services/api';
 import { ScreenLoader } from '>/modules';
 import { DatabaseForm } from './DatabaseForm';
-import { DatabaseShape } from '>/types';
+import { DatabaseShape, ComponentFormHandlers } from '>/types';
 
-type DatabaseEditProps = DatabaseShape;
+type DatabaseEditProps = DatabaseShape & ComponentFormHandlers;
 export const DatabaseEdit = ({
   name,
   charset,
   collation,
+  formHandlers,
 }: DatabaseEditProps) => {
   const queryClient = useQueryClient();
 
@@ -65,6 +66,7 @@ export const DatabaseEdit = ({
   return (
     <DatabaseForm
       mode='edit'
+      formHandlers={formHandlers}
       initialValues={{ name, collation, charset }}
       onSubmit={onDbSubmit}
     />

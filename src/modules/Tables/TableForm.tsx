@@ -6,17 +6,18 @@ import { useModal } from '>/services/hooks';
 import { ScreenLoader, DialogContent } from '>/modules';
 import { emptyTableColumn, emptyTableColumnKey } from '>/services/utils';
 import {
-  SqlColumns,
   ButtonStatus,
   TableShape,
   WizardHandlers,
   TableShapeColumn,
   TableShapeKey,
 } from '>/types';
-import { TableBasicsForm } from './TableBasicsForm';
-import { TableColumnsForm } from './TableColumnsForm';
-import { TableKeysForm } from './TableKeysForm';
-import { TableReview } from './TableReviewForm';
+import {
+  TableBasicsForm,
+  TableColumnsForm,
+  TableKeysForm,
+  TableReview,
+} from './Form';
 
 type ButtonsGroupState = Partial<Record<string, ButtonStatus>>;
 type TableFormStep = 'basics' | 'columns' | 'keys' | 'review';
@@ -110,33 +111,6 @@ export const TableForm = ({
     updateButtons(next, false);
   };
 
-  // const stepValues = useWatch({
-  //   control,
-  //   name: stepFields[step],
-  // });
-
-  // const isStepValid = stepFields[step].every((field) => {
-  //   return !form.getFieldState(field).invalid;
-  // });
-
-  // useEffect(() => {
-  //   const buttonsState: ButtonsGroupState = {
-  //     previous: isFirstStep ? 'hidden' : undefined,
-  //     next: isStepValid ? undefined : 'disabled',
-  //     finish: isLastStep ? (isStepValid ? undefined : 'disabled') : 'hidden',
-  //   };
-  //   setButtonsStatuses(buttonsState);
-  // }, [step, stepValues]);
-
-  // useEffect(() => {
-  //   const run = async () => {
-  //     // const valid = await trigger(stepFields[step]);
-  //     // setStepValidity((prev) => ({ ...prev, [step]: valid }));
-  //   };
-
-  //   run();
-  // }, [step, stepValues]);
-
   useEffect(() => {
     wizardHandlers.next = goNextStep;
     wizardHandlers.previous = goPrevStep;
@@ -183,7 +157,7 @@ export const TableForm = ({
   }
 
   return (
-    <form className='space-y-4 flex flex-1 flex-col min-h-0'>
+    <form className='dialog-form'>
       {step === 'basics' && (
         <TableBasicsForm
           mode={mode}

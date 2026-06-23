@@ -19,16 +19,24 @@
 
   .area-listing {
     @apply flex flex-col flex-1 min-h-0 gap-2 overflow-auto;
-    background-color: var(--color-srf);
+    background-color: var(--color-bg);
   }
 
   .area-content {
     @apply flex flex-col flex-1 min-h-0 gap-2 p-3 overflow-auto;
-    background-color: var(--color-srf);
+    background-color: var(--color-bg);
   }
 
   .area-item {
     @apply flex flex-col px-3 py-2 rounded-sm;
+
+    & .one-line {
+      @apply flex flex-row w-full items-center gap-2 cursor-pointer;
+
+      >:first-child {
+        @apply shrink-0;
+      }
+    }
 
     &.odd {
       background-color: var(--color-srf);

@@ -73,9 +73,9 @@ export const ModalBox: ModalCompoundComponent = ({
     // if (e.target === modalRef.current) onClose();
   };
 
-  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    console.log('test-clicks', e.target === modalRef.current);
-  };
+  // const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  //   console.log('test-clicks', e.target === modalRef.current);
+  // };
 
   // useEffect(() => {
   //   const dialog = modalRef.current;
@@ -102,7 +102,8 @@ export const ModalBox: ModalCompoundComponent = ({
   }, []);
 
   return (
-    <div className='dialog-container' onClick={handleContainerClick}>
+    // <div className='dialog-container' onClick={handleContainerClick}>
+    <div className='dialog-container'>
       <dialog
         ref={modalRef}
         onClick={handleClick}

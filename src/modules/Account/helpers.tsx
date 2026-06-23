@@ -5,9 +5,9 @@ import {
 } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import { dbApi } from '>/services/api';
-import { DialogContent } from '>/modules';
+import { DialogContent, dialogFactories } from '>/modules';
 
-export const handleLogout = (username: string) => {
+export const handleLogout = () => {
   dialogStoreActions.openDialog({
     payload: {
       caption: 'Sessions',
@@ -26,19 +26,37 @@ export const handleLogout = (username: string) => {
             messageStoreActions.addMessage({
               type: 'success',
               content: {
-                text: `Goodbye ${username} - ${rsp.message}`,
+                text: `Goodbye ${accountStoreActions.getUsername()} - ${rsp.message}`,
                 duration: 3000,
               },
             });
           } else {
             messageStoreActions.addMessage({
               type: 'warn',
-              content: { text: `Error: ${rsp.message} `, duration: 3000 },
+              content: { text: `Error: ${rsp.message} `, duration: 5000 },
             });
           }
           accountStoreActions.initialize();
         },
       }),
     },
+  });
+};
+
+export const handlePreferences = () => {
+  dialogStoreActions.openDialog({
+    payload: dialogFactories.editPreferences(),
+  });
+};
+
+export const handleNewUser = () => {
+  dialogStoreActions.openDialog({
+    payload: dialogFactories.newUser(),
+  });
+};
+
+export const handleYourPrivileges = () => {
+  dialogStoreActions.openDialog({
+    payload: dialogFactories.yourPrivileges(),
   });
 };

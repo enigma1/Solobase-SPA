@@ -39,6 +39,10 @@ export type WizardHandlers = {
   finish?: () => void;
 };
 
+export type ComponentFormHandlers = {
+  formHandlers: CommonDialogHandlers;
+};
+
 export type CommonDialogHandlers = {
   confirm: () => void;
 };

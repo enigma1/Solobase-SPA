@@ -1,5 +1,4 @@
 import {
-  TableDataType,
   TableDataColumns,
   TableDataRow,
   SqlRow,
@@ -15,6 +14,8 @@ import {
   TableData,
   TableBasics,
   GroupByModes,
+  UserCapabilities,
+  UserShape,
 } from '>/types';
 
 export type BasicResponse = {
@@ -41,9 +42,9 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = BasicResponse & {
-  success: boolean;
-  username: string;
   schemas: string[];
+  preferences: Record<string, any>;
+  capabilities: UserCapabilities;
 };
 
 export type RunQueryRequest = {
@@ -153,6 +154,16 @@ export type StorageEngineMeta = {
   savepoints: boolean;
 };
 
+export type CreateUserRequest = UserShape;
+export type CreateUserResponse = BasicResponse & {};
+
+export type EditUserRequest = {
+  username: string;
+  password: string;
+  host: string;
+};
+export type EditUserResponse = BasicResponse & {};
+
 export type FetchDatabaseInfoResponse = BasicResponse & {
   collationsByCharset: Record<string, CharsetMeta>;
   engines: StorageEngineMeta[];
@@ -161,6 +172,18 @@ export type FetchDatabaseInfoResponse = BasicResponse & {
     collation: string;
     engine: string;
   };
+};
+
+export type FetchUsersRequest = {};
+export type FetchUsersResponse = BasicResponse & BasicRowsShape;
+
+export type DeleteUsersRequest = {
+  rows: Scalar[][];
+  columnsOrder: string[];
+};
+export type DeleteUsersResponse = BasicResponse & {
+  rows: Scalar[][];
+  columnsOrder: string[];
 };
 
 export type SelectDatabaseRequest = {
@@ -218,6 +241,7 @@ export type EditTableRequest = {
 export type EditTableResponse = BasicResponse & TableBasics;
 
 export type DeleteTablesResponse = BasicResponse & {
+  database: string;
   tables: string[];
 };
 

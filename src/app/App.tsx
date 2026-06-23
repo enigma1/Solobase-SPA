@@ -24,6 +24,7 @@ import {
   HomeRedirect,
   Login,
   NetworkDown,
+  UsersList,
 } from '>/modules';
 import { isNonEmptyString } from '>/services/utils';
 
@@ -67,7 +68,7 @@ export const App = () => {
       element: <RootLayout />,
       children: [
         {
-          index: true, // this is "/"
+          index: true, // this is "/" the home page
           element: <HomeRedirect />,
         },
         {
@@ -79,31 +80,15 @@ export const App = () => {
           path: '*',
           element: <Navigate to={routes.front.home} replace />,
         },
-        // {
-        //   path: routes.front.login,
-        //   element: <Account key={location.pathname} />,
-        // },
+        // Anonymous routes
         {
           element: <GuestGuard />,
-          children: [
-            { path: routes.front.home, element: <HomeRedirect /> },
-            // { path: routes.front.login, element: <Login /> },
-            // { path: routes.front.register, element: <Register /> },
-          ],
+          children: [{ path: routes.front.home, element: <HomeRedirect /> }],
         },
-        // PROTECTED
+        // Authorized routes
         {
           element: <AuthGuard />,
           children: [
-            // {
-            //   path: routes.front.logout,
-            //   element: <Logout />,
-            // },
-            {
-              path: routes.front.newDatabase,
-              element: <DatabaseNew />,
-            },
-
             {
               path: routes.front.dbView,
               element: <DatabasesMainView />,
@@ -125,11 +110,9 @@ export const App = () => {
               element: <QueryView />,
             },
             {
-              path: routes.front.settings,
-              element: <SettingsView />,
+              path: routes.front.usersList,
+              element: <UsersList />,
             },
-
-            // other protected routes...
           ],
         },
       ],

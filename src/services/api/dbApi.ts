@@ -25,6 +25,14 @@ import {
   UpdateDataRowsResponse,
   CreateDataRowsRequest,
   CreateDataRowsResponse,
+  CreateUserRequest,
+  CreateUserResponse,
+  EditUserRequest,
+  EditUserResponse,
+  FetchUsersRequest,
+  FetchUsersResponse,
+  DeleteUsersRequest,
+  DeleteUsersResponse,
   SelectDatabaseRequest,
   SelectDatabaseResponse,
   CreateDatabaseRequest,
@@ -85,6 +93,15 @@ const runQuery = (data: RunQueryRequest, signal?: AbortSignal) =>
 
 const runRawQuery = (data: RunRawQueryRequest) =>
   apiCall<RunRawQueryResponse>(() => apiClient.post('/db/run-raw-query', data));
+
+const fetchUsers = () =>
+  apiCall<FetchUsersResponse>(() => apiClient.get('/db/fetch-users'));
+const createUser = (data: CreateUserRequest) =>
+  apiCall<CreateUserResponse>(() => apiClient.post('/db/create-user', data));
+const editUser = (data: EditUserRequest) =>
+  apiCall<EditUserResponse>(() => apiClient.post('/db/edit-user', data));
+const deleteUsers = (data: DeleteUsersRequest) =>
+  apiCall<DeleteUsersResponse>(() => apiClient.post('/db/delete-users', data));
 
 const fetchDatabases = () =>
   apiCall<FetchDatabasesResponse>(() => apiClient.get('/db/fetch-databases'));
@@ -186,8 +203,7 @@ export const dbApi = {
   sessionRestore,
   login,
   logout,
-  createUser: (data: any) =>
-    apiCall(() => apiClient.post('/db/create-user', data)),
+  fetchUsers,
   fetchDatabases,
   fetchTables,
   fetchRows,
@@ -197,6 +213,8 @@ export const dbApi = {
   createDataRows,
   deleteDataRows,
   updateDataRows,
+  createUser,
+  editUser,
   selectDatabase,
   exportDatabase,
   createDatabase,
@@ -205,6 +223,7 @@ export const dbApi = {
   createTable,
   editTable,
   deleteTables,
+  deleteUsers,
   saveSettings,
   loadSettings,
   exportDatabases,

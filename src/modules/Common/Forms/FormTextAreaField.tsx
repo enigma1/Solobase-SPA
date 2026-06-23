@@ -33,7 +33,7 @@ export const TextAreaField = ({
       $status={status}
       htmlFor={htmlFor ?? props.id}
     >
-      <textarea {...props} value={value ?? ''} />
+      <textarea {...props} />
     </FormFieldWrapper>
   );
 };

@@ -3,9 +3,11 @@ import { useState, useRef, useEffect } from 'react';
 export const DropdownMenu = ({
   label,
   children,
+  disabled,
 }: {
   label: React.ReactNode;
   children: React.ReactNode;
+  disabled?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -23,7 +25,11 @@ export const DropdownMenu = ({
 
   return (
     <div className='menu-dropdown' ref={ref}>
-      <button onClick={() => setOpen((v) => !v)} className='menu-trigger'>
+      <button
+        data-disabled={disabled ? 'true' : undefined}
+        onClick={() => setOpen((v) => !v)}
+        className='menu-trigger'
+      >
         {label}
       </button>
 

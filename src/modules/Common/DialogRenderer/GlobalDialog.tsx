@@ -7,8 +7,9 @@ import {
 
 export const GlobalDialog = () => {
   const dialog = useDialogStore(({ state }) => state.dialog);
+  // const dialog = dialogStoreActions.getActive();
   const isAuthenticated = accountStoreActions.getAuthenticated();
-  if (!isAuthenticated && !dialog?.anonymous) return null;
+  if (!isAuthenticated && dialog && !dialog.anonymous) return null;
   return (
     <DialogRenderer dialog={dialog} onClose={dialogStoreActions.closeDialog} />
   );

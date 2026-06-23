@@ -2,22 +2,35 @@ import { makeStore } from '>/services/utils/emitter';
 
 type UtilitiesState = {
   hiddenColumns: Record<string, boolean>;
+  sidebarVisibility: Record<string, boolean>;
+  headerVisibility: Record<string, boolean>;
+  theme: string;
+  sidebarWidth: number;
 };
 
 export type UtilitiesActions = {
   initialize: () => void;
+  setTheme: (value: string) => void;
   getHiddenColumns: () => Record<string, boolean>;
-  setHiddenColumns: (
-    cols:
-      | Record<string, boolean>
-      | ((prev: Record<string, boolean>) => Record<string, boolean>),
-  ) => void;
+  setHiddenColumns: (cols: Record<string, boolean>) => void;
+  savePreferences: (prefs: Partial<UtilitiesState>) => void;
 };
 
 export type UtilitiesStore = UtilitiesState & UtilitiesActions;
 
 const initialState: UtilitiesState = {
+  theme: sessionStorage.getItem('dbTheme') ?? 'clean-slate',
   hiddenColumns: {},
+  sidebarWidth: 256,
+  sidebarVisibility: {
+    sideDatabases: true,
+    sideTables: true,
+    sideQueries: true,
+  },
+  headerVisibility: {
+    topTheme: true,
+    runQuery: true,
+  },
 };
 
 const baseStore = makeStore<UtilitiesState>(() => ({ ...initialState }));
@@ -27,18 +40,17 @@ export const utilitiesStoreActions: UtilitiesActions = {
   initialize: () => {
     set(() => ({ ...initialState }));
   },
-
-  setHiddenColumns: (colsOrFn) => {
-    setAuto((state) => {
-      const next =
-        typeof colsOrFn === 'function'
-          ? colsOrFn(state.hiddenColumns)
-          : colsOrFn;
-
-      return { hiddenColumns: { ...next } };
-    });
+  setTheme: (value) => {
+    setAuto({ theme: value });
+    sessionStorage.setItem('dbTheme', value);
+  },
+  setHiddenColumns: (cols) => {
+    setAuto({ hiddenColumns: cols });
   },
   getHiddenColumns: () => get().hiddenColumns,
+  savePreferences: (settings: Partial<UtilitiesState>) => {
+    setAuto({ ...settings });
+  },
 };
 
 type SelectorProps = {

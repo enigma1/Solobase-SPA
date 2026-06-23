@@ -15,9 +15,33 @@
   .app-content {
     @apply flex flex-1 min-h-0 overflow-hidden;
 
-    >aside {
-      @apply w-64 border-r overflow-y-auto;
-      border-color: var(--color-border-separate)
+    >.sidebar-wrapper {
+      @apply relative flex border-r min-w-3 max-w-[90%];
+
+      >aside {
+        /* @apply w-64 border-r overflow-y-auto; */
+        @apply flex-1 overflow-y-auto overflow-x-hidden;
+        border-color: var(--color-border-separate);
+
+      }
+
+      >.resize-handle {
+        @apply absolute top-0 right-0 w-2 h-full cursor-col-resize;
+
+        &::after {
+          @apply content-[''] absolute right-0 w-px h-full;
+          background-color: var(--color-border-focus);
+          opacity: 0.3;
+          transition:
+            background-color 120ms ease,
+            opacity 120ms ease;
+        }
+
+        &:hover::after {
+          background-color: var(--color-text);
+          opacity: 1;
+        }
+      }
     }
 
     >main {

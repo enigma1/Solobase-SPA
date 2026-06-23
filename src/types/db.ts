@@ -1,5 +1,17 @@
 import { JSONObject } from 'type-plus';
-import { Scalar, ScalarObject, PrimeObject, PrimeRow } from './common';
+
+export type Scalar = Date | bigint | boolean | null | number | string;
+export type ScalarObject = Record<string, Scalar>;
+
+export type PrimeRow = Scalar[];
+export type PrimeObject<
+  T = any,
+  K extends string | number | symbol = string,
+> = T extends any[] | Function
+  ? never
+  : T extends object
+    ? Record<K, T>
+    : never;
 
 export type DataEditorType =
   | 'input'
@@ -12,9 +24,6 @@ export type DataCell = {
   value: Scalar;
   editorType: DataEditorType;
 };
-
-const DB_TABLE_TYPE = ['table', 'collection'] as const;
-export type TableDataType = (typeof DB_TABLE_TYPE)[number];
 
 export type SqlColumns = {
   field: string;
@@ -42,8 +51,9 @@ export type BaseTableData = {
   columnsOrder: string[];
 };
 
+const DB_TABLE_TYPE = ['table', 'collection'] as const;
 export type TableData = BaseTableData & {
-  type: TableDataType;
+  type: (typeof DB_TABLE_TYPE)[number];
 };
 
 export type DatabaseShape = {
@@ -94,3 +104,23 @@ export type TableShape = TableShapeBasics & {
 };
 
 export type GroupByModes = 'default' | 'legacy' | 'strict';
+export type ViewRow<T> = {
+  row: T;
+  uiKey: string;
+};
+
+export type UserCapabilities = {
+  canGrantPrivileges: boolean;
+  canViewUsers: boolean;
+  canManageUsers: boolean;
+  canCreateDatabases: boolean;
+  canManageTables: boolean;
+  canEditData: boolean;
+};
+
+export type UserShape = {
+  user: string;
+  host: string;
+  password: string;
+  profile?: string;
+};

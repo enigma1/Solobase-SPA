@@ -11,9 +11,9 @@ import { dbApi, CreateDatabaseRequest } from '>/services/api';
 import { FormTextField, ScreenLoader, ComboBox } from '>/modules';
 import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
 import { DatabaseForm } from './DatabaseForm';
-import { DatabaseShape } from '>/types';
+import { DatabaseShape, ComponentFormHandlers } from '>/types';
 
-export const DatabaseNew = () => {
+export const DatabaseNew = (props: ComponentFormHandlers) => {
   const queryClient = useQueryClient();
 
   const createDatabaseCallbacks = {
@@ -53,7 +53,7 @@ export const DatabaseNew = () => {
     createDatabaseCallbacks,
   );
 
-  const onDbSubmit = async (values: DatabaseShape) => {
+  const onSubmit = async (values: DatabaseShape) => {
     mutate({
       name: values.name,
       charset: values.charset,
@@ -66,9 +66,10 @@ export const DatabaseNew = () => {
   if (isBusy) return <ScreenLoader />;
   return (
     <DatabaseForm
+      {...props}
       mode='create'
       initialValues={{ name: '', collation: '', charset: '' }}
-      onSubmit={onDbSubmit}
+      onSubmit={onSubmit}
     />
   );
 };

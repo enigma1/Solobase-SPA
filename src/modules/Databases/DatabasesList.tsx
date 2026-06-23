@@ -25,7 +25,13 @@ import {
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
-import { ViewRow, SqlColumnsShape, SqlRow, ScalarObject } from '>/types';
+import {
+  ViewRow,
+  SqlColumnsShape,
+  SqlRow,
+  ScalarObject,
+  CommonDialogHandlers,
+} from '>/types';
 import {
   ScreenLoader,
   EffectiveTableWrapper,
@@ -34,6 +40,7 @@ import {
   DatabaseEdit,
   DialogContent,
   FilterColumns,
+  dialogFactories,
 } from '>/modules';
 
 import {
@@ -70,14 +77,6 @@ export const DatabasesList = ({
     editedRow: state.editedRow as Record<number, ScalarObject>,
     markEditedRow: api.markEditedRow,
   }));
-
-  const { collationsByCharset, defaults, isLoading, isSuccess } =
-    useDatabaseServerInfo(({ state, query }) => ({
-      collationsByCharset: state.collationsByCharset,
-      defaults: state.defaults,
-      isLoading: query.isLoading,
-      isSuccess: query.isSuccess,
-    }));
 
   const deleteDatabasesCallbacks = {
     onSuccess: (data: any) => {
@@ -147,11 +146,11 @@ export const DatabasesList = ({
   };
 
   const confirmSelectedExports = async (dbEntries: SqlRow[]) => {
-    const databases = getSingleColumnFromResult(
-      dbEntries,
+    const databases = getSingleColumnFromResult({
+      rows: dbEntries,
       columnsOrder,
-      'SCHEMA_NAME',
-    );
+      field: 'SCHEMA_NAME',
+    });
     const rsp = await dbApi.exportDatabases({ databases });
     const disposition = rsp.headers['content-disposition'];
     const match = disposition?.match(/filename="(.+)"/);
@@ -192,6 +191,12 @@ export const DatabasesList = ({
     });
   };
 
+  const handleCreateDatabase = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.createDatabase(),
+    });
+  };
+
   const handleDeleteDatabases = () => {
     const sRows = tableStore.get().selectedRows;
     if (sRows.size === 0) {
@@ -204,11 +209,11 @@ export const DatabasesList = ({
       const row = rowMap.get(id);
       if (row) dbEntries.push(row);
     }
-    const dbNames = getSingleColumnFromResult(
-      dbEntries,
+    const dbNames = getSingleColumnFromResult({
+      rows: dbEntries,
       columnsOrder,
-      'SCHEMA_NAME',
-    );
+      field: 'SCHEMA_NAME',
+    });
 
     dialogStoreActions.openDialog({
       payload: {
@@ -233,27 +238,49 @@ export const DatabasesList = ({
   const onEditRow = (uid: string) => {
     const row = rowMap.get(uid);
     if (!row) return;
-    const fields = getColumnsFromRow(row, columnsOrder, [
-      'SCHEMA_NAME',
-      'DEFAULT_CHARACTER_SET_NAME',
-      'DEFAULT_COLLATION_NAME',
-    ]);
+    const fields = getColumnsFromRow({
+      row,
+      columnsOrder,
+      fields: [
+        'SCHEMA_NAME',
+        'DEFAULT_CHARACTER_SET_NAME',
+        'DEFAULT_COLLATION_NAME',
+      ],
+    });
+    const handlers: CommonDialogHandlers = {
+      confirm: () => {},
+    };
+    const labels = [undefined, 'Update'];
     dialogStoreActions.openDialog({
       payload: {
+        initialSize: 'lg',
         caption: 'Database Forms',
+        variant: 'warn',
         component: (
           <DatabaseEdit
+            formHandlers={handlers}
             name={fields.SCHEMA_NAME as string}
             charset={fields.DEFAULT_CHARACTER_SET_NAME as string}
             collation={fields.DEFAULT_COLLATION_NAME as string}
           />
         ),
-        variant: 'warn',
+        actions: dialogActions
+          .enabledConfirmCancel({
+            onConfirm: () => {
+              handlers.confirm();
+              dialogStoreActions.closeDialog();
+            },
+          })
+          .map((control, idx) => ({
+            ...control,
+            label: labels[idx] ?? control.label,
+          })),
       },
     });
   };
 
   const shellHandlers = {
+    onCreate: handleCreateDatabase,
     onDiscardEdits:
       Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
     onDelete: handleDeleteDatabases,
@@ -265,7 +292,7 @@ export const DatabasesList = ({
 
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
 
-  const isBusy = isLoading || isPending;
+  const isBusy = isPending;
   if (isBusy) return <ScreenLoader />;
 
   return (

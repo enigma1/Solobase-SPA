@@ -5,3 +5,4 @@ export * from './FormSwitchField';
 export * from './FormTextAreaField';
 export * from './FormJsonField';
 export * from './FormCellField';
+export * from './FormComboField';

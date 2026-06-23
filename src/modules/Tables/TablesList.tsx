@@ -27,7 +27,6 @@ import {
 } from '>/modules';
 import {
   getSingleColumnFromResult,
-  getColumnsFromResult,
   getColumnsFromRow,
   getMergedSqlColumnData,
   dialogActions,
@@ -137,14 +136,18 @@ export const TablesList = ({
     const row = rowMap.get(uid);
     if (!row) return;
 
-    const fields = getColumnsFromRow(row, columnsOrder, [
-      'TABLE_NAME',
-      'ENGINE',
-      'TABLE_COLLATION',
-      'AUTO_INCREMENT',
-      'ROW_FORMAT',
-      'TABLE_COMMENT',
-    ]);
+    const fields = getColumnsFromRow({
+      row,
+      columnsOrder,
+      fields: [
+        'TABLE_NAME',
+        'ENGINE',
+        'TABLE_COLLATION',
+        'AUTO_INCREMENT',
+        'ROW_FORMAT',
+        'TABLE_COMMENT',
+      ],
+    });
     dialogStoreActions.openDialog({
       payload: dialogFactories.editTable({
         database: dbSelected,
@@ -172,11 +175,11 @@ export const TablesList = ({
       const row = rowMap.get(id);
       if (row) tableEntries.push(row);
     }
-    const tableNames = getSingleColumnFromResult(
-      tableEntries,
+    const tableNames = getSingleColumnFromResult({
+      rows: tableEntries,
       columnsOrder,
-      'TABLE_NAME',
-    );
+      field: 'TABLE_NAME',
+    });
 
     dialogStoreActions.openDialog({
       payload: {

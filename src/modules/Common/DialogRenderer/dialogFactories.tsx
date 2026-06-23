@@ -7,6 +7,9 @@ import {
   FilterColumns,
   CreateDataRows,
   QueryRequestArea,
+  Preferences,
+  UserNew,
+  SelfCaps,
 } from '>/modules';
 import { DialogPayload, WizardHandlers, CommonDialogHandlers } from '>/types';
 
@@ -33,6 +36,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
     const handlers: CommonDialogHandlers = {
       confirm: () => {},
     };
+    const labels = [undefined, 'Execute'];
     const payload: DialogPayload = {
       initialSize: 'md',
       caption: 'SQL Queries',
@@ -40,21 +44,46 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         <QueryRequestArea queryTitle={title} formHandlers={handlers} />
       ),
       variant: 'info',
-      actions: dialogActions.enabledConfirmCancel({
-        onConfirm: () => {
-          handlers.confirm();
-          dialogStoreActions.closeDialog();
-        },
-      }),
+      actions: dialogActions
+        .enabledConfirmCancel({
+          onConfirm: () => {
+            handlers.confirm();
+            dialogStoreActions.closeDialog();
+          },
+        })
+        .map((control, idx) => ({
+          ...control,
+          label: labels[idx] ?? control.label,
+        })),
     };
     return payload;
   },
 
-  createDatabase: () => ({
-    caption: 'Database Forms',
-    component: <DatabaseNew />,
-    variant: 'success',
-  }),
+  createDatabase: () => {
+    const handlers: CommonDialogHandlers = {
+      confirm: () => {},
+    };
+    const labels = [undefined, 'Create'];
+    const payload: DialogPayload = {
+      initialSize: 'lg',
+      variant: 'success',
+      caption: 'Database Forms',
+      component: <DatabaseNew formHandlers={handlers} />,
+      actions: dialogActions
+        .enabledConfirmCancel({
+          onConfirm: () => {
+            handlers.confirm();
+            dialogStoreActions.closeDialog();
+          },
+        })
+        .map((control, idx) => ({
+          ...control,
+          label: labels[idx] ?? control.label,
+        })),
+    };
+    return payload;
+  },
+
   createTable: (dbSelected: string) => {
     const handlers: WizardHandlers = {};
     const payload: DialogPayload = {
@@ -154,6 +183,66 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
       initialSize: 'xs',
       caption: 'Preferences',
       component: <FilterColumns {...filterProps} />,
+      variant: 'info',
+      actions: dialogActions.ack(),
+    };
+    return payload;
+  },
+
+  editPreferences: () => {
+    const handlers: CommonDialogHandlers = {
+      confirm: () => {},
+    };
+
+    const labels = [undefined, 'Apply'];
+    const payload: DialogPayload = {
+      initialSize: 'md',
+      caption: 'Preferences',
+      component: <Preferences formHandlers={handlers} />,
+      variant: 'info',
+      actions: dialogActions
+        .enabledConfirmCancel({
+          onConfirm: () => {
+            handlers.confirm();
+            // dialogStoreActions.closeDialog();
+          },
+        })
+        .map((control, idx) => ({
+          ...control,
+          label: labels[idx] ?? control.label,
+        })),
+    };
+    return payload;
+  },
+
+  newUser: () => {
+    const handlers: WizardHandlers = {};
+    const payload: DialogPayload = {
+      initialSize: 'lg',
+      caption: 'Database Forms',
+      component: <UserNew wizardHandlers={handlers} />,
+      variant: 'success',
+      actions: dialogActions.wizard({
+        onNext: () => {
+          handlers.next?.();
+        },
+        onPrevious: () => {
+          handlers.previous?.();
+        },
+        onFinish: () => {
+          handlers.finish?.();
+          dialogStoreActions.closeDialog();
+        },
+      }),
+    };
+    return payload;
+  },
+
+  yourPrivileges: () => {
+    const payload: DialogPayload = {
+      initialSize: 'sm',
+      caption: 'Your Priveleges',
+      component: <SelfCaps />,
       variant: 'info',
       actions: dialogActions.ack(),
     };

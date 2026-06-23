@@ -10,9 +10,6 @@ import {
   EffectiveTableWrapper,
   SimpleTableContainer,
   PageTableShell,
-  DatabaseEdit,
-  DialogContent,
-  FilterColumns,
   EmptyListing,
   dialogFactories,
 } from '>/modules';

@@ -8,6 +8,21 @@ export const defaultResponse = {
   message: 'Warning - No Request made, this is a dummy response',
 };
 
+export const defaultListResponse = {
+  rows: [],
+  cols: {},
+  columnsOrder: [],
+};
+
+export const defaultCapabilities = {
+  canGrantPrivileges: true,
+  canViewUsers: true,
+  canManageUsers: true,
+  canCreateDatabases: true,
+  canManageTables: true,
+  canEditData: true,
+} as const;
+
 export const hasObject = <T extends Record<string, unknown>>(
   target: T,
   list: T[],

@@ -65,16 +65,16 @@ export const PageTableShell = ({
               <MapPlusIcon size={24} />
             </button>
           )}
-
-          {onDownload && (
+          {onDelete && hasSelects && (
             <button
-              className={`btn-secondary ${hasSelects && 'icon-warn'}`}
-              onClick={onDownload}
-              title='Export Data from all or selected Rows'
+              className='btn icon-critical'
+              onClick={onDelete}
+              title='Delete Entries'
             >
-              <DatabaseBackupIcon size={24} />
+              <LayersMinusIcon size={24} />
             </button>
           )}
+
           {hasSelects && (
             <button
               className='btn-secondary'
@@ -99,15 +99,16 @@ export const PageTableShell = ({
             </button>
           )}
 
-          {onDelete && hasSelects && (
+          {onDownload && (
             <button
-              className='btn icon-critical'
-              onClick={onDelete}
-              title='Delete Entries'
+              className={`btn-secondary ${hasSelects && 'icon-warn'}`}
+              onClick={onDownload}
+              title='Export Data from all or selected Rows'
             >
-              <LayersMinusIcon size={24} />
+              <DatabaseBackupIcon size={24} />
             </button>
           )}
+
           {onFilterColumns && (
             <button
               className='btn-secondary'

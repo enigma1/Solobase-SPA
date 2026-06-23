@@ -1,10 +1,12 @@
 export const themes = [
   'aegean',
   'arctic',
+  'black-pearl',
+  'clean-slate',
   'deep-sea',
-  'forest',
+  'frozen-forest',
   'garden',
-  'gray',
+  'cherry-blossom',
   'lime',
   'medley',
   'mint',
@@ -12,7 +14,5 @@ export const themes = [
   'pastel',
   'sandstorm',
   'slacken',
-  'slate',
   'sunset-vibes',
-  'vscode',
 ];

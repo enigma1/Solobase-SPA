@@ -19,6 +19,7 @@ import {
 import {
   useHistoryStore,
   useAccountStore,
+  useUtilitiesStore,
   dialogStoreActions,
   queriesStoreActions,
 } from '>/services/stores';
@@ -32,6 +33,10 @@ export const Sidebar = () => {
   );
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { sidebarVisibility } = useUtilitiesStore(({ state }) => ({
+    sidebarVisibility: state.sidebarVisibility,
+  }));
 
   const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
     activeTable: state.activeTable,
@@ -49,6 +54,7 @@ export const Sidebar = () => {
     component: ReactNode;
     icon: ReactNode;
   };
+
   const sideSections: SideSectionItem[] = [
     {
       id: 'sideDatabases',
@@ -125,6 +131,10 @@ export const Sidebar = () => {
     // { id: 'privileges', title: 'Privileges', component: <PrivilegesList /> },
   ];
 
+  const visibleSideSections = sideSections.filter(
+    (section) => sidebarVisibility[section.id],
+  );
+
   const toggleSection = (section: SideSectionItem) => {
     setExpandedSection(section.id);
     const route = section.getRoute();
@@ -146,7 +156,7 @@ export const Sidebar = () => {
   // }, [dbSelected]);
   return (
     <>
-      {sideSections.map((section) => {
+      {visibleSideSections.map((section) => {
         const isActive = expandedSection === section.id;
 
         return (

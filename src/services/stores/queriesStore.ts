@@ -86,6 +86,11 @@ WHERE rn = 1`,
       query: 'ANALYZE TABLE products_description',
       groupByMode: 'legacy',
     },
+    Privileges: {
+      title: 'Privileges',
+      query: 'SHOW GRANTS FOR CURRENT_USER()',
+      // groupByMode: 'legacy',
+    },
   },
 };
 

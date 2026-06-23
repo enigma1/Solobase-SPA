@@ -27,11 +27,16 @@ export const result = (() => {
   };
 })();
 
-export const getDatabaseField = (
-  row: Scalar[],
-  columnsOrder: string[],
-  colName: string,
-): Scalar => {
+type GetDatabaseField = {
+  row: Scalar[];
+  columnsOrder: string[];
+  colName: string;
+};
+export const getDatabaseField = ({
+  row,
+  columnsOrder,
+  colName,
+}: GetDatabaseField): Scalar => {
   const index = columnsOrder.indexOf(colName);
   if (index === -1) return null;
   return row[index];
@@ -50,34 +55,51 @@ export const getDatabaseField = (
 //   return values as string[];
 // };
 
-export const getSingleColumnFromResult = (
-  rows: Scalar[][],
-  columnsOrder: string[],
-  field: string,
-) => {
-  const values = rows.map((row) => getDatabaseField(row, columnsOrder, field));
+type SingleColumnProps = {
+  rows: Scalar[][];
+  columnsOrder: string[];
+  field: string;
+};
+export const getSingleColumnFromResult = ({
+  rows,
+  columnsOrder,
+  field,
+}: SingleColumnProps) => {
+  const values = rows.map((row) =>
+    getDatabaseField({ row, columnsOrder, colName: field }),
+  );
   if (values.some((v) => v === null)) {
     return [];
   }
   return values as string[];
 };
 
-export const getColumnsFromResult = (
-  rows: Scalar[][],
-  columnsOrder: string[],
-  fields: string[],
-) => {
+type ColumnsFromResultProps = {
+  rows: Scalar[][];
+  columnsOrder: string[];
+  fields: string[];
+};
+export const getColumnsFromResult = ({
+  rows,
+  columnsOrder,
+  fields,
+}: ColumnsFromResultProps) => {
   const result = fields.map((f) =>
-    getSingleColumnFromResult(rows, columnsOrder, f),
+    getSingleColumnFromResult({ rows, columnsOrder, field: f }),
   );
   return result;
 };
 
-export const getColumnsFromRow = (
-  row: Scalar[],
-  columnsOrder: string[],
-  fields: string[],
-): Record<string, Scalar | null> => {
+type ColumnsFromRowProps = {
+  row: Scalar[];
+  columnsOrder: string[];
+  fields: string[];
+};
+export const getColumnsFromRow = ({
+  row,
+  columnsOrder,
+  fields,
+}: ColumnsFromRowProps): Record<string, Scalar | null> => {
   const obj: Record<string, Scalar | null> = {};
 
   for (const field of fields) {

@@ -7,7 +7,45 @@ import {
   useMemo,
 } from 'react';
 
+import { utilitiesStoreActions } from '>/services/stores';
+
 const MIN_WIDTH = 80;
+
+type StartSidebarResize = {
+  e: React.MouseEvent;
+  sidebarRef: RefObject<HTMLElement | null>;
+};
+export const startSidebarResize = ({ e, sidebarRef }: StartSidebarResize) => {
+  e.preventDefault();
+
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+
+  const startWidth = sidebarRef.current!.offsetWidth;
+  const startClientX = e.clientX;
+
+  const onMouseMove = (moveEvent: MouseEvent) => {
+    const delta = moveEvent.clientX - startClientX;
+    const newWidth = startWidth + delta;
+
+    sidebarRef.current!.style.width = `${newWidth}px`;
+  };
+
+  const onMouseUp = () => {
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+
+    utilitiesStoreActions.savePreferences({
+      sidebarWidth: sidebarRef.current!.offsetWidth,
+    });
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
 
 export const useColumnResize = (
   columnsOrder: string[],

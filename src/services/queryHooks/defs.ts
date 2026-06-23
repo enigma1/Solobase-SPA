@@ -11,6 +11,14 @@ import { createNetworkError } from '>/services/api/apiErrors';
 
 export const STALE_TIME = 5 * 60 * 1000; // Set default to 5 minutes
 
+export type QueryHookOptions<TData, TVariables, TApi extends object = {}> = {
+  queryKey: (variables: TVariables) => string[];
+  queryFn: (variables: TVariables) => Promise<TData>;
+  initialData: TData;
+  enabled?: (variables: TVariables) => boolean;
+  createApi?: (data: TData) => TApi;
+};
+
 export type MutationApi<TData = any, TVariables = any> = {
   mutate: UseMutateFunction<TData, unknown, TVariables>;
   mutateAsync: UseMutateAsyncFunction<TData, unknown, TVariables>;
@@ -54,6 +62,7 @@ export const queryKeys = {
   preferences: () => ['preferences'] as const,
   session: () => ['session'],
   databases: () => ['databases'],
+  users: () => ['users'],
   databaseServerInfo: () => ['database-server-info'],
   tableDetails: (db: string | null, table: string | null) => [
     'table-details',

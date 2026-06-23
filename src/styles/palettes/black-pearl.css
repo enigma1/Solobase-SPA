@@ -1,21 +1,21 @@
-[data-theme="vscode"] {
+[data-theme="black-pearl"] {
   /* Surface Group */
-  --tone-0: oklch(0.32 0.012 0);
-  --tone-1: oklch(0.20 0.012 335);
-  --tone-2: oklch(0.34 0.014 295);
+  --tone-0: oklch(0.32 0.012 340);
+  --tone-1: oklch(0.20 0.015 335);
+  --tone-2: oklch(0.34 0.019 295);
   --tone-3: oklch(0.37 0.025 250);
   --tone-4: oklch(0.45 0.030 215);
 
   /* Effects and Borders*/
   --tone-5: oklch(0.38 0.022 0);
-  --tone-6: oklch(0.48 0.050 245);
+  --tone-6: oklch(0.48 0.035 245);
   --tone-7: oklch(0.56 0.020 250);
   --tone-8: oklch(0.62 0.018 250);
 
   /* Text Group */
-  --tone-9: oklch(0.74 0.014 255);
-  --tone-10: oklch(0.82 0.012 255);
-  --tone-11: oklch(0.90 0.010 255);
+  --tone-9: oklch(0.77 0.014 255);
+  --tone-10: oklch(0.82 0.012 225);
+  --tone-11: oklch(0.95 0.010 190);
 
   --overlay: rgb(0 0 0 / 0.55);
 

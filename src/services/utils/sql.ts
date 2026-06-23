@@ -9,6 +9,7 @@ import {
   DataCell,
 } from '>/types';
 
+export const MIN_QUERY_CHARS = 4;
 export const MAX_TABLE_COLUMNS = 256;
 export const MAX_TABLE_KEYS = 64;
 export const MAX_COLUMNS_PER_KEY = 16;

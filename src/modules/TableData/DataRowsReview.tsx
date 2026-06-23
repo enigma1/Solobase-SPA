@@ -55,17 +55,12 @@ export const DataRowsReview = ({
                   {columnsOrder.map((columnName, colIndex) => {
                     const cell = row.values[colIndex];
                     return (
-                      <div className={`area-item ${bg}`}>
-                        <div
-                          key={`${row.uid}-label-${columnName}`}
-                          className='font-semibold'
-                        >
-                          {columnName}
-                        </div>
-
-                        <div key={`${row.uid}-value-${columnName}`}>
-                          {renderValue(cell)}
-                        </div>
+                      <div
+                        key={`${row.uid}-lv-${columnName}`}
+                        className={`area-item ${bg}`}
+                      >
+                        <div className='font-semibold'>{columnName}</div>
+                        <div>{renderValue(cell)}</div>
                       </div>
                     );
                   })}

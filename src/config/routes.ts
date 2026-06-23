@@ -30,6 +30,7 @@ export const routes = {
     userView: '/user-view',
     newUser: '/new-user',
     editUser: '/edit-user',
+    usersList: '/users-list',
     newDatabase: '/new-database',
     exportDatabase: '/export-database',
     createTable: '/create-table',

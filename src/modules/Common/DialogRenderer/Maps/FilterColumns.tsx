@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckboxField } from '>/modules';
 import { useModal } from '>/services/hooks';
 
@@ -14,8 +14,13 @@ export const FilterColumns = ({
 }: FilterColumnsProps) => {
   const { setButtonStatus } = useModal();
   const [localHiddenColumns, setLocalHiddenColumns] = useState(hiddenColumns);
+
   return (
     <div className='area-container'>
+      <div className='area-item text-xs'>
+        Unselected columns are hidden. Columns with the same name will be hidden
+        from all databases and tables
+      </div>
       <div className='area-listing'>
         {columnsOrder.map((col, idx) => {
           const bgStyle = idx % 2 ? 'odd' : 'even';
@@ -23,8 +28,10 @@ export const FilterColumns = ({
             <div key={`${col}-${idx}`} className={`area-item ${bgStyle}`}>
               <CheckboxField
                 id={col}
+                label={col}
                 checked={!Boolean(localHiddenColumns[col])}
                 onChange={(checked) => {
+                  setLocalHiddenColumns((prev) => prev);
                   if (checked) {
                     const { [col]: removed, ...rest } = localHiddenColumns;
                     setLocalHiddenColumns(rest);

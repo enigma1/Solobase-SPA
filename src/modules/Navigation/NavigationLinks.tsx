@@ -15,8 +15,7 @@ import { routes, themes } from '>/config';
 
 export const AuthNavigationLinks = () => {
   // const buttonRef = useRef<HTMLButtonElement>(null);
-  const { username, theme, setTheme } = useAccountStore(({ state, api }) => ({
-    username: state.username,
+  const { theme, setTheme } = useAccountStore(({ state, api }) => ({
     theme: state.theme,
     setTheme: api.setTheme,
   }));
@@ -28,6 +27,12 @@ export const AuthNavigationLinks = () => {
   const handleQueryExecute = () => {
     dialogStoreActions.openDialog({
       payload: dialogFactories.makeQuery(),
+    });
+  };
+
+  const handlePreferences = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.editPreferences(),
     });
   };
 
@@ -53,22 +58,30 @@ export const AuthNavigationLinks = () => {
           <nav className='flex items-center gap-2'>
             <button
               className='btn'
-              title='Execute Query'
+              title='Create Query'
               onClick={handleQueryExecute}
             >
               <DatabaseSearchIcon size={24} />
             </button>
-            <Link
+            <button
+              className='btn'
+              title='Preferences and Settings'
+              onClick={handlePreferences}
+            >
+              <CogIcon size={24} />
+            </button>
+
+            {/* <Link
               className='btn'
               to={routes.front.settings}
               title='Set Defaults'
             >
               <CogIcon size={24} />
-            </Link>
+            </Link> */}
             <button
               className='btn-secondary'
               title='Logout'
-              onClick={() => handleLogout(username)}
+              onClick={() => handleLogout()}
             >
               <LogOutIcon size={24} />
             </button>

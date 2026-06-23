@@ -1,4 +1,11 @@
-import { Fragment, useMemo, useState, useEffect, useRef } from 'react';
+import {
+  Fragment,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  KeyboardEvent,
+} from 'react';
 import {
   useFloating,
   offset,
@@ -8,18 +15,7 @@ import {
 } from '@floating-ui/react-dom';
 import { ChevronLeftIcon } from 'lucide-react';
 import { StatusType } from '>/types';
-
-type Option = {
-  value: string;
-  label?: string;
-  disabled?: boolean;
-  $editable?: boolean;
-};
-
-type OptionGroup = {
-  label: string;
-  options: Option[];
-};
+import { Option, OptionGroup } from '>/modules/Common/Forms/commonTypes';
 
 type ComboBoxProps = {
   id?: string;
@@ -55,6 +51,7 @@ export const ComboBox = (props: ComboBoxProps) => {
   const [query, setQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
   const floatingRef = useRef<HTMLUListElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   // const currentOpen = $open ?? internalOpen;
 
   useEffect(() => {
@@ -91,8 +88,10 @@ export const ComboBox = (props: ComboBoxProps) => {
         block: 'center',
         behavior: 'auto',
       });
+
+      inputRef.current?.focus();
     });
-  }, [internalOpen]);
+  }, [value, internalOpen]);
 
   const flatOptions = useMemo(() => {
     if ($options.length) return $options;
@@ -192,6 +191,48 @@ export const ComboBox = (props: ComboBoxProps) => {
   const hasItems = !isEmpty;
   const hasSelection = $multiple ? multiSelect.length > 0 : !!singleSelect;
 
+  const getNormalizedSelection = (dir: 1 | -1) => {
+    const currentIndex = flatOptions.findIndex((o) => o.value === value);
+
+    if (dir === -1) {
+      return currentIndex <= 0
+        ? flatOptions[flatOptions.length - 1]
+        : flatOptions[currentIndex - 1];
+    }
+    return flatOptions[currentIndex + 1] ?? flatOptions[0];
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!internalOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      setInternalOpen(true);
+      return;
+    }
+    if (e.key === 'Escape') {
+      setInternalOpen(false);
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const next = getNormalizedSelection(1);
+      props.onChange(next.value);
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prev = getNormalizedSelection(-1);
+      props.onChange(prev.value);
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setInternalOpen(false);
+      return;
+    }
+  };
+
   return (
     <div
       className='combo-shell'
@@ -228,6 +269,7 @@ export const ComboBox = (props: ComboBoxProps) => {
       )}
 
       <input
+        ref={inputRef}
         id={id}
         value={
           internalOpen
@@ -237,6 +279,7 @@ export const ComboBox = (props: ComboBoxProps) => {
               : (singleSelect?.label ?? singleSelect?.value ?? '')
         }
         onFocus={() => setInternalOpen(true)}
+        onKeyDown={handleKeyDown}
         onChange={(e) => {
           setQuery(e.target.value);
           setInternalOpen(true);

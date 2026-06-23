@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DeleteIcon, RotateCcwIcon } from 'lucide-react';
 import {
@@ -8,6 +8,7 @@ import {
 } from '>/services/stores';
 import { useModal } from '>/services/hooks';
 import { useDatabases, useRawQueryMutation } from '>/services/queryHooks';
+import { MIN_QUERY_CHARS } from '>/services/utils';
 import {
   ScreenLoader,
   ComboBox,
@@ -36,6 +37,7 @@ export const QueryRequestArea = ({
   const [title, setTitle] = useState<string>(queryTitle);
   const [query, setQuery] = useState<string>('');
   const [groupByMode, setGroupByMode] = useState<GroupByModes>('default');
+
   const { setButtonStatus } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,7 +60,6 @@ export const QueryRequestArea = ({
       groupByMode,
     };
     queriesStoreActions.addQuery(values);
-    const sel = queriesStoreActions.getSelectedQuery();
     if (location.pathname !== routes.front.queryView) {
       navigate(routes.front.queryView);
     }
@@ -82,6 +83,11 @@ export const QueryRequestArea = ({
   }, []);
 
   useEffect(() => {
+    const disabled = query.trim().length < MIN_QUERY_CHARS;
+    setButtonStatus('confirm', disabled ? 'disabled' : undefined);
+  }, [selectedDatabase, title, query, groupByMode]);
+
+  useEffect(() => {
     formHandlers.confirm = onConfirm;
   }, [onConfirm]);
 
@@ -93,7 +99,7 @@ export const QueryRequestArea = ({
   return (
     <div className='area-container'>
       <div className='area-spacer'>
-        <h1 className='area-title'>Raw Query</h1>
+        <h1 className='area-title'>Run Raw Query</h1>
         <div className='area-actions'>
           <div className='btn-group'>
             <button
@@ -126,9 +132,8 @@ export const QueryRequestArea = ({
             title='When is named it will save the query'
             onChange={(e) => {
               const value = e.currentTarget.value;
-              // setSaveQuery(value.length > 0);
               setTitle(value);
-              query.length >= 4 && setButtonStatus('confirm');
+              // query.length >= MIN_QUERY_CHARS && setButtonStatus('confirm');
             }}
           />
         </div>
@@ -151,11 +156,11 @@ export const QueryRequestArea = ({
             label='Query SQL:'
             className='text-dialog-area resize-none input border'
             wrapClass='h-full'
-            value={query}
+            defaultValue={query}
             onChange={(v) => {
               const value = v.currentTarget.value;
-              const disabled = value.length < 4;
-              setButtonStatus('confirm', disabled ? 'disabled' : undefined);
+              // const disabled = value.length < MIN_QUERY_CHARS;
+              // setButtonStatus('confirm', disabled ? 'disabled' : undefined);
               setQuery(value);
             }}
           />
@@ -170,20 +175,7 @@ export const QueryRequestArea = ({
           />
         </div>
 
-        {/* <div className='flex flex-col space-y-1 w-full h-full'>
-          <label htmlFor='query-sql'>Query SQL:</label>
-          <textarea
-            id='query-sql'
-            className='text-dialog-area resize-none input border'
-            value={query}
-            onChange={(v) => {
-              const value = v.currentTarget.value;
-              const disabled = value.length < 4;
-              setButtonStatus('confirm', disabled ? 'disabled' : undefined);
-              setQuery(value);
-            }}
-          />
-        </div>
+        {/*
         <div className='area-item space-y-1'>
           <label className='check-label' htmlFor='save-query'>
             <CheckboxField

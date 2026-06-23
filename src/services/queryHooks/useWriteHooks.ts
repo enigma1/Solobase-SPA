@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQueryClient,
-  MutationFunction,
-} from '@tanstack/react-query';
+import { useQueryClient, MutationFunction } from '@tanstack/react-query';
 import { PrimeObject } from '>/types';
 import { dbApi } from '>/services/api/dbApi';
 import {
@@ -10,65 +6,95 @@ import {
   LoginResponse,
   RunRawQueryResponse,
   RunRawQueryRequest,
+  EditTableRequest,
+  EditTableResponse,
+  CreateTableRequest,
+  CreateTableResponse,
+  DeleteTablesRequest,
+  DeleteTablesResponse,
+  DeleteDatabasesRequest,
+  DeleteDatabasesResponse,
+  CreateDatabaseRequest,
+  CreateDatabaseResponse,
+  SelectDatabaseRequest,
+  SelectDatabaseResponse,
+  EditDatabaseRequest,
+  EditDatabaseResponse,
+  CreateUserRequest,
+  CreateUserResponse,
+  EditUserRequest,
+  EditUserResponse,
+  DeleteUsersRequest,
+  DeleteUsersResponse,
 } from '>/services/api';
-import {
-  queryKeys,
-  MutationCallbacks,
-  MutationHookProps,
-  getMutationResult,
-} from './defs';
+import { queryKeys, MutationCallbacks, MutationHookProps } from './defs';
 import { useAccountStore } from '>/services/stores';
-import { defaultResponse } from '>/services/utils';
+import { defaultResponse, defaultCapabilities } from '>/services/utils';
 import { createMutationHook } from './mutationBuilder';
+
+const userDefaults = {
+  ...defaultResponse,
+};
+export const useCreateUserMutation = createMutationHook<
+  MutationFunction<CreateUserResponse, CreateUserRequest>
+>(dbApi.createUser, userDefaults);
+
+export const useEditUserMutation = createMutationHook<
+  MutationFunction<EditUserResponse, EditUserRequest>
+>(dbApi.editUser, userDefaults);
+
+export const useDeleteUsersMutation = createMutationHook<
+  MutationFunction<DeleteUsersResponse, DeleteUsersRequest>
+>(dbApi.deleteUsers, {
+  ...defaultResponse,
+  rows: [],
+  columnsOrder: [],
+});
 
 const dbDefaults = {
   ...defaultResponse,
-  database: undefined,
+  database: 'undefined',
 };
-export const useEditDatabaseMutation = createMutationHook(
-  dbApi.editDatabase,
-  dbDefaults,
-);
+export const useEditDatabaseMutation = createMutationHook<
+  MutationFunction<EditDatabaseResponse, EditDatabaseRequest>
+>(dbApi.editDatabase, dbDefaults);
 
-export const useSelectDatabaseMutation = createMutationHook(
-  dbApi.selectDatabase,
-  dbDefaults,
-);
+export const useSelectDatabaseMutation = createMutationHook<
+  MutationFunction<SelectDatabaseResponse, SelectDatabaseRequest>
+>(dbApi.selectDatabase, dbDefaults);
 
-export const useCreateDatabaseMutation = createMutationHook(
-  dbApi.createDatabase,
-  dbDefaults,
-);
+export const useCreateDatabaseMutation = createMutationHook<
+  MutationFunction<CreateDatabaseResponse, CreateDatabaseRequest>
+>(dbApi.createDatabase, dbDefaults);
 
-export const useDeleteDatabasesMutation = createMutationHook(
-  dbApi.deleteDatabases,
-  {
-    ...defaultResponse,
-    databases: [],
-  },
-);
-
-export const useDeleteTablesMutation = createMutationHook(dbApi.deleteTables, {
+export const useDeleteDatabasesMutation = createMutationHook<
+  MutationFunction<DeleteDatabasesResponse, DeleteDatabasesRequest>
+>(dbApi.deleteDatabases, {
   ...defaultResponse,
-  database: undefined,
+  databases: [],
+});
+
+export const useDeleteTablesMutation = createMutationHook<
+  MutationFunction<DeleteTablesResponse, DeleteTablesRequest>
+>(dbApi.deleteTables, {
+  ...defaultResponse,
+  database: 'undefined',
   tables: [],
 });
 
 const tableDefaults = {
   ...defaultResponse,
-  database: undefined,
-  table: undefined,
+  database: 'undefined',
+  table: 'undefined',
 };
 
-export const useCreateTableMutation = createMutationHook(
-  dbApi.createTable,
-  tableDefaults,
-);
+export const useCreateTableMutation = createMutationHook<
+  MutationFunction<CreateTableResponse, CreateTableRequest>
+>(dbApi.createTable, tableDefaults);
 
-export const useEditTableMutation = createMutationHook(
-  dbApi.editTable,
-  tableDefaults,
-);
+export const useEditTableMutation = createMutationHook<
+  MutationFunction<EditTableResponse, EditTableRequest>
+>(dbApi.editTable, tableDefaults);
 
 export const useRawQueryMutation = createMutationHook<
   MutationFunction<RunRawQueryResponse, RunRawQueryRequest>
@@ -80,40 +106,14 @@ export const useRawQueryMutation = createMutationHook<
   columnsOrder: [],
 });
 
-export const useLoginMutation = <
-  TSelected = ReturnType<typeof createMutationHook>,
->(
-  selector?: (
-    args: MutationHookProps<LoginResponse, LoginRequest>,
-  ) => TSelected,
-  callbacks?: MutationCallbacks<LoginResponse, LoginRequest>,
-) => {
-  const setAuthenticated = useAccountStore(({ api }) => api.setAuthenticated);
-  const queryClient = useQueryClient();
-  const mutation = createMutationHook(dbApi.login, {
-    username: '',
-    success: false,
-    schemas: [],
-  })(selector, {
-    // const [data, variables, onMutateResult, context] = args;
-    onSuccess: (...args) => {
-      setAuthenticated(true);
-      queryClient.clear();
-      // queryClient.invalidateQueries();
-      callbacks?.onSuccess?.(...args);
-    },
-    onError: (...args) => {
-      console.error('Login failed', args[0]);
-      callbacks?.onError?.(...args);
-    },
-  });
-  return mutation;
-};
-
-// export const useInsertRowsMutation = createMutationHook(dbApi.insertDataRows, {
-//   ...tableDefaults,
-//   rows: [],
-// });
+export const useLoginMutation = createMutationHook<
+  MutationFunction<LoginResponse, LoginRequest>
+>(dbApi.login, {
+  ...defaultResponse,
+  schemas: [],
+  preferences: {},
+  capabilities: defaultCapabilities,
+});
 
 export const useCreateDataRowsMutation = createMutationHook(
   dbApi.createDataRows,

@@ -1,4 +1,9 @@
 @layer components {
+  .preview-table-wrapper {
+    @apply space-y-3 p-2 flex flex-col flex-1 min-h-0 w-full
+  }
+
+  /* EffectiveTableWrapper component */
   .table-wrapper {
     @apply relative flex-1 min-h-0 overflow-auto w-full border-t;
     border-color: var(--color-border)
@@ -73,11 +78,6 @@
       }
     }
   }
-
-  .preview-table-wrapper {
-    @apply space-y-3 p-2 flex-1 min-h-0 w-full
-  }
-
 
   .col-header {
     @apply flex items-center gap-2;

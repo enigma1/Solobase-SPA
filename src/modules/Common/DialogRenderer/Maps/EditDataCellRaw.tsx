@@ -1,6 +1,7 @@
 import ReactJsonView from '@microlink/react-json-view';
 import { useModal } from '>/services/hooks';
 import { Scalar } from '>/types';
+import { TextAreaField } from '>/modules';
 
 type EditDataCellRawProps = {
   value: Scalar;
@@ -28,14 +29,16 @@ export const EditDataCellRaw = ({
     );
   } else {
     return (
-      <textarea
+      <TextAreaField
         defaultValue={String(cellValue ?? '')}
-        // rows={50}
+        id='sql-value'
+        label='SQL Value:'
+        className='text-dialog-area resize-none input border'
+        wrapClass='h-full'
         onChange={(e) => {
-          setButtonStatus('confirm');
           onChange(e.target.value);
+          setButtonStatus('confirm');
         }}
-        className='text-dialog-area'
       />
     );
   }

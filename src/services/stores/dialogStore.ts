@@ -13,6 +13,7 @@ export type DialogStoreActions = {
   closeDialog: () => void;
   openDialogAsync: (dialog: DialogState) => Promise<void>;
   closeDialogAsync: () => Promise<void>;
+  getActive: () => DialogState | null;
 };
 
 export const dialogStoreActions: DialogStoreActions = {
@@ -30,6 +31,7 @@ export const dialogStoreActions: DialogStoreActions = {
   closeDialogAsync: async () => {
     await setAuto({ dialog: null }, { wait: true });
   },
+  getActive: () => get().dialog,
 };
 
 type DialogProps = {

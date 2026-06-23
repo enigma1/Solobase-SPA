@@ -9,3 +9,4 @@ export * from './Tables';
 export * from './TableData';
 export * from './Configuration';
 export * from './Databases';
+export * from './Users';

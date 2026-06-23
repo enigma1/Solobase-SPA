@@ -9,6 +9,7 @@ export type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   notice?: string;
   status?: 'error' | 'success';
   endAdornment?: React.ReactNode;
+  inputClassName?: string;
 };
 
 export const InputField = ({
@@ -17,6 +18,7 @@ export const InputField = ({
   notice,
   status,
   endAdornment,
+  inputClassName,
   value,
   type,
   ...props
@@ -33,7 +35,7 @@ export const InputField = ({
         value={value ?? ''}
         type={type ?? 'text'}
         id={id}
-        className='w-full input'
+        className={`w-full input ${inputClassName ?? ''}`}
         data-status={status}
       />
       {endAdornment}

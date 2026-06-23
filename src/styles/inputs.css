@@ -53,8 +53,29 @@
     }
   }
 
-  .input-group {
-    @apply flex gap-2 pt-2;
+  .input-icons-group {
+    @apply flex absolute items-center gap-1.5 right-2;
+    top: 50%;
+    transform: translateY(-50%);
+
+    & button {
+      color: var(--color-text-dim);
+
+      &[aria-pressed='true'] {
+        color: var(--color-action);
+      }
+
+      &:hover {
+        color: var(--color-ring);
+      }
+
+      &:disabled {
+        color: var(--color-text-muted);
+        border-color: var(--color-border);
+        cursor: not-allowed;
+      }
+
+    }
   }
 
   .field-control {
@@ -120,7 +141,7 @@
     }
 
     & input[type='checkbox'] {
-      @apply sr-only;
+      display: none;
     }
 
     & .box {
@@ -146,7 +167,7 @@
   }
 
   .text-dialog-area {
-    @apply flex-1 w-full h-full resize-none;
+    @apply flex-1 h-full px-2 py-1 resize-none;
 
     background: var(--color-srf);
     color: var(--color-text);

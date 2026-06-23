@@ -49,7 +49,6 @@ export const SettingsView = () => {
   );
 
   const onSubmit = (data: SettingsForm) => {
-    console.log('Settings Saved:', data);
     saveSettings({
       preferences: {
         sidebarItems: data.sidebarItems,

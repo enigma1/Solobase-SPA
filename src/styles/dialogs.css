@@ -15,10 +15,10 @@
     }
 
     & .caption {
-      @apply flex px-4 py-3 text-lg font-semibold;
+      @apply flex shrink-0 px-4 py-3 text-lg font-semibold;
       /* background-color: var(--color-srf-dim); */
       border-color: var(--color-border-separate);
-      background: linear-gradient(54deg in oklch, var(--color-srf-dim) 39%, var(--color-action) 100%);
+      background: linear-gradient(54deg in oklch, var(--color-srf-dim) 40%, var(--color-action) 100%);
       box-shadow: var(--shadow-lg);
 
       &.warn {
@@ -44,12 +44,12 @@
     }
 
     & .content {
-      @apply flex-1 grow min-h-0 flex flex-col border-b;
+      @apply flex flex-col flex-1 min-h-0 overflow-hidden;
       border-color: var(--color-border-separate)
     }
 
     & .controls {
-      @apply flex justify-end gap-2 px-6 pt-2 pb-3;
+      @apply flex shrink-0 justify-end gap-2 px-6 pt-2 pb-3;
       background: linear-gradient(65deg in oklch, var(--color-srf-dim) 35%, var(--color-bg) 100%);
     }
 
@@ -57,5 +57,9 @@
       @apply px-6 py-10 text-center;
       color: var(--color-text-muted);
     }
+  }
+
+  .dialog-form {
+    @apply space-y-4 flex flex-1 flex-col min-h-0;
   }
 }

@@ -50,10 +50,11 @@ export const CheckboxField = ({
         id={id}
         type='checkbox'
         checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={(e) => {
+          onChange(e.target.checked);
+        }}
         disabled={disabled}
         title={title}
-        className='sr-only'
       />
 
       <span

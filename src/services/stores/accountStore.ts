@@ -1,7 +1,8 @@
 import { makeStore } from '>/services/utils/emitter';
 import { hasObjectProps, getSchemaFromSample } from '>/services/utils';
 import { SessionRestoreResponse } from '>/services/api';
-import { PrimeObject } from '>/types';
+import { defaultCapabilities } from '>/services/utils';
+import { PrimeObject, UserCapabilities } from '>/types';
 
 export type AccountStoreState = {
   username: string;
@@ -10,6 +11,7 @@ export type AccountStoreState = {
   isAuthenticated: boolean;
   online: boolean;
   preferences: PrimeObject;
+  capabilities: UserCapabilities;
   theme: string;
 };
 
@@ -17,6 +19,7 @@ export type AccountStoreActions = {
   initialize: () => Promise<void>;
   restoreSession: (data: SessionRestoreResponse) => { username: string } | null;
   // logout: () => Promise<unknown>;
+  getActiveDatabase: () => string | null;
   setActiveDatabase: (db: string) => void;
   setActiveTable: (table: string) => void;
   getAuthenticated: () => boolean;
@@ -25,6 +28,7 @@ export type AccountStoreActions = {
   setAppStatus: (value: boolean) => void;
   setTheme: (value: string) => void;
   setSettings: (settings: PrimeObject) => void;
+  getUsername: () => string;
 };
 
 export type AccountStore = AccountStoreState & AccountStoreActions;
@@ -36,7 +40,8 @@ const initialState: AccountStoreState = {
   isAuthenticated: false,
   online: true,
   preferences: {},
-  theme: sessionStorage.getItem('dbTheme') ?? 'slate',
+  capabilities: { ...defaultCapabilities },
+  theme: sessionStorage.getItem('dbTheme') ?? 'clean-slate',
 } as const;
 
 const baseStore = makeStore<AccountStoreState>(() => initialState);
@@ -61,20 +66,17 @@ export const accountStoreActions: AccountStoreActions = {
         activeTable: null,
         isAuthenticated: true,
         online: true,
-        // theme: data.preferences?.theme || 'slate',
-        theme: sessionStorage.getItem('dbTheme') ?? 'slate',
+        theme: sessionStorage.getItem('dbTheme') ?? initialState.theme,
         preferences: data.preferences || initialState.preferences,
       });
-
       return { username: data.username };
     }
 
     set(() => initialState);
     return null;
   },
-  // logout: async () => {
-  //   set(() => initialState);
-  // },
+  getUsername: () => get().username,
+  getActiveDatabase: () => get().dbSelected,
   setActiveDatabase: (database) => {
     setAuto({ dbSelected: database, activeTable: null });
   },

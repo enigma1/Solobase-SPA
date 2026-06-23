@@ -2,15 +2,12 @@ import { dialogStoreActions, utilitiesStoreActions } from '>/services/stores';
 import { dialogFactories } from '>/modules';
 
 const changeColumnsActivePrefs = (col: string, hidden: boolean) => {
-  utilitiesStoreActions.setHiddenColumns((prev: Record<string, boolean>) => {
-    const next = { ...prev };
-
-    if (hidden) {
-      next[col] = true;
-    } else {
-      delete next[col];
-    }
-    return next;
+  const { [col]: removed, ...rest } = utilitiesStoreActions.getHiddenColumns();
+  utilitiesStoreActions.savePreferences({
+    hiddenColumns: {
+      ...rest,
+      ...(hidden && { [col]: true }),
+    },
   });
 };
 

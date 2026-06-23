@@ -26,6 +26,13 @@
     color: var(--color-text);
     transition: background-color 0.15s ease;
 
+    &[data-disabled='true'] {
+      @apply line-through pointer-events-none;
+      color: var(--color-text-muted);
+      background-color: var(--color-srf-dim);
+      cursor: not-allowed;
+    }
+
   }
 
   .menu-panel {
@@ -34,6 +41,7 @@
     background-color: var(--color-srf-dim);
     box-shadow: var(--shadow-md);
 
+    & .menu-item,
     & a {
       @apply block px-4 py-2 items-center border-t border-l border-r last:border-b rounded-t-none last:rounded-b-sm;
       border-color: var(--color-border-separate);

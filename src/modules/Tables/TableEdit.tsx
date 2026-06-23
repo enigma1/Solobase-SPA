@@ -99,7 +99,6 @@ export const TableEdit = ({
   );
 
   const onSubmit = async (values: TableShape) => {
-    console.log('values to update', values);
     mutate({
       original: originalTable,
       modified: {
