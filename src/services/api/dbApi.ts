@@ -1,3 +1,4 @@
+import { queriesStoreActions } from '>/services/stores';
 import { apiClient } from './client';
 import { handleApiAxios } from './apiHelpers';
 import { routes } from '>/config/routes';
@@ -71,6 +72,9 @@ apiClient.interceptors.response.use(
 const apiCall = <T>(fn: () => Promise<any>, unwrap = true) =>
   handleApiAxios(async () => {
     const res = await fn();
+    if (Array.isArray(res.data?.queries) && res.data.queries.length) {
+      queriesStoreActions.addExecutedQueries(res.data.queries);
+    }
     return unwrap ? res.data : res;
   });
 

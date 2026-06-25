@@ -5,6 +5,7 @@ import { useTableDetailsHook } from '>/services/queryHooks';
 import { ScreenLoader } from '>/modules';
 import { TableShape, WizardHandlers } from '>/types';
 import { TableForm } from './TableForm';
+import { TableFormShape } from './Form';
 
 type TableEditProps = {
   database: string;
@@ -98,7 +99,7 @@ export const TableEdit = ({
     editTableCallbacks,
   );
 
-  const onSubmit = async (values: TableShape) => {
+  const onSubmit = async (values: TableFormShape) => {
     mutate({
       original: originalTable,
       modified: {

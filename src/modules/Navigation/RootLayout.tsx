@@ -96,6 +96,16 @@ const AuthMenu = () => {
             New Query
           </a>
           <Link to={routes.front.queriesList}>List Queries</Link>
+          <a
+            href='#'
+            onClick={() => {
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.queriesExecuted(),
+              });
+            }}
+          >
+            Executed Queries
+          </a>
         </DropdownMenu>
         {capabilities.canViewUsers && (
           <>

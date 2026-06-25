@@ -13,12 +13,13 @@ import {
   isDuplicatedValue,
   MAX_TABLE_COLUMNS,
 } from '>/services/utils';
-import { SqlColumns, TableShape } from '>/types';
+import { SqlColumns } from '>/types';
 import { TableColumnEntry } from './TableColumnEntry';
+import { TableFormShape } from './tableDefs';
 
 type ColumnBasics = Pick<SqlColumns, 'field' | 'type'>;
 type TableColumnsFormProps = {
-  form: UseFormReturn<TableShape>;
+  form: UseFormReturn<TableFormShape>;
   onValidation: (valid: boolean) => void;
   defaults: {
     column: ColumnBasics;

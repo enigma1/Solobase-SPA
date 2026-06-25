@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { queryKeys } from '>/services/queryHooks';
 import { useModal } from '>/services/hooks';
 import { ScreenLoader, DialogContent } from '>/modules';
-import { ButtonStatus, UserShape, WizardHandlers } from '>/types';
-import { UserBasics, UserReview } from './Form';
+import { ButtonStatus, WizardHandlers } from '>/types';
+import { UserBasics, UserReview, UserFormShape, UserFormProfile } from './Form';
 
 type ButtonsGroupState = Partial<Record<string, ButtonStatus>>;
 type UserFormStep = 'basics' | 'review';
@@ -15,10 +15,10 @@ type UserFormProps = {
   initialValues?: {
     user?: string;
     host?: string;
-    profile?: string;
     password?: string;
+    profile?: UserFormProfile;
   };
-  onSubmit: (data: UserShape) => void;
+  onSubmit: (data: UserFormShape) => void;
   wizardHandlers: WizardHandlers;
   mode?: 'create' | 'edit';
 };
@@ -52,7 +52,7 @@ export const UserForm = ({
   //   }),
   // );
 
-  const form = useForm<UserShape>({
+  const form = useForm<UserFormShape>({
     defaultValues: {
       ...initialValues,
       user: initialValues.user ?? '',
@@ -122,7 +122,7 @@ export const UserForm = ({
         />
       )}
       {step === 'review' && (
-        <UserReview onValidation={onValidation} form={form} />
+        <UserReview mode={mode} onValidation={onValidation} form={form} />
       )}
     </form>
   );

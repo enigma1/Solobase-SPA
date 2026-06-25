@@ -1,5 +1,6 @@
 import { makeStore } from '>/services/utils/emitter';
-import { GroupByModes } from '>/types';
+import { collapseSequentialQueryDuplicates } from './helpers';
+import { GroupByModes, QueryLogEntry } from '>/types';
 type Query = {
   title: string;
   query: string;
@@ -10,6 +11,7 @@ type Query = {
 type QueriesState = {
   selectedQueryTitle?: string;
   queries: Record<string, Query>;
+  queriesExecuted: QueryLogEntry[];
 };
 // columnsOrder: string[];
 // rows: unknown[];
@@ -26,9 +28,12 @@ export type QueriesActions = {
   getQuery: (title: string) => Query;
   getQueries: () => Record<string, Query>;
   getSelectedQuery: () => Query | undefined;
+  addExecutedQueries: (queries: QueryLogEntry[]) => void;
+  resetExecutedQueries: () => void;
 };
 
 const initialState: QueriesState = {
+  queriesExecuted: [],
   selectedQueryTitle: undefined,
   queries: {
     'Query-1': {
@@ -109,6 +114,7 @@ export const queriesStoreActions: QueriesActions = {
   addQuery: (query, select = true) => {
     set((s) => {
       const next = {
+        ...s,
         queries: {
           ...s.queries,
           [query.title]: query,
@@ -122,6 +128,7 @@ export const queriesStoreActions: QueriesActions = {
     set((s) => {
       const { [title]: removed, ...rest } = s.queries;
       return {
+        ...s,
         queries: { ...rest },
         ...(s.selectedQueryTitle === title && {
           selectedQueryTitle: undefined,
@@ -145,6 +152,17 @@ export const queriesStoreActions: QueriesActions = {
     return selectedQueryTitle !== undefined
       ? queries[selectedQueryTitle]
       : undefined;
+  },
+
+  addExecutedQueries: (queries) => {
+    const collapsed = collapseSequentialQueryDuplicates(queries);
+    setAuto((s) => ({
+      ...s,
+      queriesExecuted: [...collapsed, ...s.queriesExecuted].slice(0, 500),
+    }));
+  },
+  resetExecutedQueries: () => {
+    setAuto({ queriesExecuted: [] });
   },
 };
 

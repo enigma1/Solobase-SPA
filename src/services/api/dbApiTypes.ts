@@ -21,6 +21,8 @@ import {
 export type BasicResponse = {
   ok: boolean;
   message: string;
+  route: string;
+  queries: string[];
 };
 
 export type BasicRowsShape = {

@@ -3,7 +3,7 @@ export const themes = [
   'arctic',
   'black-pearl',
   'clean-slate',
-  'deep-sea',
+  'deep-blue-sea',
   'frozen-forest',
   'garden',
   'cherry-blossom',

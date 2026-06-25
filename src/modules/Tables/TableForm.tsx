@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { queryKeys, useDatabaseServerInfo } from '>/services/queryHooks';
@@ -7,16 +7,17 @@ import { ScreenLoader, DialogContent } from '>/modules';
 import { emptyTableColumn, emptyTableColumnKey } from '>/services/utils';
 import {
   ButtonStatus,
-  TableShape,
   WizardHandlers,
   TableShapeColumn,
   TableShapeKey,
+  EmptyObject,
 } from '>/types';
 import {
   TableBasicsForm,
   TableColumnsForm,
   TableKeysForm,
   TableReview,
+  TableFormShape,
 } from './Form';
 
 type ButtonsGroupState = Partial<Record<string, ButtonStatus>>;
@@ -24,15 +25,8 @@ type TableFormStep = 'basics' | 'columns' | 'keys' | 'review';
 const stepOrder: TableFormStep[] = ['basics', 'columns', 'keys', 'review'];
 
 type TableFormProps = {
-  initialValues?: {
-    table?: string;
-    engine?: string;
-    charset?: string;
-    collation?: string;
-    cols?: TableShapeColumn[];
-    keys?: TableShapeKey[];
-  };
-  onSubmit: (data: TableShape) => void;
+  initialValues?: TableFormShape | EmptyObject;
+  onSubmit: (data: TableFormShape) => void;
   wizardHandlers: WizardHandlers;
   database: string;
   mode?: 'create' | 'edit';
@@ -45,6 +39,7 @@ export const TableForm = ({
   wizardHandlers,
   mode = 'create',
 }: TableFormProps) => {
+  const originalValuesRef = useRef<TableFormShape | EmptyObject>(initialValues);
   const [step, setStep] = useState<TableFormStep>('basics');
   const nextStep = (current: TableFormStep): TableFormStep => {
     const idx = stepOrder.indexOf(current);
@@ -83,7 +78,7 @@ export const TableForm = ({
       isError: query.isError,
     }));
 
-  const form = useForm<TableShape>({
+  const form = useForm<TableFormShape>({
     defaultValues: {
       ...initialValues,
       table: initialValues.table ?? '',
@@ -114,9 +109,7 @@ export const TableForm = ({
   useEffect(() => {
     wizardHandlers.next = goNextStep;
     wizardHandlers.previous = goPrevStep;
-    wizardHandlers.finish = handleSubmit((values) =>
-      onSubmit({ ...values, database }),
-    );
+    wizardHandlers.finish = handleSubmit((values) => onSubmit({ ...values }));
 
     return () => {
       wizardHandlers.next = undefined;

@@ -1,5 +1,5 @@
 import { JSONObject } from 'type-plus';
-
+export type EmptyObject = Record<string, never>;
 export type Scalar = Date | bigint | boolean | null | number | string;
 export type ScalarObject = Record<string, Scalar>;
 
@@ -118,9 +118,18 @@ export type UserCapabilities = {
   canEditData: boolean;
 };
 
+export type UserProfile = 'admin' | 'editor' | 'readOnly';
 export type UserShape = {
   user: string;
   host: string;
   password: string;
-  profile?: string;
+  profile?: UserProfile;
+};
+
+export type QueryLogEntry = {
+  sql: string;
+  params?: unknown;
+  connector: 'sql' | 'xdevapi' | 'stream';
+  startedAt: number;
+  durationMs: number;
 };

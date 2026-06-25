@@ -24,10 +24,7 @@
 
   /* effects */
   --color-effect: var(--effect);
-  --color-ring:
-    color-mix(in oklch,
-      var(--color-effect) 60%,
-      var(--tone-5) 40%);
+  --color-ring: var(--tone-5);
 
   /* borders */
   --color-border: var(--tone-8);
@@ -66,8 +63,8 @@
 
   --state-normal:
     color-mix(in oklch,
-      var(--color-accent) 40%,
-      var(--color-srf) 60%);
+      var(--color-accent) 25%,
+      var(--color-srf) 75%);
 
   /* Shadows */
   --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.02);

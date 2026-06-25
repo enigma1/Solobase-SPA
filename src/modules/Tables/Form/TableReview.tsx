@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { extractNameFromRequired } from '>/services/utils';
-import { TableShape } from '>/types';
+import { TableFormShape } from './tableDefs';
 
 type TableColumnsFormProps = {
   database: string;
-  form: UseFormReturn<TableShape>;
+  form: UseFormReturn<TableFormShape>;
   onValidation: (valid: boolean) => void;
 };
 
@@ -41,6 +41,9 @@ export const TableReview = ({
 
           <div className='font-semibold'>Collation</div>
           <div>{values.collation}</div>
+
+          <div className='font-semibold'>Engine</div>
+          <div>{values.engine}</div>
         </div>
         <h2>Columns</h2>
         <div>
@@ -60,16 +63,17 @@ export const TableReview = ({
                   <div>Nullable: {col.nullable ? 'YES' : 'NO'}</div>
                   {col.defaultValue && <div>Default: {col.defaultValue}</div>}
                   {col.comment && <div>Comment: {col.comment}</div>}
+
+                  {col.params && Object.keys(col.params).length > 0 && (
+                    <div>
+                      {Object.entries(col.params).map(([k, v]) => (
+                        <div key={k}>
+                          {extractNameFromRequired(k)}: {v}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {col.params && Object.keys(col.params).length > 0 && (
-                  <div>
-                    {Object.entries(col.params).map(([k, v]) => (
-                      <div key={k}>
-                        {extractNameFromRequired(k)}: {v}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })}

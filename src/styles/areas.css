@@ -1,3 +1,4 @@
+@layer components {
   .area-container {
     @apply flex flex-col flex-1 min-h-0 w-full h-full;
   }
@@ -59,5 +60,36 @@
       @apply border;
       background: linear-gradient(75deg in oklch, var(--color-srf-muted) 35%, var(--color-success-bg) 100%);
     }
-
   }
+
+  .area-grid {
+    @apply grid grid-cols-[max-content_1fr] gap-x-6 gap-y-3 px-3 py-2;
+    background-color: var(--color-srf-dim);
+
+    & .row-line {
+      @apply contents;
+
+      &.even {
+        background-color: var(--color-bg);
+      }
+
+      &.odd {
+        background-color: var(--color-red-50);
+      }
+
+      &:hover {
+        background-color: var(--color-srf-dim);
+      }
+    }
+
+    & .row-label {
+      @apply font-semibold;
+      color: var(--color-text);
+    }
+
+    & .row-value {
+      color: var(--color-text-muted);
+    }
+  }
+
+}

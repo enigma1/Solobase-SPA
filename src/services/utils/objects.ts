@@ -6,6 +6,8 @@ import merge from 'lodash-es/merge';
 export const defaultResponse = {
   ok: false,
   message: 'Warning - No Request made, this is a dummy response',
+  route: '#',
+  queries: [],
 };
 
 export const defaultListResponse = {

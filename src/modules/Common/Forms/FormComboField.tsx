@@ -1,10 +1,18 @@
 import { ChangeEvent } from 'react';
 import { FormFieldWrapper } from './FormCommon';
-import { FieldValues, Controller } from 'react-hook-form';
+import { FieldValues, Controller, Path } from 'react-hook-form';
 import { ComboBox } from '>/modules';
 import { FormCommonFieldProps, Option, OptionGroup, StatusType } from '>/types';
 
-type ComboFieldProps = {
+type ComboCommonFields = {
+  $options?: Option[];
+  $groups?: OptionGroup[];
+  $editable?: boolean;
+  $multiple?: boolean;
+  $placeholder?: string;
+};
+
+type ComboFieldProps = ComboCommonFields & {
   label?: string;
   notice?: string;
   status?: StatusType;
@@ -12,11 +20,6 @@ type ComboFieldProps = {
   value: string | string[];
   onChange: (value: string | string[]) => void;
   htmlFor?: string;
-  $options?: Option[];
-  $groups?: OptionGroup[];
-  $editable?: boolean;
-  $multiple?: boolean;
-  $placeholder?: string;
 };
 export const ComboField = ({
   label,
@@ -38,19 +41,20 @@ export const ComboField = ({
   );
 };
 
-type FormComboFieldProps<T extends FieldValues> = Omit<
-  FormCommonFieldProps<T>,
+type FormComboFieldProps<T extends FieldValues, N extends Path<T>> = Omit<
+  FormCommonFieldProps<T, N>,
   'onValueChange'
-> & {
-  onValueChange?: (value: string | string[], field: any) => void;
-};
-export const FormComboField = <T extends FieldValues>({
+> &
+  ComboCommonFields & {
+    onValueChange?: (value: string | string[], field: any) => void;
+  };
+export const FormComboField = <T extends FieldValues, N extends Path<T>>({
   name,
   control,
   rules,
   onValueChange,
   ...rest
-}: FormComboFieldProps<T>) => {
+}: FormComboFieldProps<T, N>) => {
   return (
     <Controller
       name={name}

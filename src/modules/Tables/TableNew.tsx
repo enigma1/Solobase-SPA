@@ -1,10 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys, useCreateTableMutation } from '>/services/queryHooks';
-import { messageStoreActions, useAccountStore } from '>/services/stores';
+import { messageStoreActions } from '>/services/stores';
 import { dbApi, CreateTableRequest } from '>/services/api';
 import { ScreenLoader } from '>/modules';
-import { TableShape, WizardHandlers } from '>/types';
+import { WizardHandlers } from '>/types';
 import { TableForm } from './TableForm';
+import { TableFormShape } from './Form';
 
 type TableNewProps = {
   database: string;
@@ -50,12 +51,11 @@ export const TableNew = ({ database, wizardHandlers }: TableNewProps) => {
     createTableCallbacks,
   );
 
-  const onNewSubmit = async (values: TableShape) => {
-    mutate(values);
+  const onNewSubmit = async (values: TableFormShape) => {
+    mutate({ ...values, database });
   };
 
   const isBusy = isPending;
-
   if (isBusy) return <ScreenLoader />;
   return (
     <TableForm

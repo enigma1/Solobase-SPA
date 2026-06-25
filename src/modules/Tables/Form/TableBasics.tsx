@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { useWatch, UseFormReturn, Controller } from 'react-hook-form';
 import { SquareActivityIcon } from 'lucide-react';
-import { FormTextField, ComboBox } from '>/modules';
+import { FormTextField, ComboBox, FormComboField } from '>/modules';
 import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
-import { TableShape } from '>/types';
 import { StorageEngineMeta } from '>/services/api';
+import { TableFormShape } from './tableDefs';
 
 type TableBasicsFormProps = {
   mode: 'create' | 'edit';
-  form: UseFormReturn<TableShape>;
+  form: UseFormReturn<TableFormShape>;
   dbCharsets: string[];
   collationsByCharset: Record<string, { collations: string[] }>;
   engines: StorageEngineMeta[];
@@ -34,6 +34,7 @@ export const TableBasicsForm = ({
     watch,
     setValues,
     clearErrors,
+    getValues,
     formState: { errors },
   } = form;
 
@@ -58,6 +59,7 @@ export const TableBasicsForm = ({
 
   const onSetDefaults = () => {
     setValues({
+      table: getValues('table'),
       charset: defaults.charset,
       collation: defaults.collation,
       engine: defaults.engine,
@@ -70,7 +72,9 @@ export const TableBasicsForm = ({
       <div className='area-container'>
         <div className='area-spacer'>
           <h1 className='area-title'>
-            {mode === 'create' ? 'Create Table Basics' : `Editing ${values[0]}`}
+            {mode === 'create'
+              ? 'Create Table Basics'
+              : `Editing ${getValues('table')}`}
           </h1>
           <div className='area-actions'>
             <button
@@ -104,77 +108,44 @@ export const TableBasicsForm = ({
               },
             }}
           />
-          <Controller
+          <FormComboField
+            id='table-charset'
             name='charset'
+            label='Charset'
             control={control}
-            render={({ field, fieldState }) => (
-              <FormFieldWrapper
-                label='Charset:'
-                htmlFor='charset'
-                $status={fieldState.error ? 'error' : undefined}
-                $notice={fieldState.error?.message}
-              >
-                <ComboBox
-                  id='charset'
-                  value={field.value}
-                  onChange={field.onChange}
-                  $options={dbCharsets.map((c) => ({
-                    value: c,
-                    label: c,
-                  }))}
-                />
-              </FormFieldWrapper>
-            )}
+            $options={dbCharsets.map((c) => ({
+              value: c,
+              label: c,
+            }))}
+            $placeholder='Select Character Set'
           />
-          <Controller
+          <FormComboField
+            id='table-collation'
             name='collation'
+            label='Collation'
             control={control}
             rules={{
               validate: (value) =>
-                !value ||
+                value === undefined ||
                 validCollations.includes(value) ||
                 'Invalid collation',
             }}
-            render={({ field, fieldState }) => (
-              <FormFieldWrapper
-                label='Collation:'
-                htmlFor='collation'
-                $status={fieldState.error ? 'error' : undefined}
-                $notice={fieldState.error?.message}
-              >
-                <ComboBox
-                  id='collation'
-                  value={field.value}
-                  onChange={field.onChange}
-                  $options={validCollations.map((c) => ({
-                    value: c,
-                    label: c,
-                  }))}
-                />
-              </FormFieldWrapper>
-            )}
+            $options={validCollations.map((c) => ({
+              value: c,
+              label: c,
+            }))}
+            $placeholder='Select Table Collation'
           />
-          <Controller
+          <FormComboField
+            id='table-engine'
             name='engine'
+            label='Engine'
             control={control}
-            render={({ field, fieldState }) => (
-              <FormFieldWrapper
-                label='Engine:'
-                htmlFor='engine'
-                $status={fieldState.error ? 'error' : undefined}
-                $notice={fieldState.error?.message}
-              >
-                <ComboBox
-                  id='engine'
-                  value={field.value}
-                  onChange={field.onChange}
-                  $options={engines.map((e) => ({
-                    value: e.name,
-                    label: e.name,
-                  }))}
-                />
-              </FormFieldWrapper>
-            )}
+            $options={engines.map((e) => ({
+              value: e.name,
+              label: e.name,
+            }))}
+            $placeholder='Select Table Engine'
           />
         </div>
       </div>

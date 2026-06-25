@@ -1,8 +1,8 @@
 [data-theme="arctic"] {
-  --tone-0: oklch(0.993 0.004 220);
-  --tone-1: oklch(0.982 0.005 220);
-  --tone-2: oklch(0.961 0.007 220);
-  --tone-3: oklch(0.940 0.009 220);
+  --tone-0: oklch(0.985 0 0);
+  --tone-1: oklch(0.875 0.02 248);
+  --tone-2: oklch(0.815 0.04 248);
+  --tone-3: oklch(0.795 0.05 230);
   --tone-4: oklch(0.918 0.011 220);
   --tone-5: oklch(0.894 0.014 220);
   --tone-6: oklch(0.865 0.018 220);

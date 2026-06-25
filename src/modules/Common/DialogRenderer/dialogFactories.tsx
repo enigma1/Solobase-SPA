@@ -1,4 +1,4 @@
-import { dialogStoreActions } from '>/services/stores';
+import { dialogStoreActions, queriesStoreActions } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import {
   DatabaseNew,
@@ -7,6 +7,7 @@ import {
   FilterColumns,
   CreateDataRows,
   QueryRequestArea,
+  QueriesExecuted,
   Preferences,
   UserNew,
   SelfCaps,
@@ -245,6 +246,28 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
       component: <SelfCaps />,
       variant: 'info',
       actions: dialogActions.ack(),
+    };
+    return payload;
+  },
+
+  queriesExecuted: () => {
+    const labels = [undefined, 'Reset'];
+    const payload: DialogPayload = {
+      initialSize: 'xxl',
+      caption: 'Queries Executed',
+      component: <QueriesExecuted />,
+      variant: 'info',
+      actions: dialogActions
+        .confirmCancel({
+          onConfirm: () => {
+            dialogStoreActions.closeDialog();
+            queriesStoreActions.resetExecutedQueries();
+          },
+        })
+        .map((control, idx) => ({
+          ...control,
+          label: labels[idx] ?? control.label,
+        })),
     };
     return payload;
   },

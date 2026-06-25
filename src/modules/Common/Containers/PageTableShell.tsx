@@ -54,7 +54,7 @@ export const PageTableShell = ({
     onFilterColumns,
   } = shellActions;
   const [isPacked, setIsPacked] = useState(false);
-
+  const [showNotice, setShowNotice] = useState(false);
   return (
     <div className='page-container'>
       <div className='page-toolbar'>
@@ -135,6 +135,11 @@ export const PageTableShell = ({
           )}
         </div>
       </div>
+      {showNotice && (
+        <div className='page-notice'>
+          Notice around queries goes here if queries are present
+        </div>
+      )}
     </div>
   );
 };

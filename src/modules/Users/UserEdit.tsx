@@ -2,9 +2,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys, useCreateUserMutation } from '>/services/queryHooks';
 import { messageStoreActions } from '>/services/stores';
 import { ScreenLoader } from '>/modules';
-import { WizardHandlers, UserShape } from '>/types';
+import { WizardHandlers } from '>/types';
 import { UserForm } from './UserForm';
-import { KEEP_EXISTING_PROFILE } from './Form';
+import { KEEP_EXISTING_PROFILE, UserFormShape } from './Form';
 
 type UserEditProps = {
   wizardHandlers: WizardHandlers;
@@ -51,7 +51,7 @@ export const UserEdit = ({ wizardHandlers, user, host }: UserEditProps) => {
     editUserCallbacks,
   );
 
-  const handleSubmit = (data: UserShape) => {
+  const handleSubmit = (data: UserFormShape) => {
     const serverData = {
       ...data,
       profile:
@@ -71,7 +71,6 @@ export const UserEdit = ({ wizardHandlers, user, host }: UserEditProps) => {
       initialValues={{
         user,
         host,
-        profile: KEEP_EXISTING_PROFILE,
       }}
     />
   );

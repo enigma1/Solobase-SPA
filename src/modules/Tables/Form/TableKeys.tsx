@@ -14,10 +14,10 @@ import {
   MAX_COLUMNS_PER_KEY,
   MAX_TABLE_KEYS,
 } from '>/services/utils';
-import { TableShape } from '>/types';
+import { TableFormShape } from './tableDefs';
 
 type TableKeysFormProps = {
-  form: UseFormReturn<TableShape>;
+  form: UseFormReturn<TableFormShape>;
   onValidation: (valid: boolean) => void;
 };
 

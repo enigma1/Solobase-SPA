@@ -4,6 +4,7 @@ import { messageStoreActions } from '>/services/stores';
 import { ScreenLoader } from '>/modules';
 import { UserForm } from './UserForm';
 import { WizardHandlers, UserShape } from '>/types';
+import { UserFormShape, KEEP_EXISTING_PROFILE } from './Form';
 
 type UserNewProps = {
   wizardHandlers: WizardHandlers;
@@ -48,9 +49,13 @@ export const UserNew = ({ wizardHandlers }: UserNewProps) => {
     createUserCallbacks,
   );
 
-  const handleSubmit = (data: UserShape) => {
-    console.log('create user', data);
-    mutate(data);
+  const handleSubmit = (data: UserFormShape) => {
+    const serverData = {
+      ...data,
+      profile:
+        data.profile !== KEEP_EXISTING_PROFILE ? data.profile : undefined,
+    };
+    mutate(serverData);
   };
 
   const isBusy = isPending;
@@ -64,7 +69,6 @@ export const UserNew = ({ wizardHandlers }: UserNewProps) => {
       initialValues={{
         user: '',
         host: '%',
-        profile: '',
       }}
     />
   );
