@@ -17,9 +17,8 @@ import {
   dialogFactories,
 } from '>/modules';
 import {
-  useHistoryStore,
   useAccountStore,
-  useUtilitiesStore,
+  useConfigStore,
   dialogStoreActions,
   queriesStoreActions,
 } from '>/services/stores';
@@ -34,7 +33,7 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { sidebarVisibility } = useUtilitiesStore(({ state }) => ({
+  const { sidebarVisibility } = useConfigStore(({ state }) => ({
     sidebarVisibility: state.sidebarVisibility,
   }));
 
@@ -116,19 +115,6 @@ export const Sidebar = () => {
         />
       ),
     },
-
-    // ...(queries.length > 0
-    //   ? [
-    //       {
-    //         id: 'queries',
-    //         getTitle: () => `Queries: ${queries.length}`,
-    //         component: <QueryList />,
-    //       },
-    //     ]
-    //   : []),
-
-    // { id: 'users', title: 'Users', component: <UsersList /> },
-    // { id: 'privileges', title: 'Privileges', component: <PrivilegesList /> },
   ];
 
   const visibleSideSections = sideSections.filter(
@@ -143,17 +129,6 @@ export const Sidebar = () => {
     }
   };
 
-  const gotoSection = (id: string) => {
-    setExpandedSection(id);
-    if (location.pathname !== id) {
-      navigate(id);
-    }
-  };
-  // useEffect(() => {
-  //   if (dbSelected && location.pathname === routes.front.dbView) {
-  //     setExpandedSection('tables');
-  //   }
-  // }, [dbSelected]);
   return (
     <>
       {visibleSideSections.map((section) => {

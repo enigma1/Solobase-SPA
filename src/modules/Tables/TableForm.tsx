@@ -5,13 +5,7 @@ import { queryKeys, useDatabaseServerInfo } from '>/services/queryHooks';
 import { useModal } from '>/services/hooks';
 import { ScreenLoader, DialogContent } from '>/modules';
 import { emptyTableColumn, emptyTableColumnKey } from '>/services/utils';
-import {
-  ButtonStatus,
-  WizardHandlers,
-  TableShapeColumn,
-  TableShapeKey,
-  EmptyObject,
-} from '>/types';
+import { ButtonStatus, WizardHandlers } from '>/types';
 import {
   TableBasicsForm,
   TableColumnsForm,
@@ -25,7 +19,7 @@ type TableFormStep = 'basics' | 'columns' | 'keys' | 'review';
 const stepOrder: TableFormStep[] = ['basics', 'columns', 'keys', 'review'];
 
 type TableFormProps = {
-  initialValues?: TableFormShape | EmptyObject;
+  initialValues?: TableFormShape;
   onSubmit: (data: TableFormShape) => void;
   wizardHandlers: WizardHandlers;
   database: string;
@@ -34,12 +28,11 @@ type TableFormProps = {
 
 export const TableForm = ({
   database,
-  initialValues = {},
+  initialValues = { keys: [], cols: [], table: '' },
   onSubmit,
   wizardHandlers,
   mode = 'create',
 }: TableFormProps) => {
-  const originalValuesRef = useRef<TableFormShape | EmptyObject>(initialValues);
   const [step, setStep] = useState<TableFormStep>('basics');
   const nextStep = (current: TableFormStep): TableFormStep => {
     const idx = stepOrder.indexOf(current);
@@ -50,23 +43,6 @@ export const TableForm = ({
     return stepOrder[Math.max(idx - 1, 0)];
   };
 
-  const colsWithUids = useMemo(
-    () =>
-      (initialValues.cols ?? []).map((col) => ({
-        ...col,
-        uid: crypto.randomUUID(),
-      })),
-    [initialValues.cols],
-  );
-
-  const keysWithUids = useMemo(
-    () =>
-      (initialValues.keys ?? []).map((key) => ({
-        ...key,
-        uid: crypto.randomUUID(),
-      })),
-    [initialValues.keys],
-  );
   const queryClient = useQueryClient();
   const { collationsByCharset, engines, defaults, isFetching, isSuccess } =
     useDatabaseServerInfo(({ state, query }) => ({
@@ -78,21 +54,34 @@ export const TableForm = ({
       isError: query.isError,
     }));
 
-  const form = useForm<TableFormShape>({
-    defaultValues: {
+  const defaultValues = useMemo<TableFormShape>(
+    () => ({
       ...initialValues,
       table: initialValues.table ?? '',
       charset: initialValues.charset ?? defaults.charset,
       engine: initialValues.engine ?? defaults.engine,
       collation: initialValues.collation ?? defaults.collation,
-      cols: colsWithUids.length ? colsWithUids : [emptyTableColumn()],
-      keys: keysWithUids.length ? keysWithUids : [emptyTableColumnKey()],
-    },
+      cols: initialValues.cols?.map((col) => ({
+        ...col,
+        uid: crypto.randomUUID(),
+      })) ?? [emptyTableColumn()],
+      keys: initialValues.keys?.map((key) => ({
+        ...key,
+        uid: crypto.randomUUID(),
+      })) ?? [emptyTableColumnKey()],
+    }),
+    [initialValues, defaults],
+  );
+
+  const form = useForm<TableFormShape>({
+    defaultValues,
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
 
   const { handleSubmit } = form;
+
+  const originalValues = useRef<TableFormShape>(structuredClone(defaultValues));
 
   const goPrevStep = () => {
     const prev = prevStep(step);
@@ -164,6 +153,7 @@ export const TableForm = ({
             collation: defaults.collation,
             engine: defaults.engine,
           }}
+          originalValues={originalValues.current}
         />
       )}
       {step === 'columns' && (
@@ -176,16 +166,22 @@ export const TableForm = ({
           }}
           onValidation={onValidation}
           form={form}
+          originalValues={originalValues.current}
         />
       )}
       {step === 'keys' && (
-        <TableKeysForm onValidation={onValidation} form={form} />
+        <TableKeysForm
+          onValidation={onValidation}
+          form={form}
+          originalValues={originalValues.current}
+        />
       )}
       {step === 'review' && (
         <TableReview
           database={database}
           onValidation={onValidation}
           form={form}
+          originalValues={originalValues.current}
         />
       )}
     </form>

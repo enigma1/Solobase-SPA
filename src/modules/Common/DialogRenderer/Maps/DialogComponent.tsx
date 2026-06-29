@@ -1,11 +1,17 @@
-import { ReactNode, useState, useMemo, useCallback } from 'react';
+import {
+  ReactNode,
+  SyntheticEvent,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
 import { ModalDialog } from '>/modules';
 import { DialogPayload, ButtonStatus } from '>/types';
 import { ModalContext } from '>/services/hooks';
 
 type DialogComponentProps = {
   payload: DialogPayload;
-  onClose: () => void;
+  onClose: (e?: SyntheticEvent<HTMLDialogElement>) => void;
 };
 
 export const DialogComponent = ({ payload, onClose }: DialogComponentProps) => {
@@ -80,7 +86,7 @@ export const DialogComponent = ({ payload, onClose }: DialogComponentProps) => {
       }}
     >
       <ModalDialog
-        onClose={onClose}
+        onClose={payload.onCancel ?? onClose}
         caption={payload.caption}
         content={payload.component}
         controls={buttons}

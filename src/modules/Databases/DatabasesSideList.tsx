@@ -77,7 +77,7 @@ export const DatabasesSideList = () => {
   useEffect(() => {
     if (!dbSelected && dbList.length > 0) {
       initialize();
-      return;
+      // return;
     }
 
     queryClient.invalidateQueries({
@@ -99,11 +99,11 @@ export const DatabasesSideList = () => {
   const handleDbChange = async (dbName: string) => {
     mutate({ name: dbName });
   };
-  const isBusy = isFetching;
+  const isBusy = isFetching || isPending;
+  if (isBusy) return <ScreenLoader />;
 
   return (
     <>
-      {isBusy && <ScreenLoader />}
       <div className='side-list'>
         {dbList.length > 0 ? (
           dbList.map((db, idx) => {

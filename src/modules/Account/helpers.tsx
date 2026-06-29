@@ -36,7 +36,7 @@ export const handleLogout = () => {
               content: { text: `Error: ${rsp.message} `, duration: 5000 },
             });
           }
-          accountStoreActions.initialize();
+          accountStoreActions.initialize({ online: true });
         },
       }),
     },

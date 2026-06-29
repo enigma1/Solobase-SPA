@@ -11,16 +11,48 @@ import {
   Preferences,
   UserNew,
   SelfCaps,
+  ImportDataArea,
 } from '>/modules';
 import { DialogPayload, WizardHandlers, CommonDialogHandlers } from '>/types';
 
 export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
+  importData: () => {
+    const handlers: CommonDialogHandlers = {
+      confirm: async (): Promise<void> => {},
+      close: () => {},
+    };
+    const labels = [undefined, 'Import'];
+    const payload: DialogPayload = {
+      initialSize: 'xl',
+      caption: 'SQL Queries',
+      component: <ImportDataArea formHandlers={handlers} />,
+      variant: 'info',
+      onCancel: handlers.close,
+      actions: dialogActions
+        .enabledConfirmCancel({
+          onConfirm: async () => {
+            await handlers.confirm();
+            dialogStoreActions.closeDialog();
+          },
+          onCancel: () => {
+            handlers?.close?.();
+            dialogStoreActions.closeDialog();
+          },
+        })
+        .map((control, idx) => ({
+          ...control,
+          label: labels[idx] ?? control.label,
+        })),
+    };
+    return payload;
+  },
+
   makeQuery: () => {
     const handlers: CommonDialogHandlers = {
       confirm: () => {},
     };
     const payload: DialogPayload = {
-      initialSize: 'md',
+      initialSize: 'lg',
       caption: 'SQL Queries',
       component: <QueryRequestArea formHandlers={handlers} />,
       variant: 'info',

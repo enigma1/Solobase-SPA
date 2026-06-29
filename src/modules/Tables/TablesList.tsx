@@ -2,7 +2,7 @@ import { useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys, useDeleteTablesMutation } from '>/services/queryHooks';
 import {
-  useUtilitiesStore,
+  useConfigStore,
   useTablesStore,
   useDialogStore,
   messageStoreActions,
@@ -58,7 +58,7 @@ export const TablesList = ({
     [rows],
   );
 
-  const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
+  const { hiddenColumns } = useConfigStore(({ state }) => ({
     hiddenColumns: state.hiddenColumns,
   }));
 
@@ -79,7 +79,7 @@ export const TablesList = ({
     onSuccess: (data: any) => {
       if (data.ok) {
         queryClient.invalidateQueries({
-          queryKey: queryKeys.databases(),
+          queryKey: queryKeys.tables(dbSelected),
           exact: true,
         });
 

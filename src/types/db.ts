@@ -1,5 +1,4 @@
 import { JSONObject } from 'type-plus';
-export type EmptyObject = Record<string, never>;
 export type Scalar = Date | bigint | boolean | null | number | string;
 export type ScalarObject = Record<string, Scalar>;
 

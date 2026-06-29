@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { CogIcon, LogOutIcon, DatabaseSearchIcon } from 'lucide-react';
-import { useAccountStore, dialogStoreActions } from '>/services/stores';
+import { useConfigStore, dialogStoreActions } from '>/services/stores';
 import {
   ComboBox,
   Auth,
@@ -15,7 +15,7 @@ import { routes, themes } from '>/config';
 
 export const AuthNavigationLinks = () => {
   // const buttonRef = useRef<HTMLButtonElement>(null);
-  const { theme, setTheme } = useAccountStore(({ state, api }) => ({
+  const { theme, setTheme } = useConfigStore(({ state, api }) => ({
     theme: state.theme,
     setTheme: api.setTheme,
   }));

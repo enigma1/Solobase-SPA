@@ -7,7 +7,7 @@ import {
   useMemo,
 } from 'react';
 
-import { utilitiesStoreActions } from '>/services/stores';
+import { configStoreActions } from '>/services/stores';
 
 const MIN_WIDTH = 80;
 
@@ -38,7 +38,7 @@ export const startSidebarResize = ({ e, sidebarRef }: StartSidebarResize) => {
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
 
-    utilitiesStoreActions.savePreferences({
+    configStoreActions.savePreferences({
       sidebarWidth: sidebarRef.current!.offsetWidth,
     });
   };

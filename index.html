@@ -3,7 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DbManagerJS</title>
+    <script>
+      window.APP_CONFIG = {
+        userPrefs: {
+          backend: 'https://127.0.0.1:5650',
+          theme: 'clean-slate',
+          hiddenColumns: {},
+          sidebarWidth: 256,
+          sidebarVisibility: {
+            sideDatabases: true,
+            sideTables: true,
+            sideQueries: true,
+          },
+          headerVisibility: {
+            topTheme: true,
+            runQuery: true,
+          },
+        },
+        appSettings: {
+          maxSqlString: 1024 * 1024,
+          pageSize: 100,
+          queryTimeout: 5000,
+        },
+        buildInfo: {
+          version: '0.0.25',
+          buildDate: '2026-06-30',
+        },
+      };
+    </script>
+    <title>Solobase-SPA</title>
   </head>
   <body>
     <div id="root"></div>
@@ -11,6 +39,6 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-<script>
+<!-- <script>
   global = window;
-</script>
+</script> -->

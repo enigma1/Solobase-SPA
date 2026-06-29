@@ -20,7 +20,7 @@ const authError = async () => {
   //     duration: 3000,
   //   },
   // });
-  accountStoreActions.initialize(); // triggers redirect
+  // accountStoreActions.initialize(); // triggers redirect
   throw new Error('Unauthorized');
 };
 

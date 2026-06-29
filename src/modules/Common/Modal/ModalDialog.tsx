@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 import { ModalBox } from './ModalBox';
 
 export type ModalDialogProps = {
-  onClose: () => void;
+  onClose: (e?: SyntheticEvent<HTMLDialogElement>) => void;
   caption?: ReactNode;
   content: ReactNode;
   controls?: ReactNode;

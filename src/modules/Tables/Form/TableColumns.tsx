@@ -1,18 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { UseFormReturn, useWatch, useFieldArray } from 'react-hook-form';
 import {
-  FormProvider,
-  UseFormReturn,
-  useWatch,
-  useFieldArray,
-} from 'react-hook-form';
-import { SquareActivityIcon, ListPlusIcon } from 'lucide-react';
-import {
-  tableColumnTypes,
-  emptyTableColumn,
-  isColumnParameterValid,
-  isDuplicatedValue,
-  MAX_TABLE_COLUMNS,
-} from '>/services/utils';
+  SquareActivityIcon,
+  ListPlusIcon,
+  ArchiveRestoreIcon,
+} from 'lucide-react';
+import { emptyTableColumn, MAX_TABLE_COLUMNS } from '>/services/utils';
 import { SqlColumns } from '>/types';
 import { TableColumnEntry } from './TableColumnEntry';
 import { TableFormShape } from './tableDefs';
@@ -24,18 +17,20 @@ type TableColumnsFormProps = {
   defaults: {
     column: ColumnBasics;
   };
+  originalValues: Readonly<TableFormShape>;
 };
 
 export const TableColumnsForm = ({
   form,
   onValidation,
   defaults,
+  originalValues,
 }: TableColumnsFormProps) => {
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
   const columnsSnapshotRef = useRef<string>('');
-  const { clearErrors, setValue, control } = form;
+  const { clearErrors, getValues, setValue, setValues, reset, control } = form;
   const columns = useWatch({ control, name: 'cols' });
-  const { fields, insert, append, remove } = useFieldArray({
+  const { fields, insert, remove } = useFieldArray({
     control,
     name: 'cols',
   });
@@ -94,6 +89,14 @@ export const TableColumnsForm = ({
     insert(insertIndex, item);
   };
 
+  const onSetOriginals = () => {
+    reset({
+      ...getValues(),
+      cols: structuredClone(originalValues.cols),
+    });
+    clearErrors();
+  };
+
   return (
     <div className='area-container'>
       <div className='area-spacer'>
@@ -117,23 +120,30 @@ export const TableColumnsForm = ({
           >
             <SquareActivityIcon size={24} />
           </button>
+          <button
+            type='button'
+            className='btn-secondary'
+            onClick={onSetOriginals}
+            title='Set Original values'
+          >
+            <ArchiveRestoreIcon size={24} />
+          </button>
         </div>
       </div>
       <div className='area-content'>
-        <FormProvider {...form}>
-          {fields.map((field, index) => {
-            return (
-              <TableColumnEntry
-                key={field.uid}
-                uid={field.uid}
-                index={index}
-                active={activeColumnId === field.uid}
-                onSelect={() => setActiveColumnId(field.uid)}
-                onRemove={() => remove(index)}
-              />
-            );
-          })}
-        </FormProvider>
+        {fields.map((field, idx) => {
+          return (
+            <TableColumnEntry
+              form={form}
+              key={`${field.uid}-${idx}`}
+              uid={field.uid}
+              index={idx}
+              active={activeColumnId === field.uid}
+              onSelect={() => setActiveColumnId(field.uid)}
+              onRemove={() => remove(idx)}
+            />
+          );
+        })}
       </div>
     </div>
   );

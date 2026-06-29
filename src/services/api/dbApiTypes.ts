@@ -268,3 +268,10 @@ export type GetTableColumnsInfoRequest = TableBasics;
 export type GetTableColumnsInfoResponse = BasicResponse &
   TableBasics &
   BasicRowsShape;
+
+export type ImportDataRequest = {
+  database?: string;
+  data: string;
+};
+
+export type ImportDataResponse = BasicResponse;

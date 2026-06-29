@@ -9,7 +9,7 @@ type EmptyPageProps = {
 
 export const EmptyPage = ({ note, children, onCreate }: EmptyPageProps) => {
   return (
-    <div className='page-container'>
+    <div className='page-top-container'>
       <div className='page-toolbar'>
         <div className='page-title'>{note || 'No data available.'}</div>
         <div className='page-actions'>

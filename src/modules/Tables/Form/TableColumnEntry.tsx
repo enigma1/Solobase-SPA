@@ -1,12 +1,22 @@
-import { useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   useFormContext,
   useWatch,
   useFieldArray,
   Controller,
+  UseFormReturn,
 } from 'react-hook-form';
-import { Trash2Icon } from 'lucide-react';
-import { FormTextField, FormCheckboxField, ComboBox } from '>/modules';
+import {
+  Trash2Icon,
+  PanelBottomCloseIcon,
+  PanelBottomOpenIcon,
+} from 'lucide-react';
+import {
+  FormTextField,
+  FormCheckboxField,
+  ComboBox,
+  FormComboField,
+} from '>/modules';
 import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
 import {
   tableColumnTypes,
@@ -16,8 +26,10 @@ import {
   normalizeColumnParameter,
 } from '>/services/utils';
 import { TableShape } from '>/types';
+import { TableFormShape } from './tableDefs';
 
 type TableColumnEntryProps = {
+  form: UseFormReturn<TableFormShape>;
   uid: string;
   index: number;
   active: boolean;
@@ -25,14 +37,15 @@ type TableColumnEntryProps = {
   onRemove: (uid: string) => void;
 };
 export const TableColumnEntry = ({
+  form,
   active,
   onSelect,
   onRemove,
   uid,
   index,
 }: TableColumnEntryProps) => {
-  const { control, setValue, setValues, getValues, watch } =
-    useFormContext<TableShape>();
+  const [showBottomFields, setShowBottomFields] = useState(false);
+  const { control, setValue, setValues, getValues, watch } = form;
 
   const cols =
     useWatch({
@@ -48,11 +61,6 @@ export const TableColumnEntry = ({
     control,
     name: `cols.${currentIndex}.type`,
   });
-
-  // const autoIncrement = useWatch({
-  //   control,
-  //   name: `cols.${currentIndex}.autoIncrement`,
-  // });
 
   const { typeMeta, groupMeta } = useMemo(() => {
     const group = tableColumnTypes.find((g) =>
@@ -152,6 +160,7 @@ export const TableColumnEntry = ({
             e.stopPropagation();
             onRemove(uid);
           }}
+          className='btn-micro'
         >
           <Trash2Icon size={18} />
         </button>
@@ -187,8 +196,11 @@ export const TableColumnEntry = ({
           },
         }}
       />
-      <Controller
+
+      <FormComboField
+        id={`table-type-${index}`}
         name={`cols.${currentIndex}.type`}
+        label='Type:'
         control={control}
         rules={{
           required: 'Column type is required',
@@ -197,39 +209,26 @@ export const TableColumnEntry = ({
             return exists || 'A valid column type must be selected';
           },
         }}
-        render={({ field, fieldState }) => {
-          return (
-            <FormFieldWrapper
-              label='Type:'
-              htmlFor={`table-type-${index}`}
-              $status={fieldState.error ? 'error' : undefined}
-              $notice={fieldState.error?.message}
-            >
-              <ComboBox
-                id={`table-type-${index}`}
-                value={field.value}
-                onChange={(v) => {
-                  const params =
-                    typeMeta?.params?.reduce(
-                      (acc, p) => ({
-                        ...acc,
-                        [p]: '',
-                      }),
-                      {},
-                    ) ?? {};
+        onValueChange={(v) => {
+          const params =
+            typeMeta?.params?.reduce(
+              (acc, p) => ({
+                ...acc,
+                [p]: '',
+              }),
+              {},
+            ) ?? {};
 
-                  resetOnTypeChange({
-                    index: currentIndex,
-                    type: v as string,
-                    params,
-                  });
-                }}
-                $groups={tableColumnTypes}
-              />
-            </FormFieldWrapper>
-          );
+          resetOnTypeChange({
+            index: currentIndex,
+            type: v as string,
+            params,
+          });
         }}
+        $groups={tableColumnTypes}
+        $placeholder='Select Column Type'
       />
+
       {typeMeta?.params?.map((p) => {
         const param = normalizeColumnParameter(p);
         return (
@@ -248,61 +247,80 @@ export const TableColumnEntry = ({
         );
       })}
 
-      <div className='flex flex-wrap gap-x-4 gap-y-2 my-2 mt-4'>
-        {groupMeta?.hasUnsigned && (
-          <FormCheckboxField
-            name={`cols.${index}.unsigned`}
-            control={control}
-            label='Unsigned'
-          />
-        )}
+      <div className='flex flex-wrap gap-x-4 gap-y-2 my-2 mt-4 justify-between items-center'>
+        <div className='flex flex-wrap gap-x-4 gap-y-2'>
+          {groupMeta?.hasUnsigned && (
+            <FormCheckboxField
+              name={`cols.${index}.unsigned`}
+              control={control}
+              label='Unsigned'
+            />
+          )}
 
-        {groupMeta?.hasAutoIncrement && (
+          {groupMeta?.hasAutoIncrement && (
+            <FormCheckboxField
+              name={`cols.${index}.autoIncrement`}
+              control={control}
+              onValueChange={(checked) => {
+                if (checked) {
+                  enableAutoIncrement(index);
+                } else {
+                  setValue(`cols.${index}.autoIncrement`, false);
+                }
+              }}
+              label='Auto Increment'
+            />
+          )}
+
           <FormCheckboxField
-            name={`cols.${index}.autoIncrement`}
+            name={`cols.${index}.nullable`}
             control={control}
             onValueChange={(checked) => {
+              setValue(`cols.${index}.nullable`, checked);
               if (checked) {
-                enableAutoIncrement(index);
-              } else {
                 setValue(`cols.${index}.autoIncrement`, false);
               }
             }}
-            label='Auto Increment'
+            label='Allow NULL'
           />
-        )}
-
-        <FormCheckboxField
-          name={`cols.${index}.nullable`}
-          control={control}
-          onValueChange={(checked) => {
-            setValue(`cols.${index}.nullable`, checked);
-            if (checked) {
-              setValue(`cols.${index}.autoIncrement`, false);
-            }
+        </div>
+        <button
+          type='button'
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowBottomFields((v) => !v);
           }}
-          label='Allow NULL'
-        />
+          className='btn-micro ml-auto'
+        >
+          {showBottomFields ? (
+            <PanelBottomCloseIcon size={18} />
+          ) : (
+            <PanelBottomOpenIcon size={18} />
+          )}
+        </button>
       </div>
-      <FormTextField
-        id={`cols-${index}-default`}
-        name={`cols.${index}.defaultValue`}
-        control={control}
-        onValueChange={(value) => {
-          setValue(`cols.${index}.defaultValue`, value);
-          if (value.length > 0) {
-            setValue(`cols.${index}.autoIncrement`, false);
-          }
-        }}
-        label='Default Value:'
-      />
-
-      <FormTextField
-        id={`cols-${index}-comment`}
-        name={`cols.${index}.comment`}
-        control={control}
-        label='Comment:'
-      />
+      {showBottomFields && (
+        <>
+          <FormTextField
+            id={`cols-${index}-default`}
+            name={`cols.${index}.defaultValue`}
+            control={control}
+            onValueChange={(value) => {
+              setValue(`cols.${index}.defaultValue`, value);
+              if (value.length > 0) {
+                setValue(`cols.${index}.autoIncrement`, false);
+              }
+            }}
+            label='Default Value:'
+          />
+          <FormTextField
+            id={`cols-${index}-comment`}
+            name={`cols.${index}.comment`}
+            control={control}
+            label='Comment:'
+          />
+        </>
+      )}
     </div>
   );
 };

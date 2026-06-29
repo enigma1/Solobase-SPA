@@ -6,13 +6,17 @@ import { accountStoreActions, messageStoreActions } from '>/services/stores';
 export const AliveMonitor = () => {
   useEffect(() => {
     let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
     let failures = 0;
 
     const check = async () => {
+      let nextDelay = 5000;
+
       try {
         const rsp = await dbApi.checkSession();
         const isAuthenticated = accountStoreActions.getAuthenticated();
-        if (rsp.ok === false && isAuthenticated) {
+
+        if (!rsp.ok && isAuthenticated) {
           accountStoreActions.setAuthenticated(false);
           messageStoreActions.addMessage({
             content: {
@@ -21,6 +25,7 @@ export const AliveMonitor = () => {
             },
           });
         }
+
         if (cancelled) return;
 
         failures = 0;
@@ -29,25 +34,28 @@ export const AliveMonitor = () => {
           accountStoreActions.setAppStatus(true);
           onlineManager.setOnline(true);
         }
+        nextDelay = 20000;
       } catch {
         failures++;
 
         if (failures >= 3) {
           accountStoreActions.setAppStatus(false);
           onlineManager.setOnline(false);
+          nextDelay = 5000;
         }
+      }
+
+      if (!cancelled) {
+        timeoutId = setTimeout(check, nextDelay);
       }
     };
 
     check();
 
-    const id = setInterval(check, 30000);
-
     return () => {
       cancelled = true;
-      clearInterval(id);
+      clearTimeout(timeoutId);
     };
   }, []);
-
   return null;
 };

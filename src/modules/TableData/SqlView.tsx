@@ -8,7 +8,7 @@ import {
   ViewRow,
 } from '>/types';
 import {
-  useUtilitiesStore,
+  useConfigStore,
   useTablesDataStore,
   useMessageStore,
   createFactoryTableStore,
@@ -64,7 +64,7 @@ export const SqlView = ({
     [rows],
   );
 
-  const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
+  const { hiddenColumns } = useConfigStore(({ state }) => ({
     hiddenColumns: state.hiddenColumns,
   }));
 

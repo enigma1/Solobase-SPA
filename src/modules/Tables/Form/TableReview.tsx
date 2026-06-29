@@ -7,12 +7,14 @@ type TableColumnsFormProps = {
   database: string;
   form: UseFormReturn<TableFormShape>;
   onValidation: (valid: boolean) => void;
+  originalValues: Readonly<TableFormShape>;
 };
 
 export const TableReview = ({
   database,
   form,
   onValidation,
+  originalValues,
 }: TableColumnsFormProps) => {
   const { getValues } = form;
 
@@ -29,62 +31,57 @@ export const TableReview = ({
         </h1>
       </div>
       <div className='area-content'>
-        <div className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-2'>
-          <div className='font-semibold'>Database</div>
+        <div className='grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 items-center'>
+          <div className='stand'>Database</div>
           <div>{database}</div>
 
-          <div className='font-semibold'>Table</div>
+          <div className='stand'>Table</div>
           <div>{values.table}</div>
 
-          <div className='font-semibold'>Charset</div>
+          <div className='stand'>Charset</div>
           <div>{values.charset}</div>
 
-          <div className='font-semibold'>Collation</div>
+          <div className='stand'>Collation</div>
           <div>{values.collation}</div>
 
-          <div className='font-semibold'>Engine</div>
+          <div className='stand'>Engine</div>
           <div>{values.engine}</div>
         </div>
-        <h2>Columns</h2>
+        <h3>Columns: {`${values.cols.length}`}</h3>
         <div>
-          {values?.cols?.map((col, index) => {
+          {values.cols.map((col, index) => {
             const bg = index % 2 ? 'odd' : 'even';
             return (
               <div key={`${col.field}-${index}`} className={`area-item ${bg}`}>
-                <div
-                  key={`${col.field}-${index}`}
-                  className={`area-item ${bg}`}
-                >
-                  <div>
-                    <strong>{col.field}</strong> ({col.type})
-                  </div>
-                  {col.autoIncrement && <div>Auto Increment</div>}
-                  {col.unsigned && <div>Unsigned</div>}
-                  <div>Nullable: {col.nullable ? 'YES' : 'NO'}</div>
-                  {col.defaultValue && <div>Default: {col.defaultValue}</div>}
-                  {col.comment && <div>Comment: {col.comment}</div>}
-
-                  {col.params && Object.keys(col.params).length > 0 && (
-                    <div>
-                      {Object.entries(col.params).map(([k, v]) => (
-                        <div key={k}>
-                          {extractNameFromRequired(k)}: {v}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div>
+                  <strong>{col.field}</strong> ({col.type})
                 </div>
+                {col.autoIncrement && <div>Auto Increment</div>}
+                {col.unsigned && <div>Unsigned</div>}
+                <div>Nullable: {col.nullable ? 'YES' : 'NO'}</div>
+                {col.defaultValue && <div>Default: {col.defaultValue}</div>}
+                {col.comment && <div>Comment: {col.comment}</div>}
+
+                {col.params && Object.keys(col.params).length > 0 && (
+                  <div>
+                    {Object.entries(col.params).map(([k, v]) => (
+                      <div key={k}>
+                        {extractNameFromRequired(k)}: {v}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
         <h2>Keys to use</h2>
         <div>
-          {values?.keys?.map((key, index) => {
+          {values.keys.map((key, index) => {
             const bg = index % 2 ? 'odd' : 'even';
             return (
               <div key={`${key.type}-${index}`} className={`area-item ${bg}`}>
-                {key.type}: {key.columns?.join(',')}
+                {key.type}: {key.columns.join(',')}
               </div>
             );
           })}

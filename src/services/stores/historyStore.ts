@@ -1,53 +1,30 @@
 import { makeStore } from '>/services/utils/emitter';
-import { trimString } from '>/services/utils';
-
-type QueryEntry = {
-  id: string;
-  original: string;
-  modified: string | null;
-  database: string;
-};
+import { normalizeSql, truncateString, MAX_SQL_STRING } from '>/services/utils';
 
 export type HistoryState = {
-  queriesObj: Record<string, QueryEntry>;
-  queryIds: string[];
-  selectedQuery: string | null;
-  searches: string[];
+  lastImport: string;
 };
 
 const initialState: HistoryState = {
-  queriesObj: {},
-  queryIds: [],
-  searches: [],
-  selectedQuery: null,
+  lastImport: '',
+};
+
+export type HistoryActions = {
+  initialize: () => void;
+  setLastImport: (sql: string) => void;
 };
 
 const baseStore = makeStore<HistoryState>(() => initialState);
 const { get, setAuto } = baseStore;
-export type HistoryActions = {
-  updateOriginal: ({ id, original }: { id: string; original: string }) => void;
-  updateModified: ({ id, modified }: { id: string; modified: string }) => void;
-};
 
-const actions: HistoryActions = {
-  updateOriginal: ({ id, original }) => {
-    setAuto((state) => ({
-      queriesObj: {
-        ...state.queriesObj,
-        [id]: { ...state.queriesObj[id], original, modified: null },
-      },
-    }));
+export const historyStoreActions: HistoryActions = {
+  initialize: () => {
+    setAuto({ ...initialState });
   },
-  updateModified: ({ id, modified }) => {
-    setAuto((state) => ({
-      queriesObj: {
-        ...state.queriesObj,
-        [id]: {
-          ...state.queriesObj[id],
-          modified,
-        },
-      },
-    }));
+  setLastImport: (rawSql) => {
+    const normalizedSql = normalizeSql(rawSql);
+    const sql = truncateString(normalizedSql, MAX_SQL_STRING);
+    setAuto({ lastImport: sql });
   },
 };
 
@@ -55,10 +32,10 @@ type SelectorArgsType = {
   state: HistoryState;
   api: HistoryActions;
 };
-export const useHistoryStore = <T = HistoryState>(
-  selector?: (args: SelectorArgsType) => T,
-): T => {
+export const useHistoryStore = <TSelected = HistoryState>(
+  selector?: (args: SelectorArgsType) => TSelected,
+): TSelected => {
   const state = baseStore();
-  const api = actions;
-  return selector ? selector({ state, api }) : ({ state, api } as T);
+  const api = historyStoreActions;
+  return selector ? selector({ state, api }) : ({ state, api } as TSelected);
 };

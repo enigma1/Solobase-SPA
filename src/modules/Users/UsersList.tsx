@@ -6,7 +6,7 @@ import {
   useUsers,
 } from '>/services/queryHooks';
 import {
-  useUtilitiesStore,
+  useConfigStore,
   messageStoreActions,
   createFactoryTableStore,
   dialogStoreActions,
@@ -76,7 +76,7 @@ export const UsersList = () => {
     [rows],
   );
 
-  const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
+  const { hiddenColumns } = useConfigStore(({ state }) => ({
     hiddenColumns: state.hiddenColumns,
   }));
 

@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { useAccountStore } from '>/services/stores';
+import { useConfigStore } from '>/services/stores';
 import { ComboBox, ComboField } from '>/modules';
 import { themes } from '>/config';
 
 export const ThemeSelect = () => {
-  const { theme, setTheme } = useAccountStore(({ state, api }) => ({
+  const { theme, setTheme } = useConfigStore(({ state, api }) => ({
     theme: state.theme,
     setTheme: api.setTheme,
   }));

@@ -8,5 +8,6 @@ export * from './Wrappers';
 export * from './Containers';
 export * from './Overlay';
 export * from './Icons';
+export * from './Text';
 export * from './Offline';
 export * from './Controls';

@@ -56,7 +56,7 @@ export const PageTableShell = ({
   const [isPacked, setIsPacked] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
   return (
-    <div className='page-container'>
+    <div className='page-top-container'>
       <div className='page-toolbar'>
         <div className='page-title'>{title}</div>
         <div className='page-actions'>

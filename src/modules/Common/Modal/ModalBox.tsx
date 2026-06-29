@@ -1,11 +1,4 @@
-import {
-  Children,
-  isValidElement,
-  ReactNode,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
+import { Children, isValidElement, ReactNode, useEffect, useRef } from 'react';
 import { XIcon } from 'lucide-react';
 import { useModal, ModalContext } from '>/services/hooks';
 import { dialogSizes } from '>/services/utils';
@@ -18,7 +11,6 @@ type ModalCompoundComponent = React.FC<ModalBoxProps> & {
 };
 
 type ModalBoxProps = {
-  // isOpen: boolean;
   loading?: boolean;
   loadingBody?: ReactNode;
   onClose: () => void;

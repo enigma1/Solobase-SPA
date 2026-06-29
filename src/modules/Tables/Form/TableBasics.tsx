@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
-import { useWatch, UseFormReturn, Controller } from 'react-hook-form';
-import { SquareActivityIcon } from 'lucide-react';
-import { FormTextField, ComboBox, FormComboField } from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+import { useWatch, UseFormReturn } from 'react-hook-form';
+import { SquareActivityIcon, ArchiveRestoreIcon } from 'lucide-react';
+import { FormTextField, FormComboField } from '>/modules';
 import { StorageEngineMeta } from '>/services/api';
 import { TableFormShape } from './tableDefs';
 
@@ -18,6 +17,7 @@ type TableBasicsFormProps = {
     engine: string;
   };
   onValidation: (valid: boolean) => void;
+  originalValues: Readonly<TableFormShape>;
 };
 
 export const TableBasicsForm = ({
@@ -28,6 +28,7 @@ export const TableBasicsForm = ({
   engines,
   defaults,
   onValidation,
+  originalValues,
 }: TableBasicsFormProps) => {
   const {
     control,
@@ -67,6 +68,16 @@ export const TableBasicsForm = ({
     clearErrors();
   };
 
+  const onSetOriginals = () => {
+    setValues({
+      table: originalValues.table,
+      charset: originalValues.charset,
+      collation: originalValues.collation,
+      engine: originalValues.engine,
+    });
+    clearErrors();
+  };
+
   return (
     <>
       <div className='area-container'>
@@ -84,6 +95,14 @@ export const TableBasicsForm = ({
               title='Set Server Defaults'
             >
               <SquareActivityIcon size={24} />
+            </button>
+            <button
+              type='button'
+              className='btn-secondary'
+              onClick={onSetOriginals}
+              title='Set Original values'
+            >
+              <ArchiveRestoreIcon size={24} />
             </button>
           </div>
         </div>
@@ -111,7 +130,7 @@ export const TableBasicsForm = ({
           <FormComboField
             id='table-charset'
             name='charset'
-            label='Charset'
+            label='Charset:'
             control={control}
             $options={dbCharsets.map((c) => ({
               value: c,
@@ -122,7 +141,7 @@ export const TableBasicsForm = ({
           <FormComboField
             id='table-collation'
             name='collation'
-            label='Collation'
+            label='Collation:'
             control={control}
             rules={{
               validate: (value) =>
@@ -139,7 +158,7 @@ export const TableBasicsForm = ({
           <FormComboField
             id='table-engine'
             name='engine'
-            label='Engine'
+            label='Engine:'
             control={control}
             $options={engines.map((e) => ({
               value: e.name,

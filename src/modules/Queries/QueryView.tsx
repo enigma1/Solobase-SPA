@@ -1,13 +1,13 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { CaptionsIcon, SquareArrowRightEnterIcon } from 'lucide-react';
-
-import { dbApi } from '>/services/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { SquareArrowRightEnterIcon } from 'lucide-react';
 import { useRawQueryMutation } from '>/services/queryHooks';
 import {
   createFactoryTableStore,
   dialogStoreActions,
   useQueriesStore,
   messageStoreActions,
+  accountStoreActions,
 } from '>/services/stores';
 import {
   ScreenLoader,
@@ -16,7 +16,6 @@ import {
   PageTableShell,
   FilterColumns,
   EmptyListing,
-  TitleArea,
   dialogFactories,
 } from '>/modules';
 import type { ViewRow, SqlRow } from '>/types';
@@ -25,7 +24,7 @@ export const QueryView = () => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-
+  const queryClient = useQueryClient();
   const tableStore = useMemo(() => createFactoryTableStore(), []);
   const { getSelectedQuery, getQueries } = useQueriesStore(
     ({ state, api }) => ({
@@ -38,6 +37,7 @@ export const QueryView = () => {
 
   const queryCallbacks = {
     onSuccess: (data: any) => {
+      accountStoreActions.setActiveDatabase(null);
       if (!data.ok) {
         messageStoreActions.addMessage({
           type: 'warn',

@@ -54,12 +54,6 @@ export const TableDataView = () => {
     if (!dbSelected || !activeTable) {
       return;
     }
-
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.rows(dbSelected, activeTable),
-      exact: true,
-    });
-
     queryClient.invalidateQueries({
       queryKey: queryKeys.tables(dbSelected),
       exact: true,
@@ -69,11 +63,11 @@ export const TableDataView = () => {
   const isBusy = isFetching;
 
   if (!dbSelected) {
-    navigate(routes.front.dbView, { replace: true });
+    // navigate(routes.front.dbView, { replace: true });
     return null;
   }
   if (!activeTable) {
-    navigate(routes.front.listTables, { replace: true });
+    // navigate(routes.front.listTables, { replace: true });
     return null;
   }
 

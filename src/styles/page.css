@@ -1,6 +1,10 @@
 @layer components {
-  .page-container {
+  .page-top-container {
     @apply flex flex-col;
+  }
+
+  .page-container {
+    @apply flex flex-col flex-1 min-h-0 w-full h-full;
   }
 
   .page-toolbar {
@@ -9,13 +13,22 @@
     background: linear-gradient(54deg in oklch, var(--color-srf) 39%, var(--color-srf-dim) 100%);
   }
 
+  .page-spacer {
+    @apply flex flex-[0_0_auto] gap-2 px-3 py-2 border-b;
+    background: linear-gradient(54deg in oklch, var(--color-srf) 35%, var(--color-srf-dim) 100%);
+    border-color: var(--color-border)
+  }
+
   .page-section {
     @apply flex flex-col justify-center px-3 py-2;
-    background-color: var(--color-srf);
 
     &.liner {
       @apply flex flex-row justify-start gap-2 items-center border-t;
       border-color: var(--color-border);
+    }
+
+    & .central {
+      @apply text-lg my-1 mx-auto text-center;
     }
   }
 
@@ -29,7 +42,11 @@
   }
 
   .page-content {
-    @apply flex flex-col gap-4 p-4 text-sm;
+    @apply flex flex-col flex-1 min-h-0 overflow-auto;
+
+    & .pad {
+      @apply px-3 py-0.5
+    }
   }
 
 }

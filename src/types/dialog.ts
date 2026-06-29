@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
+
 export type DialogVariants = 'success' | 'error' | 'info' | 'warn';
 export type ButtonStatus = 'hidden' | 'disabled';
 
@@ -25,6 +26,7 @@ export type DialogPayload = {
   actions?: DialogAction[];
   variant?: DialogVariants;
   initialSize?: DialogSizes;
+  onCancel?: (e?: SyntheticEvent<HTMLDialogElement>) => void;
 };
 
 export type DialogState = {
@@ -44,7 +46,8 @@ export type ComponentFormHandlers = {
 };
 
 export type CommonDialogHandlers = {
-  confirm: () => void;
+  confirm: () => void | Promise<void>;
+  close?: () => void;
 };
 
 export type DialogMap<T extends { type: string; payload: unknown }> = {

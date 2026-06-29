@@ -12,9 +12,10 @@ import {
   useDatabaseServerInfo,
 } from '>/services/queryHooks';
 import {
-  useUtilitiesStore,
+  useConfigStore,
   useDatabasesStore,
   messageStoreActions,
+  accountStoreActions,
   createFactoryTableStore,
   dialogStoreActions,
 } from '>/services/stores';
@@ -69,7 +70,7 @@ export const DatabasesList = ({
     [rows],
   );
 
-  const { hiddenColumns } = useUtilitiesStore(({ state }) => ({
+  const { hiddenColumns } = useConfigStore(({ state }) => ({
     hiddenColumns: state.hiddenColumns,
   }));
 
@@ -81,13 +82,8 @@ export const DatabasesList = ({
   const deleteDatabasesCallbacks = {
     onSuccess: (data: any) => {
       tableStore.api.clearSelected();
-      console.log('useDeleteDatabases', data);
+      queryClient.invalidateQueries();
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.databases(),
-          exact: true,
-        });
-
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: 'Selected Databases removed', duration: 3000 },

@@ -3,7 +3,7 @@ import { Outlet, Link, Navigate, useLocation } from 'react-router-dom';
 import {
   useAccountStore,
   dialogStoreActions,
-  useUtilitiesStore,
+  useConfigStore,
 } from '>/services/stores';
 import { routes } from '>/config';
 import { startSidebarResize } from '>/services/hooks';
@@ -66,6 +66,17 @@ const AuthMenu = () => {
             </a>
           )}
           <Link to={routes.front.listDatabases}>Show Databases</Link>
+          <a
+            href='#'
+            onClick={() =>
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.importData(),
+              })
+            }
+          >
+            Import Data
+          </a>
+          <Link to={routes.front.textView}>Last SQL Processed</Link>
         </DropdownMenu>
         <div className='menu-separator'>|</div>
         <DropdownMenu label='Tables' disabled={!dbSelected}>
@@ -128,12 +139,10 @@ const AuthMenu = () => {
 const AuthSideContent = () => {
   const sidebarRef = useRef<HTMLDivElement | null>(null);
 
-  const { sidebarVisibility, sidebarWidth } = useUtilitiesStore(
-    ({ state }) => ({
-      sidebarVisibility: state.sidebarVisibility,
-      sidebarWidth: state.sidebarWidth,
-    }),
-  );
+  const { sidebarVisibility, sidebarWidth } = useConfigStore(({ state }) => ({
+    sidebarVisibility: state.sidebarVisibility,
+    sidebarWidth: state.sidebarWidth,
+  }));
 
   if (Object.values(sidebarVisibility).every((bar) => !bar)) {
     return null;
@@ -165,7 +174,7 @@ const AuthSideContent = () => {
 
 export const RootLayout = () => {
   const online = useAccountStore(({ state }) => state.online);
-  const headerVisibility = useUtilitiesStore(
+  const headerVisibility = useConfigStore(
     ({ state }) => state.headerVisibility,
   );
   const isHeaderShown = Object.values(headerVisibility).every(
@@ -187,6 +196,7 @@ export const RootLayout = () => {
   if (!online && location.pathname !== routes.front.networkDown) {
     return <Navigate to={routes.front.networkDown} replace />;
   }
+
   return (
     <>
       <div className='app'>

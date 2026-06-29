@@ -9,13 +9,6 @@ import {
   DataCell,
 } from '>/types';
 
-export const MIN_QUERY_CHARS = 4;
-export const MAX_TABLE_COLUMNS = 256;
-export const MAX_TABLE_KEYS = 64;
-export const MAX_COLUMNS_PER_KEY = 16;
-
-export const MAX_INSERT_DATA_ROWS = 16;
-
 export const tableColumnTypes = [
   {
     id: 'numeric',
@@ -252,3 +245,10 @@ export const getMergedSqlColumnData = (
   });
   return mergedData;
 };
+
+export const normalizeSql = (sql: string) =>
+  sql
+    .replace(/\r\n/g, '\n') // normalize line endings
+    .replace(/[ \t]+/g, ' ') // collapse spaces/tabs
+    .replace(/\n{3,}/g, '\n\n') // reduce excessive blank lines
+    .trim();

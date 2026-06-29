@@ -1,13 +1,23 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { messageStoreActions, accountStoreActions } from '>/services/stores';
+import {
+  messageStoreActions,
+  accountStoreActions,
+  configStoreActions,
+} from '>/services/stores';
 import { useLoginMutation } from '>/services/queryHooks';
 import { useModal } from '>/services/hooks';
-import { FormTextField, FormPasswordField, ScreenLoader } from '>/modules';
+import {
+  FormTextField,
+  FormPasswordField,
+  ComboField,
+  ScreenLoader,
+} from '>/modules';
 import type { LoginRequest, LoginResponse } from '>/services/api';
 import { CommonDialogHandlers } from '>/types';
 
+type LoginFormRequest = LoginRequest & { backend: string };
 type LoginProps = {
   formHandlers: CommonDialogHandlers;
 };
@@ -18,14 +28,16 @@ export const Login = ({ formHandlers }: LoginProps) => {
   // const navigate = useNavigate();
   // const location = useLocation();
 
+  const backend = configStoreActions.getBackend();
+
   const {
     control,
     handleSubmit,
     clearErrors,
     getValues,
     formState: { isValid, errors },
-  } = useForm<LoginRequest>({
-    defaultValues: { username: '', password: '' },
+  } = useForm<LoginFormRequest>({
+    defaultValues: { username: '', password: '', backend },
     mode: 'onChange',
   });
 
@@ -35,6 +47,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
 
   const callbacks = {
     onSuccess: (data: LoginResponse) => {
+      configStoreActions.setBackend(getValues('backend'));
       const username = getValues('username');
       accountStoreActions.setAuthenticated(true);
       queryClient.clear();
@@ -48,10 +61,11 @@ export const Login = ({ formHandlers }: LoginProps) => {
       });
     },
     onError: () => {
+      console.log('callback-error');
       messageStoreActions.addMessage({
         content: {
-          text: 'Login failed. Please check your credentials and try again.',
-          duration: 3000,
+          text: 'Login failed. Please check endpoint and your credentials and try again.',
+          duration: 8000,
         },
       });
     },
@@ -66,8 +80,13 @@ export const Login = ({ formHandlers }: LoginProps) => {
     callbacks,
   );
 
-  const onLoginSubmit = (data: LoginRequest) => {
-    mutate(data);
+  const onLoginSubmit = (data: LoginFormRequest) => {
+    configStoreActions.setBackend(data.backend);
+    const request = {
+      username: data.username,
+      password: data.password,
+    };
+    mutate(request);
   };
 
   useEffect(() => {
@@ -97,13 +116,13 @@ export const Login = ({ formHandlers }: LoginProps) => {
             <FormTextField
               id='login-username'
               name='username'
-              label='Username'
+              label='Username:'
               control={control}
               rules={{
                 required: 'username required',
                 validate: {
                   moreThanOne: (v) =>
-                    v.length > 2 || 'username must be at least 2 characters',
+                    v.length > 1 || 'username must be at least 2 characters',
                 },
               }}
             />
@@ -112,18 +131,19 @@ export const Login = ({ formHandlers }: LoginProps) => {
             <FormPasswordField
               id='login-pass'
               name='password'
-              label='Password'
+              label='Password:'
               control={control}
-              rules={{
-                validate: {
-                  moreThanOne: (v) =>
-                    v.length > 0 && v.length < 8
-                      ? 'invalid password'
-                      : undefined,
-                },
-              }}
             />
           </div>
+          <div className='space-y-1'>
+            <FormTextField
+              id='back-end'
+              name='backend'
+              label='Back End URL:'
+              control={control}
+            />
+          </div>
+
           <div className='btn-group'>
             {/* <button type='submit' className='btn'>
               User Login

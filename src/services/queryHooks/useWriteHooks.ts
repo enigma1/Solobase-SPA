@@ -26,6 +26,8 @@ import {
   EditUserResponse,
   DeleteUsersRequest,
   DeleteUsersResponse,
+  ImportDataRequest,
+  ImportDataResponse,
 } from '>/services/api';
 import { queryKeys, MutationCallbacks, MutationHookProps } from './defs';
 import { useAccountStore } from '>/services/stores';
@@ -130,30 +132,34 @@ export const useUpdateRowsMutation = createMutationHook(dbApi.updateDataRows, {
   rows: [],
 });
 
-type SettingsMutationProps = MutationHookProps<void, PrimeObject>;
-export const useSettingsMutation = <TSelected = SettingsMutationProps>(
-  selector?: (args: SettingsMutationProps) => TSelected,
-  callbacks?: MutationCallbacks<void, PrimeObject>,
-) => {
-  const preferences = useAccountStore(({ state }) => state.preferences);
-  const queryClient = useQueryClient();
-  const mutation = createMutationHook(dbApi.saveSettings, undefined)(selector, {
-    ...callbacks,
+export const useImportDataMutation = createMutationHook<
+  MutationFunction<ImportDataResponse, ImportDataRequest>
+>(dbApi.importData, defaultResponse);
 
-    onError:
-      callbacks?.onError ??
-      (() => {
-        queryClient.setQueryData(queryKeys.preferences(), preferences);
-      }),
+// type SettingsMutationProps = MutationHookProps<void, PrimeObject>;
+// export const useSettingsMutation = <TSelected = SettingsMutationProps>(
+//   selector?: (args: SettingsMutationProps) => TSelected,
+//   callbacks?: MutationCallbacks<void, PrimeObject>,
+// ) => {
+//   const preferences = useAccountStore(({ state }) => state.preferences);
+//   const queryClient = useQueryClient();
+//   const mutation = createMutationHook(dbApi.saveSettings, undefined)(selector, {
+//     ...callbacks,
 
-    onSettled:
-      callbacks?.onSettled ??
-      (() => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.preferences(),
-        });
-      }),
-  });
+//     onError:
+//       callbacks?.onError ??
+//       (() => {
+//         queryClient.setQueryData(queryKeys.preferences(), preferences);
+//       }),
 
-  return mutation;
-};
+//     onSettled:
+//       callbacks?.onSettled ??
+//       (() => {
+//         queryClient.invalidateQueries({
+//           queryKey: queryKeys.preferences(),
+//         });
+//       }),
+//   });
+
+//   return mutation;
+// };

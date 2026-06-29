@@ -1,29 +1,33 @@
 import { useState, useEffect } from 'react';
+import { UseFormReturn, useWatch, useFieldArray } from 'react-hook-form';
 import {
-  UseFormReturn,
-  Controller,
-  useWatch,
-  useFieldArray,
-} from 'react-hook-form';
-import { SquareActivityIcon, Trash2Icon, ListPlusIcon } from 'lucide-react';
-import { FormTextField, ComboBox } from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+  SquareActivityIcon,
+  Trash2Icon,
+  ListPlusIcon,
+  ArchiveRestoreIcon,
+} from 'lucide-react';
 import {
   emptyTableColumnKey,
   tableColumnKeyList,
   MAX_COLUMNS_PER_KEY,
   MAX_TABLE_KEYS,
 } from '>/services/utils';
+import { FormTextField, FormComboField } from '>/modules';
 import { TableFormShape } from './tableDefs';
 
 type TableKeysFormProps = {
   form: UseFormReturn<TableFormShape>;
   onValidation: (valid: boolean) => void;
+  originalValues: Readonly<TableFormShape>;
 };
 
-export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
+export const TableKeysForm = ({
+  form,
+  onValidation,
+  originalValues,
+}: TableKeysFormProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const { control } = form;
+  const { control, reset, getValues, clearErrors } = form;
 
   const keys = useWatch({
     control,
@@ -51,6 +55,15 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
     append(emptyTableColumnKey());
   };
   const onClearAllKeys = () => {};
+
+  const onSetOriginals = () => {
+    reset({
+      ...getValues(),
+      keys: structuredClone(originalValues.keys),
+    });
+    clearErrors();
+  };
+
   const columnsList = columns.map((c) => ({
     label: c.field,
     value: c.field,
@@ -80,6 +93,14 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
           >
             <SquareActivityIcon size={24} />
           </button>
+          <button
+            type='button'
+            className='btn-secondary'
+            onClick={onSetOriginals}
+            title='Set Original values'
+          >
+            <ArchiveRestoreIcon size={24} />
+          </button>
         </div>
       </div>
       <div className='area-content'>
@@ -106,47 +127,24 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
                   <Trash2Icon size={18} />
                 </button>
               </div>
-              <Controller
+
+              <FormComboField
+                id={`key-type-${index}`}
                 name={`keys.${index}.type`}
+                label='Key Type:'
                 control={control}
                 rules={{
                   required: 'Key type is required',
                 }}
-                render={({ field, fieldState }) => (
-                  <FormFieldWrapper
-                    label='Key Type:'
-                    htmlFor={`key-type-${index}`}
-                    $status={fieldState.error ? 'error' : undefined}
-                    $notice={fieldState.error?.message}
-                  >
-                    <ComboBox
-                      id={`key-type-${index}`}
-                      value={field.value}
-                      onChange={field.onChange}
-                      $options={tableColumnKeyList}
-                    />
-                  </FormFieldWrapper>
-                )}
+                $options={tableColumnKeyList}
+                $placeholder='Select Key Type'
               />
-              <Controller
+
+              <FormComboField
+                id={`column-index-${index}`}
                 name={`keys.${index}.columns`}
+                label='Columns:'
                 control={control}
-                render={({ field, fieldState }) => (
-                  <FormFieldWrapper
-                    label='Columns:'
-                    htmlFor={`column-index-${index}`}
-                    $status={fieldState.error ? 'error' : undefined}
-                    $notice={fieldState.error?.message}
-                  >
-                    <ComboBox
-                      id={`column-index-${index}`}
-                      value={field.value}
-                      onChange={field.onChange}
-                      $options={columnsList}
-                      $multiple
-                    />
-                  </FormFieldWrapper>
-                )}
                 rules={{
                   required: 'Column is required for assigned key',
                   validate: (v) => {
@@ -156,7 +154,11 @@ export const TableKeysForm = ({ form, onValidation }: TableKeysFormProps) => {
                     );
                   },
                 }}
+                $options={columnsList}
+                $multiple
+                $placeholder='Select Columns to form a key'
               />
+
               <FormTextField
                 id={`key-name-${index}`}
                 name={`keys.${index}.name`}

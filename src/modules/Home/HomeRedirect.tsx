@@ -5,7 +5,7 @@ import {
   useAccountStore,
   useDialogStore,
   dialogStoreActions,
-  accountStoreActions,
+  configStoreActions,
 } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import { Login } from '>/modules';
@@ -15,10 +15,6 @@ export const HomeRedirect = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
 
-  // const { dialog } = useDialogStore(({ state }) => ({
-  //   dialog: state.dialog,
-  // }));
-
   useEffect(() => {
     if (isAuthenticated) {
       dialogStoreActions.closeDialog();
@@ -26,7 +22,7 @@ export const HomeRedirect = () => {
     }
     const dbTheme = sessionStorage.getItem('dbTheme');
     if (dbTheme) {
-      accountStoreActions.setTheme(dbTheme);
+      configStoreActions.setTheme(dbTheme);
     }
   }, [isAuthenticated]);
 
@@ -60,30 +56,32 @@ export const HomeRedirect = () => {
 
   return (
     <>
-      <div className='page-container'>
-        <div className='page-toolbar'>
-          <div className='page-title'>Welcome to SoloBase SPA</div>
-        </div>
-        <div className='page-content'>
-          <p>
+      <div className='page-container items-center my-2'>
+        <h1 className='page-title text-2xl font-bold'>
+          Welcome to SoloBase SPA
+        </h1>
+        <div className='page-section bg-transparent max-w-lg'>
+          <p className='central'>
             Access and manage your MySQL databases, monitor server activity,
             edit data, handle imports and exports, and configure your
             environment securely from one place.
           </p>
-          <p>
-            For documentation about this tool and latest updates, visit{' '}
+          <p className='central stand'>
+            For documentation about this tool and latest updates, visit:
+            <br />
             <a
               href='https://github.com/enigma1'
-              className='stand link'
+              className='stand link border-b'
               target='_blank'
               rel='noreferrer'
             >
               Enigma1 on GitHub
             </a>
           </p>
-
-          <p>To begin managing your databases, login to your account</p>
-          <p>
+          <p className='central'>
+            To begin managing your databases, login to your account
+          </p>
+          <p className='central'>
             <button className='btn' onClick={handleLogin}>
               Login
             </button>

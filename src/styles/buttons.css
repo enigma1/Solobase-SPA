@@ -80,6 +80,29 @@
     }
   }
 
+  .btn-micro {
+    @apply px-2 py-1 rounded shadow-xl flex items-center justify-center;
+    background-color: var(--state-normal);
+    color: var(--color-text);
+
+    &:hover {
+      @apply shadow-md;
+      background-color: var(--state-flash);
+      color: var(--color-text);
+    }
+
+    &:active {
+      background-color: var(--color-accent);
+    }
+
+    &:disabled {
+      background-color: var(--color-srf-muted);
+      color: var(--color-text-muted);
+      border-color: var(--color-border);
+      cursor: not-allowed;
+    }
+  }
+
   .btn-host {
     @apply px-4 py-1 border rounded;
     background-color: transparent;

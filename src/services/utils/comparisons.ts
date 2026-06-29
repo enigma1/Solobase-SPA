@@ -24,6 +24,9 @@ export const comparisonTypes: Record<string, EqualityFn> = {
   },
   shallowCheckFromLeft: (a, b) =>
     Object.entries(a).every(([k, v]) => Object.is(v, b[k])),
+  alwaysFail: () => {
+    return false;
+  },
 };
 
 // Helper to compare objects with optional type selection

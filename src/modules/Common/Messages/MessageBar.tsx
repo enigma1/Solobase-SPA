@@ -51,23 +51,23 @@ export const MessageBar = ({
   const typeStyles = {
     error: {
       color: 'var(--color-text)',
-      backgroundColor:
-        'linear-gradient(75deg in oklch, var(--color-error-bg) 25%, var(--color-srf-elevated) 100%)',
+      background:
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%), var(--color-error-bg) 25%',
     },
     warn: {
       color: 'var(--color-text)',
-      backgroundColor:
-        'linear-gradient(75deg in oklch, var(--color-warn-bg) 25%, var(--color-srf-elevated) 100%)',
+      background:
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%,  var(--color-warn-bg) 25%)',
     },
     info: {
       color: 'var(--color-text)',
-      backgroundColor:
-        'linear-gradient(75deg in oklch, var(--color-info-bg) 25%, var(--color-srf-elevated) 100%)',
+      background:
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%), var(--color-info-bg) 25%',
     },
     success: {
       color: 'var(--color-text)',
       background:
-        'linear-gradient(75deg in oklch, var(--color-success-bg) 25%, var(--color-srf-elevated) 100%)',
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%), var(--color-success-bg) 25%',
     },
   };
 
@@ -79,7 +79,7 @@ export const MessageBar = ({
 
   return (
     <div
-      className={`${animationClasses} px-4 py-2 rounded-lg shadow-md flex justify-between items-center`}
+      className={`${animationClasses} px-4 py-2 shadow-md flex justify-between items-center`}
       style={{
         ...typeStyles[type],
         animationDuration: duration ? `${duration}ms` : '0ms',

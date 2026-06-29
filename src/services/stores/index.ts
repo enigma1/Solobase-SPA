@@ -6,5 +6,5 @@ export * from './historyStore';
 export * from './accountStore';
 export * from './databasesStore';
 export * from './factoryTableStore';
-export * from './utilitiesStore';
+export * from './configStore';
 export * from './queriesStore';

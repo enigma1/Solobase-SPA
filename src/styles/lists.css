@@ -67,7 +67,7 @@
   .combo-button {
     @apply flex items-center justify-center px-2 rounded-md border-l rounded-l-none;
     border-color: var(--color-border);
-    background-color: var(--color-ring);
+    background-color: var(--color-srf-dim);
     color: var(--color-text-peak);
     cursor: pointer;
 

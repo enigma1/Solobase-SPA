@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useUtilitiesStore } from '>/services/stores';
+import { useConfigStore } from '>/services/stores';
 import { CheckboxField } from '>/modules';
 
 type HiddenColumnsProps = {
@@ -8,7 +8,7 @@ type HiddenColumnsProps = {
 };
 export const HiddenColumns = ({ save, onModify }: HiddenColumnsProps) => {
   const [restoredCols, setRestoredCols] = useState<Record<string, boolean>>({});
-  const { hiddenColumns, savePreferences } = useUtilitiesStore(
+  const { hiddenColumns, savePreferences } = useConfigStore(
     ({ state, api }) => ({
       hiddenColumns: state.hiddenColumns,
       savePreferences: api.savePreferences,

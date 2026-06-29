@@ -58,25 +58,42 @@ export type HookStore<TState = unknown, TApi = unknown, TQuery = unknown> = {
 };
 export type HookSelector<TStore, TResult = TStore> = (store: TStore) => TResult;
 
+const invalidationPipeline = [
+  'databases',
+  'tables',
+  'table-details',
+  'columns-info',
+  'table-rows',
+] as const;
+
+type InvalidationKey = (typeof invalidationPipeline)[number];
+
 export const queryKeys = {
   preferences: () => ['preferences'] as const,
   session: () => ['session'],
-  databases: () => ['databases'],
   users: () => ['users'],
   databaseServerInfo: () => ['database-server-info'],
-  tableDetails: (db: string | null, table: string | null) => [
-    'table-details',
-    db,
-    table,
-  ],
-  tableColumnsInfo: (db: string | null, table: string | null) => [
-    'columns-info',
-    db,
-    table,
-  ],
-  tables: (db: string | null) => ['tables', db],
-  rows: (db: string | null, table: string | null) => ['table-rows', db, table],
   query: (db: string | null, id: string | null) => ['query', db, id],
+
+  // Hierarchical keys
+  databases: () => [...getInvalidationLegacy('databases')] as const,
+  tables: (db: string | null) =>
+    [...getInvalidationLegacy('tables'), db] as const,
+  tableDetails: (db: string | null, table: string | null) =>
+    [...getInvalidationLegacy('table-details'), db, table] as const,
+  tableColumnsInfo: (db: string | null, table: string | null) =>
+    [...getInvalidationLegacy('columns-info'), db, table] as const,
+  rows: (db: string | null, table: string | null) =>
+    [...getInvalidationLegacy('table-rows'), db, table] as const,
+};
+
+export const getInvalidationLegacy = (key: InvalidationKey) => {
+  const index = invalidationPipeline.indexOf(key);
+  if (index === -1) {
+    throw new Error(`Invalidation key not found in hierarchy: ${key}`);
+  }
+
+  return invalidationPipeline.slice(0, index + 1);
 };
 
 export const getMutationResult = <TData = any, TVariables = any>(

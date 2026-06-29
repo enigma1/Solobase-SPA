@@ -92,4 +92,33 @@
     }
   }
 
+  .drop-area {
+    width: 100%;
+    min-height: 250px;
+    border: 2px dashed var(--color-ring);
+    border-radius: 8px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: .75rem;
+
+    cursor: pointer;
+    transition:
+      border-color .15s,
+      background-color .15s,
+      transform .15s;
+
+    &.dragging {
+      border-color: var(--color-accent);
+      background: var(--state-flash);
+      transform: scale(1.01);
+    }
+
+    &.has-file {
+      border-style: solid;
+      border-color: var(--color-border-focus);
+    }
+  }
 }

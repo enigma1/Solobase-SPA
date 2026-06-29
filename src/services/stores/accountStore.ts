@@ -1,7 +1,12 @@
-import { makeStore } from '>/services/utils/emitter';
-import { hasObjectProps, getSchemaFromSample } from '>/services/utils';
+import { queryClient } from '>/config/reactQuery';
+import { queryKeys } from '>/services/queryHooks';
+import {
+  makeStore,
+  hasObjectProps,
+  defaultCapabilities,
+  getSchemaFromSample,
+} from '>/services/utils';
 import { SessionRestoreResponse } from '>/services/api';
-import { defaultCapabilities } from '>/services/utils';
 import { PrimeObject, UserCapabilities } from '>/types';
 
 export type AccountStoreState = {
@@ -10,24 +15,21 @@ export type AccountStoreState = {
   activeTable: string | null;
   isAuthenticated: boolean;
   online: boolean;
-  preferences: PrimeObject;
   capabilities: UserCapabilities;
-  theme: string;
 };
 
 export type AccountStoreActions = {
-  initialize: () => Promise<void>;
+  initialize: (cfg?: Partial<AccountStoreState>) => void;
   restoreSession: (data: SessionRestoreResponse) => { username: string } | null;
   // logout: () => Promise<unknown>;
   getActiveDatabase: () => string | null;
-  setActiveDatabase: (db: string) => void;
-  setActiveTable: (table: string) => void;
+  setActiveDatabase: (db: string | null, forceUpdate?: boolean) => void;
+  getActiveTable: () => string | null;
+  setActiveTable: (table: string | null) => void;
   getAuthenticated: () => boolean;
   setAuthenticated: (value: boolean) => void;
   getAppStatus: () => boolean;
   setAppStatus: (value: boolean) => void;
-  setTheme: (value: string) => void;
-  setSettings: (settings: PrimeObject) => void;
   getUsername: () => string;
 };
 
@@ -38,25 +40,23 @@ const initialState: AccountStoreState = {
   dbSelected: null,
   activeTable: null,
   isAuthenticated: false,
-  online: true,
-  preferences: {},
+  online: false,
   capabilities: { ...defaultCapabilities },
-  theme: sessionStorage.getItem('dbTheme') ?? 'clean-slate',
 } as const;
 
 const baseStore = makeStore<AccountStoreState>(() => initialState);
 const { get, set, setAuto } = baseStore;
 
 export const accountStoreActions: AccountStoreActions = {
-  initialize: async () => {
-    set(() => ({ ...initialState }));
+  initialize: (cfg) => {
+    set(() => ({ ...initialState, ...cfg }));
   },
   restoreSession: (data) => {
     const lastSession = hasObjectProps(data, [
       'username',
       'dbSelected',
       // 'schemas',
-      'preferences',
+      // 'preferences',
     ]);
 
     if (lastSession) {
@@ -66,8 +66,8 @@ export const accountStoreActions: AccountStoreActions = {
         activeTable: null,
         isAuthenticated: true,
         online: true,
-        theme: sessionStorage.getItem('dbTheme') ?? initialState.theme,
-        preferences: data.preferences || initialState.preferences,
+        // theme: sessionStorage.getItem('dbTheme') ?? initialState.theme,
+        // preferences: data.preferences || initialState.preferences,
       });
       return { username: data.username };
     }
@@ -77,9 +77,21 @@ export const accountStoreActions: AccountStoreActions = {
   },
   getUsername: () => get().username,
   getActiveDatabase: () => get().dbSelected,
-  setActiveDatabase: (database) => {
-    setAuto({ dbSelected: database, activeTable: null });
+  setActiveDatabase: (database, forceUpdate = false) => {
+    if (!database && forceUpdate) {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.databases(),
+        exact: true,
+      });
+      setAuto(
+        { dbSelected: null, activeTable: null },
+        { equalityKey: 'alwaysFail' },
+      );
+    } else {
+      setAuto({ dbSelected: database, activeTable: null });
+    }
   },
+  getActiveTable: () => get().activeTable,
   setActiveTable: (table) => {
     setAuto({ activeTable: table });
   },
@@ -88,18 +100,14 @@ export const accountStoreActions: AccountStoreActions = {
   setAuthenticated: (value) => setAuto({ isAuthenticated: value }),
   getAppStatus: () => get().online,
   setAppStatus: (value) => setAuto({ online: value }),
-  setTheme: (value) => {
-    setAuto({ theme: value });
-    sessionStorage.setItem('dbTheme', value);
-  },
-  setSettings: (settings) => {
-    const settingsSchema = getSchemaFromSample(settings);
-    if (!settingsSchema.safeParse(settings).success) {
-      console.warn('Invalid settings object, expected shape:', settingsSchema);
-      return;
-    }
-    setAuto({ preferences: settings });
-  },
+  // setSettings: (settings) => {
+  //   const settingsSchema = getSchemaFromSample(settings);
+  //   if (!settingsSchema.safeParse(settings).success) {
+  //     console.warn('Invalid settings object, expected shape:', settingsSchema);
+  //     return;
+  //   }
+  //   setAuto({ preferences: settings });
+  // },
 };
 
 type SelectorArgsType = {

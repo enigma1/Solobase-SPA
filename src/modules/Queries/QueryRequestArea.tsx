@@ -7,7 +7,7 @@ import {
   queriesStoreActions,
 } from '>/services/stores';
 import { useModal } from '>/services/hooks';
-import { useDatabases, useRawQueryMutation } from '>/services/queryHooks';
+import { useDatabases } from '>/services/queryHooks';
 import { MIN_QUERY_CHARS } from '>/services/utils';
 import {
   ScreenLoader,

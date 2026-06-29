@@ -50,6 +50,8 @@ import {
   DeleteTablesResponse,
   ExportDatabasesRequest,
   ExportDatabasesResponse,
+  ImportDataRequest,
+  ImportDataResponse,
   GetTableDetailsRequest,
   GetTableDetailsResponse,
   GetTableColumnsInfoRequest,
@@ -145,14 +147,15 @@ const updateDataRows = (data: UpdateDataRowsRequest) =>
     apiClient.post('/db/update-data-rows', data),
   );
 
-const exportDatabase = () =>
-  apiCall<void>(() => apiClient.get('/db/export-database'));
+const importData = (data: ImportDataRequest) =>
+  apiCall<ImportDataResponse>(() => apiClient.post('/db/import-data', data));
 
 const exportDatabases = (data: ExportDatabasesRequest) =>
   apiCall(
     () =>
       apiClient.post('/db/export-databases', data, {
         responseType: 'blob',
+        timeout: 0, // Let it finish
       }),
     false,
   );
@@ -220,7 +223,6 @@ export const dbApi = {
   createUser,
   editUser,
   selectDatabase,
-  exportDatabase,
   createDatabase,
   editDatabase,
   deleteDatabases,
@@ -231,4 +233,5 @@ export const dbApi = {
   saveSettings,
   loadSettings,
   exportDatabases,
+  importData,
 };

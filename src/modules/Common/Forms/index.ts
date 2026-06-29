@@ -6,3 +6,4 @@ export * from './FormTextAreaField';
 export * from './FormJsonField';
 export * from './FormCellField';
 export * from './FormComboField';
+export * from './FormFileField';

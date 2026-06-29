@@ -1,8 +1,8 @@
-import { useUtilitiesStore } from '>/services/stores';
+import { useConfigStore } from '>/services/stores';
 import { CheckboxField } from '>/modules';
 
 export const HeaderVisibility = () => {
-  const { headerVisibility, savePreferences } = useUtilitiesStore(
+  const { headerVisibility, savePreferences } = useConfigStore(
     ({ state, api }) => ({
       headerVisibility: state.headerVisibility,
       savePreferences: api.savePreferences,
@@ -33,7 +33,7 @@ export const HeaderVisibility = () => {
 };
 
 export const SidebarVisibility = () => {
-  const { sidebarVisibility, savePreferences } = useUtilitiesStore(
+  const { sidebarVisibility, savePreferences } = useConfigStore(
     ({ state, api }) => ({
       sidebarVisibility: state.sidebarVisibility,
       savePreferences: api.savePreferences,
