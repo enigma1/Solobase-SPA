@@ -1,7 +1,6 @@
-import { useQueryClient, MutationFunction } from '@tanstack/react-query';
-import { PrimeObject } from '>/types';
+import type { MutationFunction } from '@tanstack/react-query';
 import { dbApi } from '>/services/api/dbApi';
-import {
+import type {
   LoginRequest,
   LoginResponse,
   RunRawQueryResponse,
@@ -28,10 +27,20 @@ import {
   DeleteUsersResponse,
   ImportDataRequest,
   ImportDataResponse,
+  CreateDataRowsRequest,
+  CreateDataRowsResponse,
+  DeleteDataRowsRequest,
+  DeleteDataRowsResponse,
+  UpdateDataRowsRequest,
+  UpdateDataRowsResponse,
 } from '>/services/api';
 import { queryKeys, MutationCallbacks, MutationHookProps } from './defs';
-import { useAccountStore } from '>/services/stores';
-import { defaultResponse, defaultCapabilities } from '>/services/utils';
+import {
+  defaultResponse,
+  defaultCapabilities,
+  defaultListResponse,
+} from '>/services/utils';
+import { accountStoreActions } from '>/services/stores';
 import { createMutationHook } from './mutationBuilder';
 
 const userDefaults = {
@@ -39,18 +48,38 @@ const userDefaults = {
 };
 export const useCreateUserMutation = createMutationHook<
   MutationFunction<CreateUserResponse, CreateUserRequest>
->(dbApi.createUser, userDefaults);
+>({
+  fn: dbApi.createUser,
+  state: userDefaults,
+  options: {
+    cache: async (qc) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.users(),
+      });
+    },
+  },
+});
 
 export const useEditUserMutation = createMutationHook<
   MutationFunction<EditUserResponse, EditUserRequest>
->(dbApi.editUser, userDefaults);
+>({ fn: dbApi.editUser, state: userDefaults });
 
 export const useDeleteUsersMutation = createMutationHook<
   MutationFunction<DeleteUsersResponse, DeleteUsersRequest>
->(dbApi.deleteUsers, {
-  ...defaultResponse,
-  rows: [],
-  columnsOrder: [],
+>({
+  fn: dbApi.deleteUsers,
+  state: {
+    ...defaultResponse,
+    rows: [],
+    columnsOrder: [],
+  },
+  options: {
+    cache: async (qc) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.users(),
+      });
+    },
+  },
 });
 
 const dbDefaults = {
@@ -59,29 +88,87 @@ const dbDefaults = {
 };
 export const useEditDatabaseMutation = createMutationHook<
   MutationFunction<EditDatabaseResponse, EditDatabaseRequest>
->(dbApi.editDatabase, dbDefaults);
+>({
+  fn: dbApi.editDatabase,
+  state: dbDefaults,
+  options: {
+    cache: async (qc) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.databases(),
+      });
+    },
+  },
+});
 
 export const useSelectDatabaseMutation = createMutationHook<
   MutationFunction<SelectDatabaseResponse, SelectDatabaseRequest>
->(dbApi.selectDatabase, dbDefaults);
+>({
+  fn: dbApi.selectDatabase,
+  state: dbDefaults,
+  options: {
+    cache: async (qc, data, vars) => {
+      if (!data.ok || !data.database) {
+        return;
+      }
+      accountStoreActions.setActiveDatabase(data.database);
+      await qc.invalidateQueries({
+        queryKey: queryKeys.tables(data.database),
+      });
+    },
+  },
+});
 
 export const useCreateDatabaseMutation = createMutationHook<
   MutationFunction<CreateDatabaseResponse, CreateDatabaseRequest>
->(dbApi.createDatabase, dbDefaults);
+>({
+  fn: dbApi.createDatabase,
+  state: dbDefaults,
+  options: {
+    cache: async (qc) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.databases(),
+      });
+    },
+  },
+});
 
 export const useDeleteDatabasesMutation = createMutationHook<
   MutationFunction<DeleteDatabasesResponse, DeleteDatabasesRequest>
->(dbApi.deleteDatabases, {
-  ...defaultResponse,
-  databases: [],
+>({
+  fn: dbApi.deleteDatabases,
+  state: {
+    ...defaultResponse,
+    databases: [],
+  },
+  options: {
+    cache: async (qc, data) => {
+      const dbSelected = accountStoreActions.getActiveDatabase();
+      if (dbSelected && data.databases.includes(dbSelected)) {
+        accountStoreActions.setActiveDatabase(null);
+      }
+      await qc.invalidateQueries({
+        queryKey: queryKeys.databases(),
+      });
+    },
+  },
 });
 
 export const useDeleteTablesMutation = createMutationHook<
   MutationFunction<DeleteTablesResponse, DeleteTablesRequest>
->(dbApi.deleteTables, {
-  ...defaultResponse,
-  database: 'undefined',
-  tables: [],
+>({
+  fn: dbApi.deleteTables,
+  state: {
+    ...defaultResponse,
+    database: 'undefined',
+    tables: [],
+  },
+  options: {
+    cache: async (qc, data) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.tables(data.database),
+      });
+    },
+  },
 });
 
 const tableDefaults = {
@@ -92,49 +179,130 @@ const tableDefaults = {
 
 export const useCreateTableMutation = createMutationHook<
   MutationFunction<CreateTableResponse, CreateTableRequest>
->(dbApi.createTable, tableDefaults);
+>({
+  fn: dbApi.createTable,
+  state: tableDefaults,
+  options: {
+    cache: async (qc, data) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.tables(data.database),
+      });
+    },
+  },
+});
 
 export const useEditTableMutation = createMutationHook<
   MutationFunction<EditTableResponse, EditTableRequest>
->(dbApi.editTable, tableDefaults);
+>({
+  fn: dbApi.editTable,
+  state: tableDefaults,
+  options: {
+    cache: async (qc, data) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.tables(data.database),
+      });
+    },
+  },
+});
 
 export const useRawQueryMutation = createMutationHook<
   MutationFunction<RunRawQueryResponse, RunRawQueryRequest>
->(dbApi.runRawQuery, {
-  ...defaultResponse,
-  mode: 'resultset',
-  cols: {},
-  rows: [],
-  columnsOrder: [],
+>({
+  fn: dbApi.runRawQuery,
+  state: {
+    ...defaultResponse,
+    mode: 'resultset',
+    cols: {},
+    rows: [],
+    columnsOrder: [],
+  },
+  options: {
+    cache: async (qc, data) => {
+      accountStoreActions.setActiveDatabase(null);
+      await qc.invalidateQueries({
+        queryKey: queryKeys.databases(),
+      });
+    },
+  },
 });
 
 export const useLoginMutation = createMutationHook<
   MutationFunction<LoginResponse, LoginRequest>
->(dbApi.login, {
-  ...defaultResponse,
-  schemas: [],
-  preferences: {},
-  capabilities: defaultCapabilities,
+>({
+  fn: dbApi.login,
+  state: {
+    ...defaultResponse,
+    schemas: [],
+    preferences: {},
+    capabilities: defaultCapabilities,
+  },
 });
 
-export const useCreateDataRowsMutation = createMutationHook(
-  dbApi.createDataRows,
-  tableDefaults,
-);
-
-export const useDeleteRowsMutation = createMutationHook(dbApi.deleteDataRows, {
-  ...tableDefaults,
-  rows: [],
+export const useCreateDataRowsMutation = createMutationHook<
+  MutationFunction<CreateDataRowsResponse, CreateDataRowsRequest>
+>({
+  fn: dbApi.createDataRows,
+  state: {
+    ...defaultResponse,
+    database: 'undefined',
+    table: 'undefined',
+  },
+  options: {
+    cache: async (qc, data) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.rows(data.database, data.table),
+      });
+    },
+  },
 });
 
-export const useUpdateRowsMutation = createMutationHook(dbApi.updateDataRows, {
-  ...tableDefaults,
-  rows: [],
+export const useDeleteRowsMutation = createMutationHook<
+  MutationFunction<DeleteDataRowsResponse, DeleteDataRowsRequest>
+>({
+  fn: dbApi.deleteDataRows,
+  state: {
+    ...tableDefaults,
+  },
+  options: {
+    cache: async (qc, data) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.rows(data.database, data.table),
+      });
+    },
+  },
+});
+
+export const useUpdateRowsMutation = createMutationHook<
+  MutationFunction<UpdateDataRowsResponse, UpdateDataRowsRequest>
+>({
+  fn: dbApi.updateDataRows,
+  state: {
+    ...tableDefaults,
+    rows: [],
+  },
+  options: {
+    cache: async (qc, data) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.rows(data.database, data.table),
+      });
+    },
+  },
 });
 
 export const useImportDataMutation = createMutationHook<
   MutationFunction<ImportDataResponse, ImportDataRequest>
->(dbApi.importData, defaultResponse);
+>({
+  fn: dbApi.importData,
+  state: defaultResponse,
+  options: {
+    cache: async (qc, data) => {
+      accountStoreActions.setActiveDatabase(null);
+      await qc.invalidateQueries({
+        queryKey: queryKeys.databases(),
+      });
+    },
+  },
+});
 
 // type SettingsMutationProps = MutationHookProps<void, PrimeObject>;
 // export const useSettingsMutation = <TSelected = SettingsMutationProps>(

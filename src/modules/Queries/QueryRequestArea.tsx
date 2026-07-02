@@ -8,7 +8,7 @@ import {
 } from '>/services/stores';
 import { useModal } from '>/services/hooks';
 import { useDatabases } from '>/services/queryHooks';
-import { MIN_QUERY_CHARS } from '>/services/utils';
+import { MIN_QUERY_CHARS, groupByModes } from '>/services/utils';
 import {
   ScreenLoader,
   ComboBox,
@@ -19,11 +19,6 @@ import {
 import { routes } from '>/config';
 import { GroupByModes, CommonDialogHandlers } from '>/types';
 
-const groupByModes: { label: string; value: GroupByModes }[] = [
-  { label: 'Server Default', value: 'default' },
-  { label: 'Legacy GroupBy', value: 'legacy' },
-  { label: 'Strict GroupBy', value: 'strict' },
-];
 type QueryRequestAreaProps = {
   formHandlers: CommonDialogHandlers;
   queryTitle?: string;
@@ -34,6 +29,7 @@ export const QueryRequestArea = ({
   queryTitle = '',
 }: QueryRequestAreaProps) => {
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
+  const [multi, setMulti] = useState<boolean>(false);
   const [title, setTitle] = useState<string>(queryTitle);
   const [query, setQuery] = useState<string>('');
   const [groupByMode, setGroupByMode] = useState<GroupByModes>('default');
@@ -57,6 +53,7 @@ export const QueryRequestArea = ({
       title,
       query,
       database: selectedDatabase.length > 0 ? selectedDatabase : undefined,
+      multi: multi ? multi : undefined,
       groupByMode,
     };
     queriesStoreActions.addQuery(values);
@@ -73,12 +70,11 @@ export const QueryRequestArea = ({
   };
 
   useEffect(() => {
-    if (queryTitle !== undefined) {
-      const existingSql = queriesStoreActions.getQuery(queryTitle);
-      if (existingSql) {
-        setQuery(existingSql.query);
-        existingSql.database && setSelectedDatabase(existingSql.database);
-      }
+    const existingSql = queriesStoreActions.getQuery(queryTitle ?? '');
+    if (existingSql) {
+      setQuery(existingSql.query);
+      existingSql.database && setSelectedDatabase(existingSql.database);
+      existingSql.multi && setMulti(true);
     }
   }, []);
 
@@ -163,6 +159,16 @@ export const QueryRequestArea = ({
               // setButtonStatus('confirm', disabled ? 'disabled' : undefined);
               setQuery(value);
             }}
+          />
+        </div>
+        <div className='flex flex-col space-y-1'>
+          <CheckboxField
+            checked={multi}
+            onChange={(value) => {
+              setMulti(value);
+            }}
+            id={`multi-statements`}
+            label='Multi-Statement Query'
           />
         </div>
         <div className='flex flex-col space-y-1'>

@@ -1,15 +1,12 @@
-import { MouseEvent, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '>/config/routes';
 import {
   useAccountStore,
-  useDialogStore,
   dialogStoreActions,
   configStoreActions,
 } from '>/services/stores';
-import { dialogActions } from '>/services/utils';
-import { Login } from '>/modules';
-import { CommonDialogHandlers } from '>/types';
+import { handleLogin } from '>/modules';
 
 export const HomeRedirect = () => {
   const navigate = useNavigate();
@@ -18,7 +15,7 @@ export const HomeRedirect = () => {
   useEffect(() => {
     if (isAuthenticated) {
       dialogStoreActions.closeDialog();
-      navigate(routes.front.dbView, { replace: true });
+      navigate(routes.front.listDatabases, { replace: true });
     }
     const dbTheme = sessionStorage.getItem('dbTheme');
     if (dbTheme) {
@@ -26,37 +23,9 @@ export const HomeRedirect = () => {
     }
   }, [isAuthenticated]);
 
-  const handleLogin = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const handlers: CommonDialogHandlers = {
-      confirm: () => {},
-    };
-    const labels = [undefined, 'Login'];
-    dialogStoreActions.openDialog({
-      anonymous: true,
-      payload: {
-        initialSize: 'sm',
-        caption: 'Authorization',
-        component: <Login formHandlers={handlers} />,
-        variant: 'error',
-        actions: dialogActions
-          .enabledConfirmCancel({
-            onConfirm: () => {
-              handlers.confirm();
-              dialogStoreActions.closeDialog();
-            },
-          })
-          .map((control, idx) => ({
-            ...control,
-            label: labels[idx] ?? control.label,
-          })),
-      },
-    });
-  };
-
   return (
     <>
-      <div className='page-container items-center my-2'>
+      <div className='page-container items-center my-2  justify-center h-screen'>
         <h1 className='page-title text-2xl font-bold'>
           Welcome to SoloBase SPA
         </h1>

@@ -27,7 +27,8 @@ export default defineConfig({
     alias: isAliasValid ? aliasPaths : {},
     tsconfigPaths: true, // Enable tsconfig paths resolution
   },
-  compilerOptions: ['vite/client'],
+
+  // compilerOptions: ['vite/client'],
   plugins: [
     ssl(),
     react(),
@@ -46,10 +47,11 @@ export default defineConfig({
     setupFiles: './tests/setup.js',
   },
   server: {
-    host: '127.0.0.1',
+    host: 'example.com',
     port: 5173,
   },
   build: {
     sourcemap: true,
+    outDir: 'vite-output',
   },
 });

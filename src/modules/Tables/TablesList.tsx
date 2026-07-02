@@ -1,6 +1,5 @@
 import { useRef, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys, useDeleteTablesMutation } from '>/services/queryHooks';
+import { useDeleteTablesMutation } from '>/services/queryHooks';
 import {
   useConfigStore,
   useTablesStore,
@@ -21,7 +20,6 @@ import {
   EffectiveTableWrapper,
   SqlTableContainer,
   ScreenLoader,
-  CheckboxField,
   DialogContent,
   dialogFactories,
 } from '>/modules';
@@ -32,7 +30,7 @@ import {
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
-import { TableEdit } from './TableEdit';
+import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
 import { TablesDeletePreview } from './TablesPreviews';
 
 type TablesListProps = {
@@ -51,7 +49,6 @@ export const TablesList = ({
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
   const tableStore = useMemo(() => createFactoryTableStore(), []);
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
@@ -76,13 +73,8 @@ export const TablesList = ({
   );
 
   const callbacks = {
-    onSuccess: (data: any) => {
+    onSuccess: (data: DeleteTablesResponse) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.tables(dbSelected),
-          exact: true,
-        });
-
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: 'Selected Rows removed', duration: 3000 },

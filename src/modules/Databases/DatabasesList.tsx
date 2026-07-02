@@ -1,23 +1,17 @@
-import { useEffect, useRef, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useRef, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { dbApi } from '>/services/api';
 import {
-  dbApi,
-  DeleteDatabasesRequest,
-  ExportDatabasesRequest,
-  ExportDatabasesResponse,
-} from '>/services/api';
-import {
-  queryKeys,
   useDeleteDatabasesMutation,
-  useDatabaseServerInfo,
+  useSelectDatabaseWrap,
 } from '>/services/queryHooks';
 import {
   useConfigStore,
   useDatabasesStore,
   messageStoreActions,
-  accountStoreActions,
   createFactoryTableStore,
   dialogStoreActions,
+  accountStoreActions,
 } from '>/services/stores';
 import {
   getColumnsFromRow,
@@ -26,13 +20,6 @@ import {
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
-import {
-  ViewRow,
-  SqlColumnsShape,
-  SqlRow,
-  ScalarObject,
-  CommonDialogHandlers,
-} from '>/types';
 import {
   ScreenLoader,
   EffectiveTableWrapper,
@@ -43,7 +30,15 @@ import {
   FilterColumns,
   dialogFactories,
 } from '>/modules';
-
+import { routes } from '>/config/routes';
+import type {
+  ViewRow,
+  SqlColumnsShape,
+  SqlRow,
+  ScalarObject,
+  CommonDialogHandlers,
+} from '>/types';
+import type { DeleteDatabasesResponse } from '>/services/api/dbApiTypes';
 import {
   DatabaseExportPreview,
   DatabasesDeletePreview,
@@ -63,8 +58,8 @@ export const DatabasesList = ({
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const tableStore = useMemo(() => createFactoryTableStore(), []);
-  const queryClient = useQueryClient();
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
@@ -80,9 +75,8 @@ export const DatabasesList = ({
   }));
 
   const deleteDatabasesCallbacks = {
-    onSuccess: (data: any) => {
+    onSuccess: (data: DeleteDatabasesResponse) => {
       tableStore.api.clearSelected();
-      queryClient.invalidateQueries();
       if (data.ok) {
         messageStoreActions.addMessage({
           type: 'success',
@@ -105,6 +99,11 @@ export const DatabasesList = ({
     },
   };
 
+  const {
+    mutate: mutateDabaseSelection,
+    isPending: isDatabaseSelectionPending,
+  } = useSelectDatabaseWrap();
+
   const { mutate, isPending, response } = useDeleteDatabasesMutation(
     ({ api, state, query }) => ({
       isPending: query.isPending,
@@ -113,13 +112,6 @@ export const DatabasesList = ({
     }),
     deleteDatabasesCallbacks,
   );
-
-  useEffect(() => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.databaseServerInfo(),
-      exact: true,
-    });
-  }, []);
 
   const discardEditedRows = () => {
     dialogStoreActions.openDialog({
@@ -231,6 +223,19 @@ export const DatabasesList = ({
     });
   };
 
+  const onSelectRow = (uid: string) => {
+    const row = rowMap.get(uid);
+    if (!row) return;
+    const fields = getColumnsFromRow({
+      row,
+      columnsOrder,
+      fields: ['SCHEMA_NAME'],
+    });
+    if (typeof fields['SCHEMA_NAME'] !== 'string') return;
+    mutateDabaseSelection({ database: fields['SCHEMA_NAME'] });
+    navigate(routes.front.listTables);
+  };
+
   const onEditRow = (uid: string) => {
     const row = rowMap.get(uid);
     if (!row) return;
@@ -288,7 +293,7 @@ export const DatabasesList = ({
 
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
 
-  const isBusy = isPending;
+  const isBusy = isPending || isDatabaseSelectionPending;
   if (isBusy) return <ScreenLoader />;
 
   return (
@@ -315,6 +320,7 @@ export const DatabasesList = ({
           resizeLineRef={resizeLineRef}
           editedRow={editedRow}
           onEditRow={onEditRow}
+          onSelectRow={onSelectRow}
         />
       </EffectiveTableWrapper>
     </>

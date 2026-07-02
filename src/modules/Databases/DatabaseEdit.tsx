@@ -19,10 +19,6 @@ export const DatabaseEdit = ({
   const editDatabaseCallbacks = {
     onSuccess: (data: any) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.databases(),
-          exact: true,
-        });
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: 'Database changed successfully', duration: 3000 },

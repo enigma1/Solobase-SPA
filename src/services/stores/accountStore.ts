@@ -1,5 +1,3 @@
-import { queryClient } from '>/config/reactQuery';
-import { queryKeys } from '>/services/queryHooks';
 import {
   makeStore,
   hasObjectProps,
@@ -7,7 +5,7 @@ import {
   getSchemaFromSample,
 } from '>/services/utils';
 import { SessionRestoreResponse } from '>/services/api';
-import { PrimeObject, UserCapabilities } from '>/types';
+import { UserCapabilities } from '>/types';
 
 export type AccountStoreState = {
   username: string;
@@ -21,9 +19,8 @@ export type AccountStoreState = {
 export type AccountStoreActions = {
   initialize: (cfg?: Partial<AccountStoreState>) => void;
   restoreSession: (data: SessionRestoreResponse) => { username: string } | null;
-  // logout: () => Promise<unknown>;
   getActiveDatabase: () => string | null;
-  setActiveDatabase: (db: string | null, forceUpdate?: boolean) => void;
+  setActiveDatabase: (db: string | null) => void;
   getActiveTable: () => string | null;
   setActiveTable: (table: string | null) => void;
   getAuthenticated: () => boolean;
@@ -52,12 +49,7 @@ export const accountStoreActions: AccountStoreActions = {
     set(() => ({ ...initialState, ...cfg }));
   },
   restoreSession: (data) => {
-    const lastSession = hasObjectProps(data, [
-      'username',
-      'dbSelected',
-      // 'schemas',
-      // 'preferences',
-    ]);
+    const lastSession = hasObjectProps(data, ['username', 'dbSelected']);
 
     if (lastSession) {
       setAuto({
@@ -66,8 +58,6 @@ export const accountStoreActions: AccountStoreActions = {
         activeTable: null,
         isAuthenticated: true,
         online: true,
-        // theme: sessionStorage.getItem('dbTheme') ?? initialState.theme,
-        // preferences: data.preferences || initialState.preferences,
       });
       return { username: data.username };
     }
@@ -77,19 +67,8 @@ export const accountStoreActions: AccountStoreActions = {
   },
   getUsername: () => get().username,
   getActiveDatabase: () => get().dbSelected,
-  setActiveDatabase: (database, forceUpdate = false) => {
-    if (!database && forceUpdate) {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.databases(),
-        exact: true,
-      });
-      setAuto(
-        { dbSelected: null, activeTable: null },
-        { equalityKey: 'alwaysFail' },
-      );
-    } else {
-      setAuto({ dbSelected: database, activeTable: null });
-    }
+  setActiveDatabase: (database) => {
+    setAuto({ dbSelected: database, activeTable: null });
   },
   getActiveTable: () => get().activeTable,
   setActiveTable: (table) => {
@@ -100,14 +79,6 @@ export const accountStoreActions: AccountStoreActions = {
   setAuthenticated: (value) => setAuto({ isAuthenticated: value }),
   getAppStatus: () => get().online,
   setAppStatus: (value) => setAuto({ online: value }),
-  // setSettings: (settings) => {
-  //   const settingsSchema = getSchemaFromSample(settings);
-  //   if (!settingsSchema.safeParse(settings).success) {
-  //     console.warn('Invalid settings object, expected shape:', settingsSchema);
-  //     return;
-  //   }
-  //   setAuto({ preferences: settings });
-  // },
 };
 
 type SelectorArgsType = {

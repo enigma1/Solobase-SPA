@@ -13,7 +13,11 @@ export const UsersDeletePreview = ({
   return (
     <div className='preview-table-wrapper'>
       <p>{`This action will permanently delete the following users.`}</p>
-      <PreviewTable columnsOrder={columnsOrder} rows={rows} />
+      <PreviewTable
+        columnsOrder={columnsOrder}
+        rows={rows}
+        extraClassName='w-fit'
+      />
     </div>
   );
 };

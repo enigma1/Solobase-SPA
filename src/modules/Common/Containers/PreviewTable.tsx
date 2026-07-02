@@ -3,13 +3,18 @@ import { SqlRow } from '>/types';
 type PreviewTableProps = {
   rows: SqlRow[];
   columnsOrder: string[];
+  extraClassName?: string;
 };
 
-export const PreviewTable = ({ rows, columnsOrder }: PreviewTableProps) => {
+export const PreviewTable = ({
+  rows,
+  columnsOrder,
+  extraClassName,
+}: PreviewTableProps) => {
   return (
     <div className='area-container'>
       <div className='area-listing'>
-        <table className='table'>
+        <table className={`table ${extraClassName}`}>
           <thead>
             <tr>
               {columnsOrder.map((colName, cidx) => (

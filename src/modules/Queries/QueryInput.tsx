@@ -22,6 +22,7 @@ export const QueryInput = () => {
       query,
       database: db !== null ? db : undefined,
     };
+
     queriesStoreActions.addQuery(values);
     if (location.pathname !== routes.front.queryView) {
       navigate(routes.front.queryView);

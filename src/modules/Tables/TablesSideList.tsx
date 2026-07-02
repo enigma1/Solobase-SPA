@@ -7,17 +7,18 @@ import {
   dialogStoreActions,
 } from '>/services/stores';
 import { ScreenLoader, DialogContent } from '>/modules';
-
 import { routes } from '>/config';
 
 export const TablesSideList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const { activeTable, setActiveTable } = useAccountStore(({ state, api }) => ({
-    activeTable: state.activeTable,
-    setActiveTable: api.setActiveTable,
-  }));
+  const { activeTable, setActiveTable, dbSelected } = useAccountStore(
+    ({ state, api }) => ({
+      dbSelected: state.dbSelected,
+      activeTable: state.activeTable,
+      setActiveTable: api.setActiveTable,
+    }),
+  );
 
   const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
     editedRow: state.editedRow,
@@ -35,8 +36,8 @@ export const TablesSideList = () => {
 
   const handleSwitchTable = (name: string) => {
     if (name === activeTable) {
-      if (location.pathname !== routes.front.tableView) {
-        navigate(routes.front.tableView);
+      if (location.pathname !== routes.front.listData) {
+        navigate(routes.front.listData);
       }
       return;
     }
@@ -56,8 +57,8 @@ export const TablesSideList = () => {
               dialogStoreActions.closeDialog();
               markEditedRow({});
               setActiveTable(name);
-              if (location.pathname !== routes.front.tableView) {
-                navigate(routes.front.tableView);
+              if (location.pathname !== routes.front.listData) {
+                navigate(routes.front.listData);
               }
             },
           }),
@@ -66,8 +67,8 @@ export const TablesSideList = () => {
       return;
     }
     setActiveTable(name);
-    if (location.pathname !== routes.front.tableView) {
-      navigate(routes.front.tableView);
+    if (location.pathname !== routes.front.listData) {
+      navigate(routes.front.listData);
     }
   };
 

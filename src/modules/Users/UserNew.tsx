@@ -1,9 +1,11 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys, useCreateUserMutation } from '>/services/queryHooks';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCreateUserMutation } from '>/services/queryHooks';
 import { messageStoreActions } from '>/services/stores';
 import { ScreenLoader } from '>/modules';
 import { UserForm } from './UserForm';
-import { WizardHandlers, UserShape } from '>/types';
+import type { WizardHandlers, UserShape } from '>/types';
+import { routes } from '>/config';
+import type { CreateUserResponse } from '>/services/api/dbApiTypes';
 import { UserFormShape, KEEP_EXISTING_PROFILE } from './Form';
 
 type UserNewProps = {
@@ -11,14 +13,12 @@ type UserNewProps = {
 };
 
 export const UserNew = ({ wizardHandlers }: UserNewProps) => {
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const createUserCallbacks = {
-    onSuccess: (data: any) => {
+    onSuccess: (data: CreateUserResponse) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.users(),
-          exact: true,
-        });
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: `User successfully created`, duration: 5000 },
@@ -31,6 +31,10 @@ export const UserNew = ({ wizardHandlers }: UserNewProps) => {
             duration: 3000,
           },
         });
+      }
+      if (location.pathname !== routes.front.listUsers) {
+        navigate(routes.front.listUsers);
+        return;
       }
     },
     onError: (error: any) => {

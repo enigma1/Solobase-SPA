@@ -9,10 +9,8 @@ import {
 } from 'lucide-react';
 import { routes } from '>/config';
 import {
-  DatabaseNew,
   DatabasesSideList,
   QueriesSideList,
-  TableNew,
   TablesSideList,
   dialogFactories,
 } from '>/modules';
@@ -23,12 +21,11 @@ import {
   queriesStoreActions,
 } from '>/services/stores';
 import { useTablesHook } from '>/services/queryHooks';
-import { dialogActions } from '>/services/utils';
-import { WizardHandlers } from '>/types';
+import { SidebarOptions } from '>/types';
 
 export const Sidebar = () => {
   const [expandedSection, setExpandedSection] = useState<string | null>(
-    routes.front.dbView,
+    routes.front.listDatabases,
   );
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,19 +43,19 @@ export const Sidebar = () => {
     getTablesCount: () => api.getTablesCount(),
   }));
 
-  type SideSectionItem = {
-    id: string;
+  type SidebarItem = {
+    id: SidebarOptions;
     getTitle: () => string;
     getRoute: () => string;
     component: ReactNode;
     icon: ReactNode;
   };
 
-  const sideSections: SideSectionItem[] = [
+  const sideSections: SidebarItem[] = [
     {
       id: 'sideDatabases',
       getTitle: () => (dbSelected ? dbSelected : 'Databases'),
-      getRoute: () => routes.front.dbView,
+      getRoute: () => routes.front.listDatabases,
       component: <DatabasesSideList />,
       icon: (
         <span title='Create Database'>
@@ -80,7 +77,7 @@ export const Sidebar = () => {
         if (activeTable && expandedSection === 'sideTables') {
           return routes.front.listTables;
         } else {
-          return activeTable ? routes.front.tableView : routes.front.listTables;
+          return activeTable ? routes.front.listData : routes.front.listTables;
         }
       },
       component: <TablesSideList />,
@@ -102,7 +99,7 @@ export const Sidebar = () => {
     {
       id: 'sideQueries',
       getTitle: () => `Queries: ${queriesStoreActions.getQueriesCount()}`,
-      getRoute: () => routes.front.queriesList,
+      getRoute: () => routes.front.listQueries,
       component: <QueriesSideList />,
       icon: (
         <ChevronsLeftRightEllipsisIcon
@@ -121,7 +118,7 @@ export const Sidebar = () => {
     (section) => sidebarVisibility[section.id],
   );
 
-  const toggleSection = (section: SideSectionItem) => {
+  const toggleSection = (section: SidebarItem) => {
     setExpandedSection(section.id);
     const route = section.getRoute();
     if (route && location.pathname !== route) {

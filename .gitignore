@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 dist
+output
+vite-output
 *.local
 
 # testing

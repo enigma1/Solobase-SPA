@@ -1,14 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 
+type DropDownMenuProps = {
+  label: React.ReactNode;
+  children: React.ReactNode;
+  disabled?: boolean;
+  title?: string;
+};
 export const DropdownMenu = ({
   label,
   children,
   disabled,
-}: {
-  label: React.ReactNode;
-  children: React.ReactNode;
-  disabled?: boolean;
-}) => {
+  title,
+}: DropDownMenuProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -24,7 +27,7 @@ export const DropdownMenu = ({
   }, []);
 
   return (
-    <div className='menu-dropdown' ref={ref}>
+    <div className='menu-dropdown' title={title} ref={ref}>
       <button
         data-disabled={disabled ? 'true' : undefined}
         onClick={() => setOpen((v) => !v)}

@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+// import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { queryKeys } from '>/services/queryHooks';
 import { useModal } from '>/services/hooks';
-import { ScreenLoader, DialogContent } from '>/modules';
 import { ButtonStatus, WizardHandlers } from '>/types';
 import { UserBasics, UserReview, UserFormShape, UserFormProfile } from './Form';
 
@@ -39,7 +37,7 @@ export const UserForm = ({
     return stepOrder[Math.max(idx - 1, 0)];
   };
 
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   // const { user, host, isFetching, isSuccess } = useUserInfo(
   //   ({ state, query }) => ({
@@ -89,12 +87,12 @@ export const UserForm = ({
     };
   }, [step]);
 
-  useEffect(() => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.users(),
-      exact: true,
-    });
-  }, []);
+  // useEffect(() => {
+  //   queryClient.invalidateQueries({
+  //     queryKey: queryKeys.users(),
+  //     exact: true,
+  //   });
+  // }, []);
 
   const { setButtonsStatuses } = useModal();
   const updateButtons = (step: UserFormStep, valid: boolean) => {

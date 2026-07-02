@@ -1,5 +1,5 @@
 import { useHistoryStore } from '>/services/stores';
-export const TextView = () => {
+export const ImportView = () => {
   const { lastImport } = useHistoryStore(({ state }) => ({
     lastImport: state.lastImport,
   }));
@@ -7,13 +7,13 @@ export const TextView = () => {
   const content =
     lastImport.length > 0
       ? lastImport
-      : 'No data available during the last import ';
+      : 'No details available during the last data process';
 
   return (
     <>
       <div className='page-top-container'>
         <div className='page-spacer'>
-          <div className='page-title'>Last Imported SQL</div>
+          <div className='page-title'>Last Processed SQL</div>
         </div>
       </div>
       <div className='page-content'>

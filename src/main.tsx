@@ -1,25 +1,20 @@
 import './styles/globals.css';
 import ReactDOM from 'react-dom/client';
-import { MotionConfig } from 'framer-motion';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { configStoreActions } from '>/services/stores/configStore';
-import { apiClient } from '>/services/api/client';
+import { MotionConfig } from 'framer-motion';
 import { App } from './app/App';
 import { queryClient } from './config/reactQuery';
+import { configStoreActions } from './services/stores';
 
-type WindowConfig = {
-  userPrefs: Record<string, string | number>;
-};
 const container = document.getElementById('root');
 
 if (!container) {
-  throw new Error('Root element not found to start dbManagerJs');
+  throw new Error(
+    'Solobase-SPA: Root element not found - will not start reactjs',
+  );
 }
 
-const config = (window as any).APP_CONFIG;
-const { userPrefs, appSettings } = config;
-configStoreActions.initialize(userPrefs);
-
+configStoreActions.setTheme();
 ReactDOM.createRoot(container).render(
   /*
   <React.StrictMode>

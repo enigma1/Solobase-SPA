@@ -2,21 +2,23 @@ import { z } from 'zod';
 import isEqual from 'lodash-es/isEqual';
 import cloneDeep from 'lodash-es/cloneDeep';
 import merge from 'lodash-es/merge';
+import type { BasicResponse, BasicRowsShape } from '>/services/api';
+import type { UserCapabilities } from '>/types';
 
-export const defaultResponse = {
+export const defaultResponse: BasicResponse = {
   ok: false,
   message: 'Warning - No Request made, this is a dummy response',
   route: '#',
   queries: [],
 };
 
-export const defaultListResponse = {
+export const defaultListResponse: BasicRowsShape = {
   rows: [],
   cols: {},
   columnsOrder: [],
 };
 
-export const defaultCapabilities = {
+export const defaultCapabilities: UserCapabilities = {
   canGrantPrivileges: true,
   canViewUsers: true,
   canManageUsers: true,

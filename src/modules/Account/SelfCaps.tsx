@@ -17,26 +17,29 @@ export const SelfCaps = () => {
   return (
     <div className='area-container'>
       <div className='area-spacer'>
-        <h1 className='area-title'>Privileges</h1>
+        <h1 className='area-title'>Current Privileges</h1>
       </div>
 
       <div className='area-listing'>
-        {items.map(([label, enabled]) => (
-          <div
-            key={label as string}
-            className='area-item flex-row items-center gap-2'
-          >
-            <div className='one-line'>
-              {enabled ? (
-                <CheckCircle2Icon size={16} className='shrink-0' />
-              ) : (
-                <XCircleIcon size={16} className='shrink-0' />
-              )}
+        {items.map(([label, enabled], idx) => {
+          const bgStyle = idx % 2 ? 'odd' : 'even';
+          return (
+            <div
+              key={label as string}
+              className={`area-item flex-row items-center gap-2 ${bgStyle}`}
+            >
+              <div className='one-line'>
+                {enabled ? (
+                  <CheckCircle2Icon size={16} className='shrink-0' />
+                ) : (
+                  <XCircleIcon size={16} className='shrink-0' />
+                )}
 
-              <span>{label}</span>
+                <span>{label}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

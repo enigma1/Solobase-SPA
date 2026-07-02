@@ -1,59 +1,46 @@
 import { Scalar } from '>/types';
 
-export type Result<T> =
-  | { success: true; data: T }
-  | { success: false; error: Error };
+// export type Result<T> =
+//   | { success: true; data: T }
+//   | { success: false; error: Error };
 
-export const result = (() => {
-  const withOk = <T>(data: T): Result<T> => ({ success: true, data });
-  const withFail = <T = never>(error: Error): Result<T> => ({
-    success: false,
-    error,
-  });
-  const withResult = async <T>(
-    fn: () => Promise<T> | T,
-  ): Promise<Result<T>> => {
-    try {
-      const data = await fn();
-      return withOk(data);
-    } catch (e) {
-      return withFail(e as Error);
-    }
-  };
-  return {
-    withOk,
-    withFail,
-    withResult,
-  };
-})();
+// export const result = (() => {
+//   const withOk = <T>(data: T): Result<T> => ({ success: true, data });
+//   const withFail = <T = never>(error: Error): Result<T> => ({
+//     success: false,
+//     error,
+//   });
+//   const withResult = async <T>(
+//     fn: () => Promise<T> | T,
+//   ): Promise<Result<T>> => {
+//     try {
+//       const data = await fn();
+//       return withOk(data);
+//     } catch (e) {
+//       return withFail(e as Error);
+//     }
+//   };
+//   return {
+//     withOk,
+//     withFail,
+//     withResult,
+//   };
+// })();
 
-type GetDatabaseField = {
+type GetCellValueProps = {
   row: Scalar[];
   columnsOrder: string[];
   colName: string;
 };
-export const getDatabaseField = ({
+export const getCellValue = ({
   row,
   columnsOrder,
   colName,
-}: GetDatabaseField): Scalar => {
+}: GetCellValueProps): Scalar | undefined => {
   const index = columnsOrder.indexOf(colName);
   if (index === -1) return null;
   return row[index];
 };
-
-// export const getDatabaseNamesFromResult = (
-//   rows: Scalar[][],
-//   columnsOrder: string[],
-// ) => {
-//   const values = rows.map((row) =>
-//     getDatabaseField(row, columnsOrder, 'SCHEMA_NAME'),
-//   );
-//   if (values.some((v) => v === null)) {
-//     return [];
-//   }
-//   return values as string[];
-// };
 
 type SingleColumnProps = {
   rows: Scalar[][];
@@ -66,7 +53,7 @@ export const getSingleColumnFromResult = ({
   field,
 }: SingleColumnProps) => {
   const values = rows.map((row) =>
-    getDatabaseField({ row, columnsOrder, colName: field }),
+    getCellValue({ row, columnsOrder, colName: field }),
   );
   if (values.some((v) => v === null)) {
     return [];
@@ -79,15 +66,27 @@ type ColumnsFromResultProps = {
   columnsOrder: string[];
   fields: string[];
 };
+export const getOnlyColumnsFromResult = ({
+  rows,
+  columnsOrder,
+  fields,
+}: ColumnsFromResultProps) => {
+  const indexes = fields.map((field) => columnsOrder.indexOf(field));
+  return rows.map((row) => indexes.map((i) => row[i]));
+};
+
 export const getColumnsFromResult = ({
   rows,
   columnsOrder,
   fields,
 }: ColumnsFromResultProps) => {
-  const result = fields.map((f) =>
-    getSingleColumnFromResult({ rows, columnsOrder, field: f }),
+  const fieldSet = new Set(fields);
+
+  return rows.map((row) =>
+    row.map((value, index) =>
+      fieldSet.has(columnsOrder[index]) ? value : null,
+    ),
   );
-  return result;
 };
 
 type ColumnsFromRowProps = {

@@ -1,8 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-import { routes } from '>/config';
-import { queryKeys, useTableDataHook } from '>/services/queryHooks';
+import { useTableDataHook } from '>/services/queryHooks';
 import {
   useAccountStore,
   tablesDataStoreActions,
@@ -13,17 +10,12 @@ import {
   CollectionViewType,
   SqlView,
   ScreenLoader,
-  EmptyPage,
   EmptyListing,
   dialogFactories,
 } from '>/modules';
 import { SqlColumnsShape, SqlRow, CollectionRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const queryClient = useQueryClient();
   const { dbSelected, activeTable } = useAccountStore(({ state, api }) => ({
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
@@ -51,24 +43,15 @@ export const TableDataView = () => {
 
   useEffect(() => {
     tablesDataStoreActions.initialize();
-    if (!dbSelected || !activeTable) {
-      return;
-    }
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.tables(dbSelected),
-      exact: true,
-    });
   }, [dbSelected, activeTable]);
 
   const isBusy = isFetching;
 
-  if (!dbSelected) {
-    // navigate(routes.front.dbView, { replace: true });
+  if (!dbSelected || !activeTable) {
     return null;
   }
-  if (!activeTable) {
-    // navigate(routes.front.listTables, { replace: true });
-    return null;
+  if (isBusy) {
+    return <ScreenLoader />;
   }
 
   const onCreate = () => {
@@ -79,10 +62,6 @@ export const TableDataView = () => {
       }),
     });
   };
-
-  if (isBusy) {
-    return <ScreenLoader />;
-  }
 
   if (rows.length === 0) {
     return (

@@ -1,8 +1,8 @@
-import { ChangeEvent, useState } from 'react';
+import { useState } from 'react';
+import { FieldValues, Controller } from 'react-hook-form';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { FormFieldWrapper } from './FormCommon';
-import { FieldValues, Controller } from 'react-hook-form';
-import { FormCommonFieldProps } from './commonTypes';
+import type { FormCommonFieldProps } from './commonTypes';
 
 export type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -10,6 +10,7 @@ export type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   status?: 'error' | 'success';
   endAdornment?: React.ReactNode;
   inputClassName?: string;
+  onValueChange?: (value: string) => void;
 };
 
 export const InputField = ({
@@ -21,6 +22,8 @@ export const InputField = ({
   inputClassName,
   value,
   type,
+  onChange,
+  onValueChange,
   ...props
 }: InputFieldProps) => (
   <FormFieldWrapper
@@ -37,6 +40,10 @@ export const InputField = ({
         id={id}
         className={`w-full input ${inputClassName ?? ''}`}
         data-status={status}
+        onChange={(e) => {
+          onChange?.(e);
+          onValueChange?.(e.currentTarget.value);
+        }}
       />
       {endAdornment}
     </div>
@@ -60,8 +67,7 @@ export const FormInputField = <T extends FieldValues>({
       control={control}
       rules={rules}
       render={({ field, fieldState }) => {
-        const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-          const v = e.currentTarget.value;
+        const handleChange = (v: string) => {
           onValueChange?.(v, field);
           field.onChange(v);
         };
@@ -71,7 +77,7 @@ export const FormInputField = <T extends FieldValues>({
             {...rest}
             id={id}
             label={label}
-            onChange={handleChange}
+            onValueChange={handleChange}
             notice={fieldState.error?.message}
             status={fieldState.error ? 'error' : undefined}
             endAdornment={endAdornment}

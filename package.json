@@ -24,7 +24,7 @@
     "date-fns": "^4.2.1",
     "events": "^3.3.0",
     "lodash-es": "^4.18.1",
-    "lucide-react": "^1.14.0",
+    "lucide-react": "^1.22.0",
     "motion": "^12.38.0",
     "polished": "^4.3.1",
     "react": "^19.2.5",
@@ -72,6 +72,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
+    "build:single": "vite build --config vite.single.config.ts",
     "test:exp": "node --experimental-vm-modules node_modules/.bin/jest",
     "test": "vitest"
   },

@@ -101,7 +101,10 @@ export type CreateDataRowsRequest = BasicRowsShape & {
   table: string;
 };
 
-export type CreateDataRowsResponse = BasicResponse & BasicRowsShape;
+export type CreateDataRowsResponse = BasicResponse & {
+  database: string;
+  table: string;
+};
 
 type ChangedRow = {
   originalRow: TableDataRow; // original row as fetched from the database
@@ -117,6 +120,8 @@ export type UpdateDataRowsRequest = {
 
 export type UpdateDataRowsResponse = BasicResponse & {
   rows: TableDataRow[];
+  database: string;
+  table: string;
 };
 
 export type DeleteDataRowsRequest = {
@@ -125,7 +130,8 @@ export type DeleteDataRowsRequest = {
   rows: SqlRow[];
 };
 export type DeleteDataRowsResponse = BasicResponse & {
-  rows: TableDataRow[];
+  database: string;
+  table: string; // Table being edited
 };
 
 // export type InsertDataRowsRequest = {
@@ -189,7 +195,7 @@ export type DeleteUsersResponse = BasicResponse & {
 };
 
 export type SelectDatabaseRequest = {
-  name: string;
+  database: string;
 };
 
 export type SelectDatabaseResponse = BasicResponse & {
@@ -272,6 +278,7 @@ export type GetTableColumnsInfoResponse = BasicResponse &
 export type ImportDataRequest = {
   database?: string;
   data: string;
+  groupByMode?: GroupByModes;
 };
 
 export type ImportDataResponse = BasicResponse;

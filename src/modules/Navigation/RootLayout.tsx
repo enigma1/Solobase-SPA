@@ -20,16 +20,29 @@ import {
 // For testing purposes only, remove in production
 import { NavigationDebugger } from '>/modules/Debug/NavigationDebugger';
 import {
+  handleLogin,
   handleLogout,
   handlePreferences,
-  handleNewUser,
+  handleCreateUser,
   handleYourPrivileges,
 } from '>/modules/Account';
 import { useDebouncer } from '>/services/hooks/common';
 import { AuthNavigationLinks } from './NavigationLinks';
 
 const GuestNavigationLinks = () => null;
-const GuestMenu = () => null;
+const GuestMenu = () => {
+  return (
+    <Guest>
+      <div className='menu'>
+        <DropdownMenu label='Guest'>
+          <a href='#' onClick={handleLogin}>
+            Login
+          </a>
+        </DropdownMenu>
+      </div>
+    </Guest>
+  );
+};
 
 const AuthMenu = () => {
   const { dbSelected, capabilities } = useAccountStore(({ state }) => ({
@@ -65,7 +78,7 @@ const AuthMenu = () => {
               New Database
             </a>
           )}
-          <Link to={routes.front.listDatabases}>Show Databases</Link>
+          <Link to={routes.front.listDatabases}>List Databases</Link>
           <a
             href='#'
             onClick={() =>
@@ -74,12 +87,16 @@ const AuthMenu = () => {
               })
             }
           >
-            Import Data
+            Import / Run Script
           </a>
-          <Link to={routes.front.textView}>Last SQL Processed</Link>
+          <Link to={routes.front.importView}>Last SQL Processed</Link>
         </DropdownMenu>
         <div className='menu-separator'>|</div>
-        <DropdownMenu label='Tables' disabled={!dbSelected}>
+        <DropdownMenu
+          label='Tables'
+          disabled={!dbSelected}
+          title={!dbSelected ? 'Select a database first' : undefined}
+        >
           {capabilities.canManageTables && (
             <a
               href='#'
@@ -106,7 +123,7 @@ const AuthMenu = () => {
           >
             New Query
           </a>
-          <Link to={routes.front.queriesList}>List Queries</Link>
+          <Link to={routes.front.listQueries}>List Queries</Link>
           <a
             href='#'
             onClick={() => {
@@ -123,10 +140,10 @@ const AuthMenu = () => {
             <div className='menu-separator'>|</div>
             {capabilities.canManageUsers && (
               <DropdownMenu label='Users'>
-                <a href='#' onClick={handleNewUser}>
+                <a href='#' onClick={handleCreateUser}>
                   Create User
                 </a>
-                <Link to={routes.front.usersList}>List Users</Link>
+                <Link to={routes.front.listUsers}>List Users</Link>
               </DropdownMenu>
             )}
           </>
@@ -177,9 +194,6 @@ export const RootLayout = () => {
   const headerVisibility = useConfigStore(
     ({ state }) => state.headerVisibility,
   );
-  const isHeaderShown = Object.values(headerVisibility).every(
-    (h) => h === true,
-  );
   const location = useLocation();
 
   // const [stableOnline, setStableOnline] = useState(online);
@@ -204,7 +218,7 @@ export const RootLayout = () => {
         <NavigationDebugger />
         {online && (
           <>
-            {isHeaderShown && (
+            {headerVisibility && (
               <header className='app-header'>
                 <div className='app-logo'>
                   <Link to={routes.front.home} className='font-semibold'>

@@ -2,20 +2,20 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { dbApi, FetchTablesResponse, BasicResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
-import { defaultResponse } from '>/services/utils';
-import { BaseTableData } from '>/types';
+import { defaultResponse, getSingleColumnFromResult } from '>/services/utils';
+import { SqlTableData } from '>/types';
 import { queryKeys, STALE_TIME, DataHookProps } from './defs';
 
 type TablesHookProps = DataHookProps<FetchTablesResponse>;
 export const useTablesHook = <TSelected = TablesHookProps>(
   selector?: (args: TablesHookProps) => TSelected,
 ) => {
-  const initialData = {
+  const initialData: BasicResponse & SqlTableData = {
     ...defaultResponse,
     rows: [],
     cols: {},
     columnsOrder: [],
-  } satisfies BaseTableData & BasicResponse;
+  };
 
   const { dbSelected, isAuthenticated } = useAccountStore(({ state }) => ({
     dbSelected: state.dbSelected,
@@ -39,25 +39,35 @@ export const useTablesHook = <TSelected = TablesHookProps>(
     enabled: !!database && isAuthenticated,
     retry: 1,
     refetchOnWindowFocus: false,
-    initialData,
     // placeholderData: keepPreviousData,
   });
 
   const data = q.data ?? initialData;
 
-  // state object
   const api = useMemo(() => {
-    const nameIndex = data.columnsOrder.indexOf('TABLE_NAME');
-
     return {
       getTablesCount: () => data.rows.length,
-      getTablesNames: () => {
-        if (nameIndex === -1) return [];
-        const result = data.rows.map((row) => row[nameIndex]);
-        return result;
-      },
+      getTablesNames: () =>
+        getSingleColumnFromResult({
+          rows: data.rows,
+          columnsOrder: data.columnsOrder,
+          field: 'TABLE_NAME',
+        }),
     };
   }, [data.rows, data.columnsOrder]);
+
+  // state object
+  // const api = useMemo(() => {
+  //   return {
+  //     getTablesCount: () => data.rows.length,
+  //     getTablesNames: () => {
+  //       const nameIndex = data.columnsOrder.indexOf('TABLE_NAME');
+  //       if (nameIndex === -1) return [];
+  //       const result = data.rows.map((row) => row[nameIndex]);
+  //       return result;
+  //     },
+  //   };
+  // }, [data.rows, data.columnsOrder]);
 
   // return selector pattern
   const store = {

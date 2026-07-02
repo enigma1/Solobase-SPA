@@ -227,14 +227,14 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
       confirm: () => {},
     };
 
-    const labels = [undefined, 'Apply'];
+    const labels = [undefined, 'Save Preferences'];
     const payload: DialogPayload = {
       initialSize: 'md',
       caption: 'Preferences',
       component: <Preferences formHandlers={handlers} />,
       variant: 'info',
       actions: dialogActions
-        .enabledConfirmCancel({
+        .confirmCancel({
           onConfirm: () => {
             handlers.confirm();
             // dialogStoreActions.closeDialog();
@@ -248,7 +248,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
     return payload;
   },
 
-  newUser: () => {
+  createUser: () => {
     const handlers: WizardHandlers = {};
     const payload: DialogPayload = {
       initialSize: 'lg',
@@ -274,7 +274,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
   yourPrivileges: () => {
     const payload: DialogPayload = {
       initialSize: 'sm',
-      caption: 'Your Priveleges',
+      caption: 'Account Priveleges',
       component: <SelfCaps />,
       variant: 'info',
       actions: dialogActions.ack(),

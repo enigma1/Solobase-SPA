@@ -1,59 +1,45 @@
+import {
+  makeStore,
+  userPrefs,
+  loadStoredPreferences,
+  storePreferences,
+} from '>/services/utils';
 import { apiClient } from '>/services/api/client';
-import { makeStore } from '>/services/utils/emitter';
-
-type ConfigState = {
-  hiddenColumns: Record<string, boolean>;
-  sidebarVisibility: Record<string, boolean>;
-  headerVisibility: Record<string, boolean>;
-  theme: string;
-  sidebarWidth: number;
-  backend: string;
-};
+import { StorageConfig, SidebarVisibilityType } from '>/types';
 
 export type ConfigActions = {
-  initialize: (cfg: Partial<ConfigState>) => void;
-  setTheme: (value: string) => void;
+  setTheme: (value?: string) => void;
   getHiddenColumns: () => Record<string, boolean>;
   setHiddenColumns: (cols: Record<string, boolean>) => void;
-  savePreferences: (prefs: Partial<ConfigState>) => void;
-  setBackend: (backend?: string) => void;
+  setHeaderVisibility: (visible: boolean) => void;
+  setSidebarVisibility: (visibility: SidebarVisibilityType) => void;
+  getPreferences: () => StorageConfig;
+  savePreferences: (prefs?: Partial<StorageConfig>) => void;
+  restorePreferences: (defaultsOnly: boolean) => void;
+  setBackend: (backend?: string, updateClient?: boolean) => void;
   getBackend: () => string;
+  setFrontPort: (port: number) => void;
+  getFrontPort: () => number;
 };
 
-export type ConfigStore = ConfigState & ConfigActions;
+export type ConfigStore = StorageConfig & ConfigActions;
 
-const initialState: ConfigState = {
-  backend: '',
-  hiddenColumns: {},
-  sidebarWidth: 256,
-  sidebarVisibility: {
-    sideDatabases: true,
-    sideTables: true,
-    sideQueries: true,
-  },
-  headerVisibility: {
-    topTheme: true,
-    runQuery: true,
-  },
-  theme: sessionStorage.getItem('dbTheme') ?? 'clean-slate',
-};
+const initialState: StorageConfig = userPrefs;
 
-// const baseStore = makeStore<ConfigState>(() => ({ ...initialState }));
-const baseStore = makeStore<ConfigState>(() => ({ ...initialState }));
+const baseStore = makeStore<StorageConfig>(() => {
+  apiClient.defaults.baseURL = userPrefs.backend ?? '';
+  return {
+    ...initialState,
+    ...loadStoredPreferences(),
+  };
+});
 const { get, set, setAuto } = baseStore;
 
 export const configStoreActions: ConfigActions = {
-  initialize: (cfg) => {
-    const combinedState = {
-      ...initialState,
-      ...cfg,
-    };
-    set(() => combinedState);
-    apiClient.defaults.baseURL = combinedState.backend;
-  },
   setTheme: (value) => {
-    setAuto({ theme: value });
-    sessionStorage.setItem('dbTheme', value);
+    const theme = value ?? get().theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    value && setAuto({ theme: value });
   },
   setHiddenColumns: (cols) => {
     setAuto({ hiddenColumns: cols });
@@ -61,18 +47,40 @@ export const configStoreActions: ConfigActions = {
   getHiddenColumns: () => get().hiddenColumns,
 
   getBackend: () => get().backend,
-  setBackend: (url) => {
+  setBackend: (url, updateClient = true) => {
     setAuto({ backend: url });
-    apiClient.defaults.baseURL = url;
+    if (updateClient) {
+      apiClient.defaults.baseURL = url;
+    }
+  },
+  getFrontPort: () => get().frontPort,
+  setFrontPort: (port) => {
+    setAuto({ frontPort: port });
+  },
+  setHeaderVisibility: (visible) => {
+    setAuto({ headerVisibility: visible });
+  },
+  setSidebarVisibility: (visibility) => {
+    setAuto({ sidebarVisibility: visibility });
+  },
+  getPreferences: () => get(),
+  savePreferences: (settings?: Partial<StorageConfig>) => {
+    const modSettings = settings ?? get();
+    storePreferences(modSettings);
+    setAuto({ ...modSettings });
   },
 
-  savePreferences: (settings: Partial<ConfigState>) => {
-    setAuto({ ...settings });
+  restorePreferences: (defaultsOnly = false) => {
+    const combinedState = {
+      ...initialState,
+      ...(!defaultsOnly && loadStoredPreferences()),
+    };
+    set(() => combinedState);
   },
 };
 
 type SelectorProps = {
-  state: ConfigState;
+  state: StorageConfig;
   api: ConfigActions;
 };
 export const useConfigStore = <TSelected = SelectorProps>(

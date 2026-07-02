@@ -2,35 +2,59 @@ import { useState, useEffect } from 'react';
 import { ListChevronsDownUpIcon, ListChevronsUpDownIcon } from 'lucide-react';
 import { useModal } from '>/services/hooks';
 import {
+  useConfigStore,
+  messageStoreActions,
+  configStoreActions,
+} from '>/services/stores';
+import {
   ThemeSelect,
   HiddenColumns,
   HeaderVisibility,
   SidebarVisibility,
+  NetworkSelect,
 } from './Prefs';
-import { CommonDialogHandlers } from '>/types';
+import { CommonDialogHandlers, StorageConfig } from '>/types';
 
 type PreferencesProps = {
   formHandlers: CommonDialogHandlers;
 };
 export const Preferences = ({ formHandlers }: PreferencesProps) => {
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [dirty, setDirty] = useState<boolean>(false);
-  const [save, setSave] = useState<boolean>(false);
+  // const { savePreferences, preferences } = useConfigStore(({ state, api }) => ({
+  //   savePreferences: api.savePreferences,
+  //   preferences: state,
+  // }));
+
+  const [tempSettings, setTempSettings] = useState<StorageConfig>(
+    configStoreActions.getPreferences(),
+  );
   const { setButtonStatus } = useModal();
 
   const onConfirm = () => {
-    setSave(true);
-    setDirty(false);
+    messageStoreActions.addMessage({
+      type: 'success',
+      content: {
+        text: `Preferences updated`,
+        duration: 3000,
+      },
+    });
+    configStoreActions.savePreferences(tempSettings);
+  };
+
+  const handleModify = (props: Partial<StorageConfig>) => {
+    setTempSettings({
+      ...tempSettings,
+      ...props,
+    });
   };
 
   useEffect(() => {
-    setButtonStatus('confirm', !dirty ? 'disabled' : undefined);
-    if (!dirty) setSave(false);
-  }, [dirty, save]);
+    setButtonStatus('confirm', tempSettings ? undefined : 'disabled');
+  }, [tempSettings]);
 
   useEffect(() => {
     formHandlers.confirm = onConfirm;
-  }, [onConfirm]);
+  }, [formHandlers, onConfirm]);
 
   return (
     <>
@@ -52,18 +76,31 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
           </div>
         </div>
         <div className='area-content'>
+          <div className='area-title space-y-2'>Network Settings</div>
+          {!collapsed && (
+            <NetworkSelect modified={tempSettings} onModify={handleModify} />
+          )}
           <div className='area-title space-y-2'>Theme Settings</div>
-          {!collapsed && <ThemeSelect />}
+          {!collapsed && (
+            <ThemeSelect modified={tempSettings} onModify={handleModify} />
+          )}
           <div className='area-title space-y-2'>
             Hidden Columns in table views
           </div>
           {!collapsed && (
-            <HiddenColumns onModify={() => setDirty(true)} save={save} />
+            <HiddenColumns modified={tempSettings} onModify={handleModify} />
           )}
           <div className='area-title space-y-2'>Header Visibility</div>
-          {!collapsed && <HeaderVisibility />}
+          {!collapsed && (
+            <HeaderVisibility modified={tempSettings} onModify={handleModify} />
+          )}
           <div className='area-title space-y-2'>Sidebar Visibility</div>
-          {!collapsed && <SidebarVisibility />}
+          {!collapsed && (
+            <SidebarVisibility
+              modified={tempSettings}
+              onModify={handleModify}
+            />
+          )}
         </div>
       </div>
     </>

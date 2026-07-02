@@ -107,12 +107,12 @@ export const TableForm = ({
     };
   }, [step]);
 
-  useEffect(() => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.databaseServerInfo(),
-      exact: true,
-    });
-  }, []);
+  // useEffect(() => {
+  //   queryClient.invalidateQueries({
+  //     queryKey: queryKeys.databaseServerInfo(),
+  //     exact: true,
+  //   });
+  // }, []);
 
   const { setButtonsStatuses } = useModal();
   const updateButtons = (step: TableFormStep, valid: boolean) => {

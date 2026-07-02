@@ -92,8 +92,9 @@ export const getInvalidationLegacy = (key: InvalidationKey) => {
   if (index === -1) {
     throw new Error(`Invalidation key not found in hierarchy: ${key}`);
   }
-
-  return invalidationPipeline.slice(0, index + 1);
+  const slice = invalidationPipeline.slice(0, index + 1);
+  // console.log('slice', slice);
+  return slice;
 };
 
 export const getMutationResult = <TData = any, TVariables = any>(

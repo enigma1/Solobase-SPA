@@ -1,15 +1,8 @@
-import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useForm, Controller, FieldErrors, useWatch } from 'react-hook-form';
-import {
-  queryKeys,
-  useCreateDatabaseMutation,
-  useDatabaseServerInfo,
-} from '>/services/queryHooks';
-import { messageStoreActions, useAccountStore } from '>/services/stores';
-import { dbApi, CreateDatabaseRequest } from '>/services/api';
-import { FormTextField, ScreenLoader, ComboBox } from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+import { useCreateDatabaseMutation } from '>/services/queryHooks';
+import { messageStoreActions } from '>/services/stores';
+import { CreateDatabaseResponse } from '>/services/api';
+import { ScreenLoader } from '>/modules';
 import { DatabaseForm } from './DatabaseForm';
 import { DatabaseShape, ComponentFormHandlers } from '>/types';
 
@@ -17,12 +10,8 @@ export const DatabaseNew = (props: ComponentFormHandlers) => {
   const queryClient = useQueryClient();
 
   const createDatabaseCallbacks = {
-    onSuccess: (data: any) => {
+    onSuccess: (data: CreateDatabaseResponse) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.databases(),
-          exact: true,
-        });
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: 'Database created successfully', duration: 3000 },

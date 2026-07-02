@@ -50,6 +50,12 @@ export type BaseTableData = {
   columnsOrder: string[];
 };
 
+export type SqlTableData = {
+  rows: SqlRow[];
+  cols: SqlColumnsShape;
+  columnsOrder: string[];
+};
+
 const DB_TABLE_TYPE = ['table', 'collection'] as const;
 export type TableData = BaseTableData & {
   type: (typeof DB_TABLE_TYPE)[number];

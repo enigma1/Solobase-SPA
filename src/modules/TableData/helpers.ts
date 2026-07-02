@@ -1,4 +1,4 @@
-import { UpdateRowsRequest } from '>/services/api';
+import { UpdateDataRowsRequest } from '>/services/api';
 import {
   CollectionRow,
   TableDataRow,
@@ -7,15 +7,15 @@ import {
   SqlRow,
 } from '>/types';
 
-type UpdateRowsCollectionProps = {
+type UpdateDataRowsCollectionProps = {
   componentShape: Record<string, CollectionRow>;
   table: string;
   originalRows: CollectionRow[];
 };
 
 export const updateRowsCollectionTransformer = (
-  props: UpdateRowsCollectionProps,
-): UpdateRowsRequest => {
+  props: UpdateDataRowsCollectionProps,
+): UpdateDataRowsRequest => {
   const { componentShape, table, originalRows } = props;
   const rowsToUpdate = Object.entries(componentShape).map(([_id, doc]) => {
     const row = originalRows.find((row) => row._id === _id);
@@ -31,7 +31,7 @@ export const updateRowsCollectionTransformer = (
   return { table, dataRows: rowsToUpdate };
 };
 
-type UpdateRowsSqlProps = {
+type UpdateDataRowsSqlProps = {
   componentShape: Record<number, ScalarObject>;
   cols: SqlColumnsShape;
   table: string;
@@ -39,8 +39,8 @@ type UpdateRowsSqlProps = {
 };
 
 export const updateRowsSqlTransformer = (
-  props: UpdateRowsSqlProps,
-): UpdateRowsRequest => {
+  props: UpdateDataRowsSqlProps,
+): UpdateDataRowsRequest => {
   const { componentShape, table, originalRows, cols } = props;
 
   // Transformer - componentShape into API format

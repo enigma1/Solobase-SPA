@@ -1,32 +1,19 @@
-import { useState, useEffect } from 'react';
 import { useConfigStore } from '>/services/stores';
 import { CheckboxField } from '>/modules';
+import { ItemPreferenceProps } from '>/types';
 
-type HiddenColumnsProps = {
-  save: boolean;
-  onModify: () => void;
-};
-export const HiddenColumns = ({ save, onModify }: HiddenColumnsProps) => {
-  const [restoredCols, setRestoredCols] = useState<Record<string, boolean>>({});
-  const { hiddenColumns, savePreferences } = useConfigStore(
-    ({ state, api }) => ({
-      hiddenColumns: state.hiddenColumns,
-      savePreferences: api.savePreferences,
-    }),
-  );
+export const HiddenColumns = ({ modified, onModify }: ItemPreferenceProps) => {
+  const { hiddenColumns } = useConfigStore(({ state }) => ({
+    hiddenColumns: state.hiddenColumns,
+  }));
 
-  useEffect(() => {
-    if (!save) return;
-
-    const nextHiddenColumns = { ...hiddenColumns };
-
-    Object.entries(restoredCols).forEach(([col, restored]) => {
-      if (restored) {
-        delete nextHiddenColumns[col];
-      }
+  const modHiddenColumns = { ...modified.hiddenColumns };
+  const handleColumnChange = (col: string, value: boolean) => {
+    value ? (modHiddenColumns[col] = true) : delete modHiddenColumns[col];
+    onModify({
+      hiddenColumns: modHiddenColumns,
     });
-    savePreferences({ hiddenColumns: nextHiddenColumns });
-  }, [save]);
+  };
 
   const hiddenColumnsList = Object.keys(hiddenColumns);
   if (hiddenColumnsList.length === 0) {
@@ -38,15 +25,9 @@ export const HiddenColumns = ({ save, onModify }: HiddenColumnsProps) => {
         return (
           <div key={`${col}-${idx}`} className='area-item'>
             <CheckboxField
-              checked={restoredCols[col] !== true}
+              checked={!!modHiddenColumns[col]}
               onChange={(value) => {
-                setRestoredCols((cols) => {
-                  value === false && onModify();
-                  return {
-                    ...cols,
-                    [col]: !value,
-                  };
-                });
+                handleColumnChange(col, value);
               }}
               id={`hidden-column-${idx}`}
               label={col}

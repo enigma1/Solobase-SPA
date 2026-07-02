@@ -46,13 +46,16 @@ export const NetworkDown = () => {
       return;
     }
 
-    messageStoreActions.addMessage({
-      type: 'success',
-      content: {
-        text: `Network connectivity restored after ${formatDuration(Temporal.Now.instant().since(startedAt))}`,
-        duration: 8000,
-      },
-    });
+    const duration = Temporal.Now.instant().since(startedAt);
+    if (duration.total({ unit: 'seconds' }) >= 3) {
+      messageStoreActions.addMessage({
+        type: 'success',
+        content: {
+          text: `Network connectivity restored after ${formatDuration(Temporal.Now.instant().since(startedAt))}`,
+          duration: 8000,
+        },
+      });
+    }
 
     navigate(redirectPath, {
       replace: true,
@@ -80,9 +83,9 @@ export const NetworkDown = () => {
           <h1 className='page-title text-4xl font-bold'>Network Down</h1>
           <div className='page-section bg-transparent max-w-lg'>
             <p className='central'>
-              It seems like you're offline or the system is misconfigured to
-              connect to the back-end. System will automatically reconnect once
-              connectivity is restored.
+              It seems like you're offline or the system is misconfigured and
+              cannot connect to a back endpoint. System will automatically
+              reconnect once connectivity is restored.
             </p>
             <p className='central'>
               Enter a connection endpoint below for the Solobase Agent Proxy or
@@ -99,6 +102,12 @@ export const NetworkDown = () => {
                 onChange={(e) => {
                   const value = e.currentTarget.value;
                   setEndpoint(value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    setConnection();
+                  }
                 }}
                 placeholder='eg: https://example.com:5650'
               />

@@ -1,3 +1,4 @@
+export * from './storage';
 export * from './basics';
 export * from './controls';
 export * from './status';

@@ -1,5 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys, useCreateUserMutation } from '>/services/queryHooks';
+import { useCreateUserMutation } from '>/services/queryHooks';
 import { messageStoreActions } from '>/services/stores';
 import { ScreenLoader } from '>/modules';
 import { WizardHandlers } from '>/types';
@@ -13,14 +12,9 @@ type UserEditProps = {
 };
 
 export const UserEdit = ({ wizardHandlers, user, host }: UserEditProps) => {
-  const queryClient = useQueryClient();
   const editUserCallbacks = {
     onSuccess: (data: any) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.users(),
-          exact: true,
-        });
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: `User successfully updated`, duration: 5000 },

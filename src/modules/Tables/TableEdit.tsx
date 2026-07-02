@@ -6,6 +6,7 @@ import { ScreenLoader } from '>/modules';
 import { TableShape, WizardHandlers } from '>/types';
 import { TableForm } from './TableForm';
 import { TableFormShape } from './Form';
+import type { EditTableResponse } from '>/services/api/dbApiTypes';
 
 type TableEditProps = {
   database: string;
@@ -62,12 +63,7 @@ export const TableEdit = ({
   };
 
   const editTableCallbacks = {
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.tableDetails(request.database, request.table),
-        exact: true,
-      });
-
+    onSuccess: (data: EditTableResponse) => {
       if (data.ok) {
         messageStoreActions.addMessage({
           type: 'success',

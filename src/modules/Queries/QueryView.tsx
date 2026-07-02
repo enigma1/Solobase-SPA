@@ -1,13 +1,12 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { SquareArrowRightEnterIcon } from 'lucide-react';
-import { useRawQueryMutation } from '>/services/queryHooks';
+import { useRawQueryMutation, useImportDataWrap } from '>/services/queryHooks';
 import {
   createFactoryTableStore,
   dialogStoreActions,
   useQueriesStore,
   messageStoreActions,
-  accountStoreActions,
 } from '>/services/stores';
 import {
   ScreenLoader,
@@ -18,18 +17,21 @@ import {
   EmptyListing,
   dialogFactories,
 } from '>/modules';
+import { routes } from '>/config';
 import type { ViewRow, SqlRow } from '>/types';
+import { QueryCommandView } from './QueryCommandView';
 
 export const QueryView = () => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
   const tableStore = useMemo(() => createFactoryTableStore(), []);
-  const { getSelectedQuery, getQueries } = useQueriesStore(
-    ({ state, api }) => ({
+  const navigate = useNavigate();
+
+  const { getSelectedQuery, selectedQueryTitle } = useQueriesStore(
+    ({ api, state }) => ({
       getSelectedQuery: api.getSelectedQuery,
-      getQueries: api.getQueries,
+      selectedQueryTitle: state.selectedQueryTitle,
     }),
   );
 
@@ -37,28 +39,12 @@ export const QueryView = () => {
 
   const queryCallbacks = {
     onSuccess: (data: any) => {
-      accountStoreActions.setActiveDatabase(null);
       if (!data.ok) {
         messageStoreActions.addMessage({
           type: 'warn',
           content: { text: 'Query executed with issues', duration: 3000 },
         });
       }
-
-      // if (data.ok) {
-      //   messageStoreActions.addMessage({
-      //     type: 'success',
-      //     content: { text: 'Query executed successfully', duration: 3000 },
-      //   });
-      // } else {
-      //   messageStoreActions.addMessage({
-      //     type: 'warn',
-      //     content: {
-      //       text: data.message ?? 'Not all databases were removed',
-      //       duration: 3000,
-      //     },
-      //   });
-      // }
     },
     onError: (error: any) => {
       messageStoreActions.addMessage({
@@ -66,6 +52,12 @@ export const QueryView = () => {
       });
     },
   };
+
+  const {
+    mutate: mutateImport,
+    isPending: isPendingImport,
+    response: responseImport,
+  } = useImportDataWrap();
 
   const { mutate, isPending, response } = useRawQueryMutation(
     ({ api, state, query }) => ({
@@ -79,12 +71,21 @@ export const QueryView = () => {
   useEffect(() => {
     if (!currentQuery) return;
 
+    if (currentQuery.multi) {
+      mutateImport({
+        data: currentQuery.query,
+        database: currentQuery.database,
+        groupByMode: currentQuery.groupByMode,
+      });
+      navigate(routes.front.importView);
+      return;
+    }
     mutate({
       query: currentQuery.query,
       database: currentQuery.database,
       groupByMode: currentQuery.groupByMode,
     });
-  }, [currentQuery?.query, currentQuery?.database]);
+  }, [currentQuery]);
 
   const isResultSet = response.mode === 'resultset';
   const rows = isResultSet ? response.rows : [];
@@ -117,6 +118,14 @@ export const QueryView = () => {
   if (isBusy) return <ScreenLoader />;
 
   if (!currentQuery || viewRows.length === 0) {
+    if (response.mode === 'command') {
+      return (
+        <QueryCommandView
+          message={response.message}
+          resultInfo={response.resultInfo}
+        />
+      );
+    }
     return (
       <EmptyListing
         onCreate={handleCreateQuery}
@@ -125,13 +134,8 @@ export const QueryView = () => {
     );
   }
 
-  if (!isResultSet) {
-    // return <CommandResult resultInfo={response.resultInfo} />;
-    return null;
-  }
-
   const db = currentQuery.database ? `in ${currentQuery.database}` : '';
-  const title = `${currentQuery.title.length > 0 ? 'Query: ' + currentQuery.title : 'Dynamic Query Results'}`;
+  const title = `${selectedQueryTitle && selectedQueryTitle.length > 0 ? 'Query: ' + selectedQueryTitle : 'Dynamic Query Results'}`;
 
   return (
     <>

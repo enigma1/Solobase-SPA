@@ -1,29 +1,28 @@
 import { useConfigStore } from '>/services/stores';
 import { CheckboxField } from '>/modules';
+import {
+  ItemPreferenceProps,
+  SidebarVisibilityType,
+  SidebarOptions,
+} from '>/types';
 
-export const HeaderVisibility = () => {
-  const { headerVisibility, savePreferences } = useConfigStore(
+export const HeaderVisibility = ({ onModify }: ItemPreferenceProps) => {
+  const { headerVisibility, setHeaderVisibility } = useConfigStore(
     ({ state, api }) => ({
       headerVisibility: state.headerVisibility,
-      savePreferences: api.savePreferences,
+      setHeaderVisibility: api.setHeaderVisibility,
     }),
-  );
-
-  const someHeadersVisible = Object.values(headerVisibility).some(
-    (head) => head === true,
   );
 
   return (
     <div className='area-item'>
       <CheckboxField
-        checked={someHeadersVisible}
+        checked={headerVisibility}
         onChange={(value) => {
-          const next = Object.fromEntries(
-            Object.keys(headerVisibility).map((key) => [key, value]),
-          );
-          savePreferences({
-            headerVisibility: next,
+          onModify({
+            headerVisibility: value,
           });
+          setHeaderVisibility(value);
         }}
         id='header-all'
         label='Show Header'
@@ -32,11 +31,14 @@ export const HeaderVisibility = () => {
   );
 };
 
-export const SidebarVisibility = () => {
-  const { sidebarVisibility, savePreferences } = useConfigStore(
+export const SidebarVisibility = ({
+  onModify,
+  modified,
+}: ItemPreferenceProps) => {
+  const { sidebarVisibility, setSidebarVisibility } = useConfigStore(
     ({ state, api }) => ({
       sidebarVisibility: state.sidebarVisibility,
-      savePreferences: api.savePreferences,
+      setSidebarVisibility: api.setSidebarVisibility,
     }),
   );
 
@@ -44,40 +46,41 @@ export const SidebarVisibility = () => {
     (bar) => bar,
   );
 
+  const bars = Object.keys(sidebarVisibility) as SidebarOptions[];
+
   return (
     <>
       <div className='area-item'>
         <CheckboxField
           checked={allSidebarsVisible}
           onChange={(value) => {
-            const next = Object.keys(sidebarVisibility).reduce(
-              (acc, key) => {
-                acc[key] = value;
-                return acc;
-              },
-              {} as typeof sidebarVisibility,
-            );
+            const next = bars.reduce((acc, key) => {
+              acc[key] = value;
+              return acc;
+            }, {} as SidebarVisibilityType);
 
-            savePreferences({
+            onModify({
               sidebarVisibility: next,
             });
+            setSidebarVisibility(next);
           }}
           id='sidebar-all'
           label='Show/hide Sidebar'
         />
       </div>
-      {Object.keys(sidebarVisibility).map((bar, idx) => {
+      {bars.map((bar, idx) => {
         return (
           <div key={`${bar}-${idx}`} className='area-item'>
             <CheckboxField
               checked={sidebarVisibility[bar]}
               onChange={(value) => {
-                // const { [bar]: removed, ...rest } = sidebarVisibility;
-                savePreferences({
-                  sidebarVisibility: {
-                    ...sidebarVisibility,
-                    [bar]: value,
-                  },
+                const combinedVisibility = {
+                  ...sidebarVisibility,
+                  [bar]: value,
+                };
+                setSidebarVisibility(combinedVisibility);
+                onModify({
+                  sidebarVisibility: combinedVisibility,
                 });
               }}
               id={`sidebar-${idx}`}

@@ -31,6 +31,7 @@ type SqlTableContainerProps = {
   editedRow?: Record<string, ScalarObject>;
   onEditCell?: (props: EditHandlerProps) => void;
   onEditRow?: (uid: string) => void;
+  onSelectRow?: (uid: string) => void;
 };
 
 export const SqlTableContainer = ({
@@ -45,8 +46,8 @@ export const SqlTableContainer = ({
   editedRow,
   onEditCell,
   onEditRow,
+  onSelectRow,
 }: SqlTableContainerProps) => {
-  // const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const { useFactoryTableStore } = store;
   const columnIndices = useMemo(
     () => Object.fromEntries(columnsOrder.map((name, idx) => [name, idx])),
@@ -104,8 +105,14 @@ export const SqlTableContainer = ({
               ? 'even'
               : 'odd';
           return (
-            <tr key={`row-${uid}-${idx}`} className={`${rowBg}`}>
-              <td className='align-middle'>
+            <tr
+              key={`row-${uid}-${idx}`}
+              className={`${rowBg}`}
+              onClick={() => {
+                onSelectRow?.(uid);
+              }}
+            >
+              <td className='align-middle' onClick={(e) => e.stopPropagation()}>
                 <div className='flex items-center gap-2'>
                   <CheckboxField
                     wrapLayout='stack'
@@ -117,7 +124,9 @@ export const SqlTableContainer = ({
                   {onEditRow && (
                     <button
                       className='btn-secondary p-0 bg-transparent border-0'
-                      onClick={() => onEditRow(uid)}
+                      onClick={(e) => {
+                        onEditRow(uid);
+                      }}
                     >
                       <PencilLineIcon size={18} className='inline-block' />
                     </button>
@@ -151,14 +160,15 @@ export const SqlTableContainer = ({
 
                     <button
                       className='btn p-0 edit'
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onEditCell({
                           row: [...row],
                           rId: Number(uid),
                           cId: colIndex,
                           colName,
-                        })
-                      }
+                        });
+                      }}
                     >
                       <SquarePenIcon size={18} />
                     </button>

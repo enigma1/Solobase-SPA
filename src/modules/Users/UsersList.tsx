@@ -14,6 +14,7 @@ import {
 import {
   getColumnsFromRow,
   getColumnsFromResult,
+  getOnlyColumnsFromResult,
   getSingleColumnFromResult,
   createFileSaveUrl,
   dialogActions,
@@ -83,11 +84,6 @@ export const UsersList = () => {
   const deleteUsersCallbacks = {
     onSuccess: (data: any) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.users(),
-          exact: true,
-        });
-
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: 'Selected Databases removed', duration: 3000 },
@@ -118,16 +114,16 @@ export const UsersList = () => {
     deleteUsersCallbacks,
   );
 
-  useEffect(() => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.databaseServerInfo(),
-      exact: true,
-    });
-  }, []);
+  // useEffect(() => {
+  //   queryClient.invalidateQueries({
+  //     queryKey: queryKeys.databaseServerInfo(),
+  //     exact: true,
+  //   });
+  // }, []);
 
   const handleCreateUser = () => {
     dialogStoreActions.openDialog({
-      payload: dialogFactories.createDatabase(),
+      payload: dialogFactories.createUser(),
     });
   };
 
@@ -143,10 +139,18 @@ export const UsersList = () => {
       const row = rowMap.get(id);
       if (row) dbEntries.push(row);
     }
+
+    const fields = ['Host', 'User'];
+
     const hostsUsers = getColumnsFromResult({
       rows: dbEntries,
       columnsOrder,
-      fields: ['Host', 'User'],
+      fields,
+    });
+    const hostsUsersPreview = getOnlyColumnsFromResult({
+      rows: dbEntries,
+      columnsOrder,
+      fields,
     });
 
     dialogStoreActions.openDialog({
@@ -154,7 +158,10 @@ export const UsersList = () => {
         caption: 'Removal of Databases',
         variant: 'error',
         component: (
-          <UsersDeletePreview rows={dbEntries} columnsOrder={columnsOrder} />
+          <UsersDeletePreview
+            rows={hostsUsersPreview}
+            columnsOrder={['Host', 'User']}
+          />
         ),
         actions: dialogActions.confirmCancel({
           onConfirm: () => {

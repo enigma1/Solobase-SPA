@@ -47,7 +47,7 @@ export const useTableDataHook = <TSelected = TablesHookProps>(
     enabled: !!dbSelected && !!activeTable && isAuthenticated,
     retry: 1,
     refetchOnWindowFocus: false,
-    initialData,
+    // initialData,
   });
 
   const data = q.data ?? initialData;

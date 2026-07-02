@@ -8,13 +8,13 @@ export const QueriesExecuted = () => {
       <div className='area-listing'>
         {queriesExecuted.map((q, idx) => {
           const bg = idx % 2 ? 'odd' : 'even';
-
+          const sql = typeof q === 'string' ? q : q?.sql;
           return (
             <div key={`${q}-${idx}`} className={`area-item ${bg}`}>
               <div className='stand'>
                 {`${q.durationMs.toFixed(2)} mSecs executed at: ${formatTime(q.startedAt)}`}
               </div>
-              <div className='stand'>{q.sql}</div>
+              <div className='stand'>{sql}</div>
               {(q.params as string) && (
                 <div className='stand'>{JSON.stringify(q.params)}</div>
               )}

@@ -6,6 +6,7 @@ type Query = {
   query: string;
   database?: string;
   groupByMode?: GroupByModes;
+  multi?: boolean;
 };
 
 type QueriesState = {
@@ -20,7 +21,7 @@ type QueriesState = {
 export type QueriesActions = {
   initialize: () => void;
   addQuery: (query: Query, select?: boolean) => void;
-  removeQuery: (title: string) => void;
+  removeQuery: (title?: string) => void;
   getQueriesCount: () => number;
   isQuerySelected: (title: string) => boolean;
   clearSelectedQuery: () => void;
@@ -124,7 +125,8 @@ export const queriesStoreActions: QueriesActions = {
       return next;
     });
   },
-  removeQuery: (title) => {
+  removeQuery: (inputTitle) => {
+    const title = inputTitle ?? '';
     set((s) => {
       const { [title]: removed, ...rest } = s.queries;
       return {

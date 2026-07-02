@@ -7,6 +7,7 @@ import {
   TableShapeColumn,
   SqlColumnsShape,
   DataCell,
+  GroupByModes,
 } from '>/types';
 
 export const tableColumnTypes = [
@@ -252,3 +253,9 @@ export const normalizeSql = (sql: string) =>
     .replace(/[ \t]+/g, ' ') // collapse spaces/tabs
     .replace(/\n{3,}/g, '\n\n') // reduce excessive blank lines
     .trim();
+
+export const groupByModes: { label: string; value: GroupByModes }[] = [
+  { label: 'Server Default', value: 'default' },
+  { label: 'Legacy GroupBy', value: 'legacy' },
+  { label: 'Strict GroupBy', value: 'strict' },
+];

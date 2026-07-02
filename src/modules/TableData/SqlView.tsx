@@ -1,5 +1,4 @@
 import { useRef, useMemo } from 'react';
-import { queryClient } from '>/config/reactQuery';
 import {
   Scalar,
   ScalarObject,
@@ -76,10 +75,6 @@ export const SqlView = ({
 
   const callbacks = {
     onSuccess: () => {
-      // Remove rows from query cache
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.rows(dbSelected, activeTable),
-      });
       // reset local edited state if provided
       markEditedRow({});
       addMessage({
@@ -107,10 +102,6 @@ export const SqlView = ({
 
   const deleteCallbacks = {
     onSuccess: () => {
-      // Remove rows from query cache
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.rows(dbSelected, activeTable),
-      });
       // reset local edited state if provided
       markEditedRow({});
       addMessage({

@@ -1,8 +1,9 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys, useCreateTableMutation } from '>/services/queryHooks';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCreateTableMutation } from '>/services/queryHooks';
 import { messageStoreActions } from '>/services/stores';
-import { dbApi, CreateTableRequest } from '>/services/api';
+import { CreateTableResponse } from '>/services/api';
 import { ScreenLoader } from '>/modules';
+import { routes } from '>/config';
 import { WizardHandlers } from '>/types';
 import { TableForm } from './TableForm';
 import { TableFormShape } from './Form';
@@ -13,14 +14,12 @@ type TableNewProps = {
 };
 
 export const TableNew = ({ database, wizardHandlers }: TableNewProps) => {
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const createTableCallbacks = {
-    onSuccess: (data: any) => {
+    onSuccess: (data: CreateTableResponse) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.tables(database),
-          exact: true,
-        });
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: `Table created in ${database}`, duration: 5000 },
@@ -33,6 +32,10 @@ export const TableNew = ({ database, wizardHandlers }: TableNewProps) => {
             duration: 3000,
           },
         });
+      }
+      if (location.pathname !== routes.front.listTables) {
+        navigate(routes.front.listTables);
+        return;
       }
     },
     onError: (error: any) => {

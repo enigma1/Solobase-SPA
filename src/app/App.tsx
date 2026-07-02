@@ -22,7 +22,7 @@ import {
   HomeRedirect,
   NetworkDown,
   UsersList,
-  TextView,
+  ImportView,
   ScreenLoader,
 } from '>/modules';
 import { isNonEmptyString } from '>/services/utils';
@@ -51,7 +51,6 @@ export const App = () => {
     if (isSuccess && session && isNonEmptyString(session.username)) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.databases(),
-        exact: true,
       });
 
       messageStoreActions.addMessage({
@@ -93,23 +92,23 @@ export const App = () => {
           element: <AuthGuard />,
           children: [
             {
-              path: routes.front.textView,
-              element: <TextView />,
+              path: routes.front.importView,
+              element: <ImportView />,
             },
             {
-              path: routes.front.dbView,
+              path: routes.front.listDatabases,
               element: <DatabasesMainView />,
-            },
-            {
-              path: routes.front.tableView,
-              element: <TableDataView />,
             },
             {
               path: routes.front.listTables,
               element: <TablesMainView />,
             },
             {
-              path: routes.front.queriesList,
+              path: routes.front.listData,
+              element: <TableDataView />,
+            },
+            {
+              path: routes.front.listQueries,
               element: <QueriesList />,
             },
             {
@@ -117,7 +116,7 @@ export const App = () => {
               element: <QueryView />,
             },
             {
-              path: routes.front.usersList,
+              path: routes.front.listUsers,
               element: <UsersList />,
             },
           ],

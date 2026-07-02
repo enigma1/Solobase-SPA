@@ -47,18 +47,7 @@ export const TablesMainView = () => {
   useEffect(() => {
     if (!dbSelected || !activeTable) {
       tablesDataStoreActions.initialize();
-      return;
     }
-
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.rows(dbSelected, activeTable),
-      exact: true,
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.tables(dbSelected),
-      exact: true,
-    });
   }, [dbSelected, activeTable]);
 
   const handleCreateTable = () => {

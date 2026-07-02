@@ -7,16 +7,20 @@ import {
   accountStoreActions,
   historyStoreActions,
 } from '>/services/stores';
-import { useDatabases, useImportDataMutation } from '>/services/queryHooks';
+import { useDatabases, useImportDataWrap } from '>/services/queryHooks';
 import {
   ScreenLoader,
   ComboField,
   TextAreaField,
   DropFileField,
 } from '>/modules';
-import { MIN_QUERY_CHARS, sqlStringConvert } from '>/services/utils';
+import {
+  MIN_QUERY_CHARS,
+  sqlStringConvert,
+  groupByModes,
+} from '>/services/utils';
 import { routes } from '>/config';
-import { CommonDialogHandlers } from '>/types';
+import { GroupByModes, CommonDialogHandlers } from '>/types';
 
 type ImportDataAreaProps = {
   formHandlers: CommonDialogHandlers;
@@ -26,6 +30,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [rawData, setRawData] = useState<string>('');
+  const [groupByMode, setGroupByMode] = useState<GroupByModes>('default');
   const navigate = useNavigate();
   const location = useLocation();
   const { setButtonStatus } = useModal();
@@ -40,43 +45,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
     };
   });
 
-  useEffect(() => {
-    return () => {
-      console.log('Import dialog unmounted');
-    };
-  }, []);
-
-  const importDataCallbacks = {
-    onSuccess: (data: any) => {
-      accountStoreActions.setActiveDatabase(null, true);
-      if (!data.ok) {
-        messageStoreActions.addMessage({
-          type: 'warn',
-          content: { text: 'Importing data had issues', duration: 3000 },
-        });
-      } else {
-        messageStoreActions.addMessage({
-          type: 'success',
-          content: { text: 'Data imported successfully', duration: 3000 },
-        });
-      }
-    },
-    onError: (error: any) => {
-      messageStoreActions.addMessage({
-        content: { text: 'Failed to execute query', duration: 3000 },
-      });
-    },
-  };
-
-  const { mutate, mutateAsync, isPending, response } = useImportDataMutation(
-    ({ api, state, query }) => ({
-      isPending: query.isPending,
-      mutate: api.mutate,
-      mutateAsync: api.mutateAsync,
-      response: state,
-    }),
-    importDataCallbacks,
-  );
+  const { mutate, mutateAsync, isPending, response } = useImportDataWrap();
 
   useEffect(() => {
     if (file || rawData.length > MIN_QUERY_CHARS) setButtonStatus('confirm');
@@ -108,12 +77,13 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
     mutate({
       database: selectedDatabase,
       data: sql,
+      groupByMode,
     });
 
     historyStoreActions.setLastImport(sql);
 
-    if (location.pathname !== routes.front.textView) {
-      navigate(routes.front.textView);
+    if (location.pathname !== routes.front.importView) {
+      navigate(routes.front.importView);
     }
   };
 
@@ -136,7 +106,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
   return (
     <div className='area-container'>
       <div className='area-spacer'>
-        <h1 className='area-title'>Import Data</h1>
+        <h1 className='area-title'>Import Data / Run Script</h1>
         <div className='area-actions'>
           <div className='btn-group'>
             <button
@@ -204,6 +174,15 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
               const value = v.currentTarget.value;
               setRawData(value);
             }}
+          />
+        </div>
+        <div className='flex flex-col space-y-1'>
+          <ComboField
+            id='select-groupby-mode'
+            label='Query Group-By Mode:'
+            value={groupByMode}
+            onChange={(v) => setGroupByMode(v as GroupByModes)}
+            $options={groupByModes.map((mode) => ({ ...mode }))}
           />
         </div>
       </div>

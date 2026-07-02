@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import {
   messageStoreActions,
   dialogStoreActions,
@@ -5,7 +6,38 @@ import {
 } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import { dbApi } from '>/services/api';
-import { DialogContent, dialogFactories } from '>/modules';
+import { Login, DialogContent, dialogFactories } from '>/modules';
+import { CommonDialogHandlers } from '>/types';
+
+export const handleLogin = (
+  e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>,
+) => {
+  e.preventDefault();
+  const handlers: CommonDialogHandlers = {
+    confirm: () => {},
+  };
+  const labels = [undefined, 'Login'];
+  dialogStoreActions.openDialog({
+    anonymous: true,
+    payload: {
+      initialSize: 'md',
+      caption: 'Authorization',
+      component: <Login formHandlers={handlers} />,
+      variant: 'error',
+      actions: dialogActions
+        .enabledConfirmCancel({
+          onConfirm: () => {
+            handlers.confirm();
+            dialogStoreActions.closeDialog();
+          },
+        })
+        .map((control, idx) => ({
+          ...control,
+          label: labels[idx] ?? control.label,
+        })),
+    },
+  });
+};
 
 export const handleLogout = () => {
   dialogStoreActions.openDialog({
@@ -49,9 +81,9 @@ export const handlePreferences = () => {
   });
 };
 
-export const handleNewUser = () => {
+export const handleCreateUser = () => {
   dialogStoreActions.openDialog({
-    payload: dialogFactories.newUser(),
+    payload: dialogFactories.createUser(),
   });
 };
 

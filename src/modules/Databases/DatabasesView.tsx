@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useDatabases, useDatabaseServerInfo } from '>/services/queryHooks';
+import { useDatabases } from '>/services/queryHooks';
 import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 import { ScreenLoader, EmptyPage } from '>/modules';
 import { DatabasesList } from './DatabasesList';

@@ -7,7 +7,6 @@ export const DialogContent = ({
   note?: string;
   children?: ReactNode;
 }) => {
-  console.log('somne note', note, children);
   return (
     <div className='area-container'>
       <div className='area-spacer'>

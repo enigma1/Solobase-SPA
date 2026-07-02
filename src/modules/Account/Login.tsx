@@ -151,7 +151,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
 
             {/* <button
                 type='button'
-                onClick={() => navigate(routes.front.newUser)}
+                onClick={() => navigate(routes.front.createUser)}
                 className='btn-secondary'
               >
                 Register

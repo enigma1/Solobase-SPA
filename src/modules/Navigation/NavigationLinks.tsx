@@ -1,6 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { CogIcon, LogOutIcon, DatabaseSearchIcon } from 'lucide-react';
+import {
+  CogIcon,
+  LogOutIcon,
+  DatabaseSearchIcon,
+  DatabaseArrowUpIcon,
+} from 'lucide-react';
 import { useConfigStore, dialogStoreActions } from '>/services/stores';
 import {
   ComboBox,
@@ -35,6 +40,11 @@ export const AuthNavigationLinks = () => {
       payload: dialogFactories.editPreferences(),
     });
   };
+  const handleImportSql = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.importData(),
+    });
+  };
 
   return (
     <>
@@ -65,19 +75,18 @@ export const AuthNavigationLinks = () => {
             </button>
             <button
               className='btn'
+              title='Import SQL'
+              onClick={handleImportSql}
+            >
+              <DatabaseArrowUpIcon size={24} />
+            </button>
+            <button
+              className='btn'
               title='Preferences and Settings'
               onClick={handlePreferences}
             >
               <CogIcon size={24} />
             </button>
-
-            {/* <Link
-              className='btn'
-              to={routes.front.settings}
-              title='Set Defaults'
-            >
-              <CogIcon size={24} />
-            </Link> */}
             <button
               className='btn-secondary'
               title='Logout'

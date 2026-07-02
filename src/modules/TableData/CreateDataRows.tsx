@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { messageStoreActions } from '>/services/stores';
 import {
-  queryKeys,
   useCreateDataRowsMutation,
   useTableColumnsInfoHook,
 } from '>/services/queryHooks';
@@ -116,15 +114,9 @@ export const CreateDataRows = ({
     updateButtons(step, isValid);
   }, [isValid, step]);
 
-  const queryClient = useQueryClient();
-
   const createDataRowsCallbacks = {
     onSuccess: (data: any) => {
       if (data.ok) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.rows(database, table),
-          exact: true,
-        });
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: 'Data rows created successfully', duration: 3000 },
