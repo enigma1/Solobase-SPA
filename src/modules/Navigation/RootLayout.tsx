@@ -77,7 +77,6 @@ const AuthMenu = () => {
             Clear Pending Requests
           </a>
         </DropdownMenu>
-
         <div className='menu-separator'>|</div>
         <DropdownMenu label='Database'>
           {capabilities.canCreateDatabases && (
