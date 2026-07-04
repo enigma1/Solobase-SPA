@@ -17,7 +17,7 @@ import {
   InputField,
 } from '>/modules';
 import { routes } from '>/config';
-import { GroupByModes, CommonDialogHandlers } from '>/types';
+import { SqlQueryModes, CommonDialogHandlers } from '>/types';
 
 type QueryRequestAreaProps = {
   formHandlers: CommonDialogHandlers;
@@ -32,7 +32,7 @@ export const QueryRequestArea = ({
   const [multi, setMulti] = useState<boolean>(false);
   const [title, setTitle] = useState<string>(queryTitle);
   const [query, setQuery] = useState<string>('');
-  const [groupByMode, setGroupByMode] = useState<GroupByModes>('default');
+  const [groupByMode, setGroupByMode] = useState<SqlQueryModes>('default');
 
   const { setButtonStatus } = useModal();
   const navigate = useNavigate();
@@ -172,11 +172,11 @@ export const QueryRequestArea = ({
           />
         </div>
         <div className='flex flex-col space-y-1'>
-          <label htmlFor='select-groupby-mode'>Query Group-By Mode:</label>
+          <label htmlFor='select-groupby-mode'>Query Mode:</label>
           <ComboBox
             id='select-groupby-mode'
             value={groupByMode}
-            onChange={(v) => setGroupByMode(v as GroupByModes)}
+            onChange={(v) => setGroupByMode(v as SqlQueryModes)}
             $options={groupByModes.map((mode) => ({ ...mode }))}
           />
         </div>

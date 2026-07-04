@@ -1,3 +1,4 @@
+import { RefObject } from 'react';
 import pickBy from 'lodash-es/pickBy';
 import {
   useQuery,
@@ -5,11 +6,37 @@ import {
   UseMutateFunction,
   UseMutateAsyncFunction,
   MutationOptions,
+  MutationFunction,
+  QueryClient,
 } from '@tanstack/react-query';
 import { accountStoreActions } from '>/services/stores';
 import { createNetworkError } from '>/services/api/apiErrors';
 
 export const STALE_TIME = 5 * 60 * 1000; // Set default to 5 minutes
+
+export type MutationRequestMeta = {
+  ctrl?: RefObject<AbortController | null>;
+  timeout?: number;
+};
+
+export type InferData<T> = T extends MutationFunction<infer R, any> ? R : never;
+export type InferVariables<T> =
+  T extends MutationFunction<any, infer V> ? V : never;
+
+export type MutationCacheEffect<
+  TMutationFn extends MutationFunction<any, any>,
+> = {
+  cache?: (
+    queryClient: QueryClient,
+    data: InferData<TMutationFn>,
+    variables: InferVariables<TMutationFn>,
+  ) => void | Promise<void>;
+  cacheError?: (
+    queryClient: QueryClient,
+    error: Error,
+    variables: InferVariables<TMutationFn>,
+  ) => void | Promise<void>;
+};
 
 export type QueryHookOptions<TData, TVariables, TApi extends object = {}> = {
   queryKey: (variables: TVariables) => string[];
@@ -59,6 +86,7 @@ export type HookStore<TState = unknown, TApi = unknown, TQuery = unknown> = {
 export type HookSelector<TStore, TResult = TStore> = (store: TStore) => TResult;
 
 const invalidationPipeline = [
+  'users',
   'databases',
   'tables',
   'table-details',
@@ -71,11 +99,11 @@ type InvalidationKey = (typeof invalidationPipeline)[number];
 export const queryKeys = {
   preferences: () => ['preferences'] as const,
   session: () => ['session'],
-  users: () => ['users'],
   databaseServerInfo: () => ['database-server-info'],
   query: (db: string | null, id: string | null) => ['query', db, id],
 
   // Hierarchical keys
+  users: () => [...getInvalidationLegacy('users')] as const,
   databases: () => [...getInvalidationLegacy('databases')] as const,
   tables: (db: string | null) =>
     [...getInvalidationLegacy('tables'), db] as const,
@@ -140,3 +168,20 @@ export const getMutationResult = <TData = any, TVariables = any>(
     query,
   };
 };
+
+export const invalidateOptions = <
+  TMutationFn extends MutationFunction<any, any>,
+>(): MutationCacheEffect<TMutationFn> => ({
+  cache: async (qc, data) => {
+    accountStoreActions.setActiveDatabase(null);
+    await qc.invalidateQueries({
+      queryKey: queryKeys.databases(),
+    });
+  },
+  cacheError: async (qc, error) => {
+    accountStoreActions.setActiveDatabase(null);
+    await qc.invalidateQueries({
+      queryKey: queryKeys.databases(),
+    });
+  },
+});

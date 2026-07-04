@@ -48,15 +48,4 @@
       @apply flex flex-col flex-1 min-h-0 overflow-hidden;
     }
   }
-
-  .overlay-container {
-    @apply fixed inset-0 z-50 flex items-center justify-center;
-    background-color: var(--overlay);
-
-    &>div {
-      @apply w-9 h-9 border-4 rounded-full animate-spin;
-      border-color: var(--color-srf);
-      border-top-color: var(--color-text);
-    }
-  }
 }

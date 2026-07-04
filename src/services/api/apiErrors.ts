@@ -2,40 +2,48 @@ import axios, { AxiosError } from 'axios';
 import { queryClient } from '>/config/reactQuery';
 import { messageStoreActions, accountStoreActions } from '>/services/stores';
 import { hasObjectProps, hasStringPropValue } from '>/services/utils';
+import { ApiError } from '>/types';
 
 export const isNetworkError = (error: unknown): boolean =>
   hasStringPropValue(error, 'type', 'network');
 
 export const createNetworkError = (reason: string) => ({
-  name: 'NetworkError',
-  type: 'network' as const,
-  reason,
+  code: 'ERR_OFFLINE',
+  error: 'Network is down',
+  message: reason,
+});
+
+export const createCancelError = (reason: string) => ({
+  code: 'ERR_CANCELED',
+  error: 'Request Cancelled',
+  message: reason,
+});
+
+export const createAuthError = (reason: string) => ({
+  code: 'ERR_UNAUTHORIZED',
+  error: 'Unauthorized',
+  message: reason,
+});
+
+export const createUnknownError = (response: Record<string, unknown>) => ({
+  code: response?.code ?? 'ERR_UNKNOWN',
+
+  error: response?.error ?? 'Unknown Error',
+  message: response?.message ?? 'Unknown response received from server',
 });
 
 const authError = async () => {
   await queryClient.cancelQueries();
-  // messageStoreActions.addMessage({
-  //   content: {
-  //     text: 'Currently you are not authorized to access this resource. Please login again.',
-  //     duration: 3000,
-  //   },
-  // });
-  // accountStoreActions.initialize(); // triggers redirect
-  throw new Error('Unauthorized');
-};
-
-const unknownResponseError = (response: any) => {
-  return {
-    name: 'ApiError',
-    type: 'server',
-    status: response?.status,
-    error: response?.error,
-    message: response?.message ?? 'Unknown response received from server',
-    // data: response,
-  };
+  throw createAuthError('Login required to access this');
 };
 
 export const apiErrorResolver = async (e: unknown) => {
+  if (axios.isAxiosError(e) && e.code === axios.AxiosError.ERR_CANCELED) {
+    const cancelError = createCancelError(
+      e.message ?? 'unknown cancellation reason',
+    );
+    throw cancelError;
+  }
   if (
     axios.isAxiosError(e) &&
     (e.code === axios.AxiosError.ERR_NETWORK ||
@@ -55,11 +63,7 @@ export const apiErrorResolver = async (e: unknown) => {
     if (status === 401) {
       await authError();
     }
-    throw unknownResponseError({
-      status,
-      error: data?.error ?? 'No specifics given',
-      message: data?.message ?? 'No details available',
-    });
+    throw createUnknownError({ ...data, code: status });
   }
   if (e instanceof Error) {
     throw e;

@@ -12,7 +12,10 @@ import {
   UserNew,
   SelfCaps,
   ImportDataArea,
+  DialogContent,
 } from '>/modules';
+import { dbApi } from '>/services/api';
+
 import { DialogPayload, WizardHandlers, CommonDialogHandlers } from '>/types';
 
 export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
@@ -300,6 +303,26 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
           ...control,
           label: labels[idx] ?? control.label,
         })),
+    };
+    return payload;
+  },
+
+  clearPendingRequests: () => {
+    const payload: DialogPayload = {
+      initialSize: 'md',
+      caption: 'Server',
+      component: (
+        <DialogContent note='Clear Pending Requests'>
+          {'Are you sure you want to clear pending requests?'}
+        </DialogContent>
+      ),
+      variant: 'warn',
+      actions: dialogActions.confirmCancel({
+        onConfirm: async () => {
+          await dbApi.abort();
+          dialogStoreActions.closeDialog();
+        },
+      }),
     };
     return payload;
   },

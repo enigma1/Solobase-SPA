@@ -2,9 +2,12 @@ import { queriesStoreActions } from '>/services/stores';
 import { apiClient } from './client';
 import { handleApiAxios } from './apiHelpers';
 import { routes } from '>/config/routes';
+import { ApiFunction } from './dbApiTypes';
+import { MutationRequestMeta } from '>/services/queryHooks';
 
 import {
   BasicResponse,
+  AbortResponse,
   SessionRestoreResponse,
   LoginRequest,
   LoginResponse,
@@ -59,6 +62,10 @@ import {
 } from './dbApiTypes';
 import { PrimeObject } from '>/types';
 
+type ApiOptions = {
+  signal?: AbortSignal;
+};
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -87,18 +94,32 @@ const checkSession = () =>
 const sessionRestore = () =>
   apiCall<SessionRestoreResponse>(() => apiClient.get('/auth/presence'));
 
+const abort = () => apiCall<AbortResponse>(() => apiClient.get('/db/abort'));
+
 const login = (data: LoginRequest) =>
   apiCall<LoginResponse>(() => apiClient.post('/auth/login', data));
 const logout = () =>
   apiCall<BasicResponse>(() => apiClient.get('/auth/logout'));
 
-const runQuery = (data: RunQueryRequest, signal?: AbortSignal) =>
-  apiCall<RunQueryResponse>(() =>
-    apiClient.post('/db/run-query', data, { signal }),
+const importData = (data: ImportDataRequest, { signal }: ApiOptions) =>
+  apiCall<ImportDataResponse>(() =>
+    apiClient.post('/db/import-data', data, { signal, timeout: 600_000 }),
   );
 
-const runRawQuery = (data: RunRawQueryRequest) =>
-  apiCall<RunRawQueryResponse>(() => apiClient.post('/db/run-raw-query', data));
+const runRawQuery = (data: RunRawQueryRequest, { signal }: ApiOptions) =>
+  apiCall<RunRawQueryResponse>(() =>
+    apiClient.post('/db/run-raw-query', data, { timeout: 300_000, signal }),
+  );
+
+const exportDatabases = (data: ExportDatabasesRequest) =>
+  apiCall(
+    () =>
+      apiClient.post('/db/export-databases', data, {
+        responseType: 'blob',
+        timeout: 0, // Let it finish
+      }),
+    false,
+  );
 
 const fetchUsers = () =>
   apiCall<FetchUsersResponse>(() => apiClient.get('/db/fetch-users'));
@@ -133,11 +154,6 @@ const createDataRows = (data: CreateDataRowsRequest) =>
     apiClient.post('/db/create-data-rows', data),
   );
 
-// const insertDataRows = (data: InsertDataRowsRequest) =>
-//   apiCall<InsertDataRowsResponse>(() =>
-//     apiClient.post('/db/insert-data-rows', data),
-//   );
-
 const deleteDataRows = (data: DeleteDataRowsRequest) =>
   apiCall<DeleteDataRowsResponse>(() =>
     apiClient.post('/db/delete-data-rows', data),
@@ -145,19 +161,6 @@ const deleteDataRows = (data: DeleteDataRowsRequest) =>
 const updateDataRows = (data: UpdateDataRowsRequest) =>
   apiCall<UpdateDataRowsResponse>(() =>
     apiClient.post('/db/update-data-rows', data),
-  );
-
-const importData = (data: ImportDataRequest) =>
-  apiCall<ImportDataResponse>(() => apiClient.post('/db/import-data', data));
-
-const exportDatabases = (data: ExportDatabasesRequest) =>
-  apiCall(
-    () =>
-      apiClient.post('/db/export-databases', data, {
-        responseType: 'blob',
-        timeout: 0, // Let it finish
-      }),
-    false,
   );
 
 const fetchDatabaseInfo = () =>
@@ -182,7 +185,7 @@ const editDatabase = (data: EditDatabaseRequest) =>
 
 const deleteDatabases = (data: DeleteDatabasesRequest) =>
   apiCall<DeleteDatabasesResponse>(() =>
-    apiClient.post('/db/delete-databases', data),
+    apiClient.post('/db/delete-databases', data, { timeout: 0 }),
   );
 
 const createTable = (data: CreateTableRequest) =>
@@ -204,6 +207,7 @@ const loadSettings = () =>
 export const dbApi = {
   ping,
   checkSession,
+  abort,
   getTableDetails,
   getTableColumnsInfo,
   fetchDatabaseInfo,
@@ -214,7 +218,8 @@ export const dbApi = {
   fetchDatabases,
   fetchTables,
   fetchRows,
-  runQuery,
+  // runQuery,
+  importData,
   runRawQuery,
   // insertDataRows,
   createDataRows,
@@ -233,5 +238,4 @@ export const dbApi = {
   saveSettings,
   loadSettings,
   exportDatabases,
-  importData,
-};
+} as const;

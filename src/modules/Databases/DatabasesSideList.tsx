@@ -1,13 +1,19 @@
 import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDatabases, useSelectDatabaseWrap } from '>/services/queryHooks';
 import {
   useAccountStore,
   useTablesDataStore,
   messageStoreActions,
 } from '>/services/stores';
-import { ScreenLoader } from '>/modules/Common';
+import { routes } from '>/config';
+
+import { ScreenLoader } from '>/modules';
 
 export const DatabasesSideList = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const { initialize } = useTablesDataStore(({ api, state }) => ({
     initialize: api.initialize,
   }));
@@ -34,8 +40,16 @@ export const DatabasesSideList = () => {
   }, [dbSelected]);
 
   const handleChange = async (dbName: string) => {
+    if (!dbName) {
+      console.log('no database selected');
+      return;
+    }
     mutate({ database: dbName });
+    if (location.pathname !== routes.front.listTables) {
+      navigate(routes.front.listTables, { replace: true });
+    }
   };
+
   const isBusy = isFetching || isPending;
   if (isBusy) return <ScreenLoader />;
 

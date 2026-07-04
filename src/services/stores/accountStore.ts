@@ -27,6 +27,7 @@ export type AccountStoreActions = {
   setAuthenticated: (value: boolean) => void;
   getAppStatus: () => boolean;
   setAppStatus: (value: boolean) => void;
+  setCapabilities: (capabilities: UserCapabilities) => void;
   getUsername: () => string;
 };
 
@@ -73,6 +74,9 @@ export const accountStoreActions: AccountStoreActions = {
   getActiveTable: () => get().activeTable,
   setActiveTable: (table) => {
     setAuto({ activeTable: table });
+  },
+  setCapabilities: (capabilities: UserCapabilities) => {
+    setAuto({ capabilities });
   },
 
   getAuthenticated: () => get().isAuthenticated,

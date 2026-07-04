@@ -65,6 +65,20 @@ const AuthMenu = () => {
           </a>
         </DropdownMenu>
         <div className='menu-separator'>|</div>
+        <DropdownMenu label='Server'>
+          <a
+            href='#'
+            onClick={() => {
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.clearPendingRequests(),
+              });
+            }}
+          >
+            Clear Pending Requests
+          </a>
+        </DropdownMenu>
+
+        <div className='menu-separator'>|</div>
         <DropdownMenu label='Database'>
           {capabilities.canCreateDatabases && (
             <a

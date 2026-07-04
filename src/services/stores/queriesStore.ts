@@ -1,11 +1,11 @@
 import { makeStore } from '>/services/utils/emitter';
 import { collapseSequentialQueryDuplicates } from './helpers';
-import { GroupByModes, QueryLogEntry } from '>/types';
+import { SqlQueryModes, QueryLogEntry } from '>/types';
 type Query = {
   title: string;
   query: string;
   database?: string;
-  groupByMode?: GroupByModes;
+  groupByMode?: SqlQueryModes;
   multi?: boolean;
 };
 

@@ -1,5 +1,6 @@
-import { SyntheticEvent, useState, useEffect } from 'react';
+import { SyntheticEvent, useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { DeleteIcon, RotateCcwIcon } from 'lucide-react';
 import { useModal } from '>/services/hooks';
 import {
@@ -19,20 +20,23 @@ import {
   sqlStringConvert,
   groupByModes,
 } from '>/services/utils';
+import { dbApi } from '>/services/api';
 import { routes } from '>/config';
-import { GroupByModes, CommonDialogHandlers } from '>/types';
+import { SqlQueryModes, CommonDialogHandlers } from '>/types';
 
 type ImportDataAreaProps = {
   formHandlers: CommonDialogHandlers;
 };
 
 export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
+  const controllerRef = useRef<AbortController | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [rawData, setRawData] = useState<string>('');
-  const [groupByMode, setGroupByMode] = useState<GroupByModes>('default');
+  const [groupByMode, setGroupByMode] = useState<SqlQueryModes>('default');
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const { setButtonStatus } = useModal();
 
   const { isFetching, dbNames } = useDatabases(({ api, query }) => {
@@ -45,7 +49,9 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
     };
   });
 
-  const { mutate, mutateAsync, isPending, response } = useImportDataWrap();
+  const { mutate, mutateAsync, isPending, response } = useImportDataWrap({
+    ctrl: controllerRef,
+  });
 
   useEffect(() => {
     if (file || rawData.length > MIN_QUERY_CHARS) setButtonStatus('confirm');
@@ -74,22 +80,32 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
       return;
     }
 
-    mutate({
-      database: selectedDatabase,
-      data: sql,
-      groupByMode,
-    });
-
-    historyStoreActions.setLastImport(sql);
+    const confirmAsync = async () => {
+      controllerRef.current?.abort();
+      controllerRef.current = new AbortController();
+      await mutateAsync({
+        database: selectedDatabase,
+        data: sql,
+        groupByMode,
+      });
+      historyStoreActions.setLastImport(sql);
+    };
+    await confirmAsync();
 
     if (location.pathname !== routes.front.importView) {
       navigate(routes.front.importView);
     }
   };
 
+  const onAbort = async () => {
+    await dbApi.abort();
+    controllerRef.current?.abort();
+  };
+
   // Do not close this dialog when the file dialog closes
   const onClose = (e?: SyntheticEvent<HTMLDialogElement>) => {
     e?.preventDefault();
+    controllerRef.current?.abort();
   };
 
   useEffect(() => {
@@ -100,7 +116,13 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
   const isBusy = isFetching || isPending;
 
   if (isBusy) {
-    return <ScreenLoader />;
+    return (
+      <ScreenLoader>
+        <button className='btn-secondary space-y-1' onClick={onAbort}>
+          Abort
+        </button>
+      </ScreenLoader>
+    );
   }
 
   return (
@@ -179,9 +201,9 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
         <div className='flex flex-col space-y-1'>
           <ComboField
             id='select-groupby-mode'
-            label='Query Group-By Mode:'
+            label='Query Mode:'
             value={groupByMode}
-            onChange={(v) => setGroupByMode(v as GroupByModes)}
+            onChange={(v) => setGroupByMode(v as SqlQueryModes)}
             $options={groupByModes.map((mode) => ({ ...mode }))}
           />
         </div>

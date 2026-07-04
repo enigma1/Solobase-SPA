@@ -66,7 +66,7 @@
     color: var(--color-text-peak);
   }
 
-  .overlay-wrapper {
+  /* .overlay-wrapper {
     @apply fixed z-50 inset-0 flex items-center justify-center;
     background-color: var(--overlay);
 
@@ -74,6 +74,22 @@
       @apply w-9 h-9 border-4;
       border-color: var(--tone-2);
       border-top-color: var(--tone10);
+    }
+  } */
+
+
+  .overlay-wrapper {
+    @apply fixed z-50 inset-0 flex items-center justify-center;
+    background-color: var(--overlay);
+
+    & .content {
+      @apply flex flex-col items-center gap-2;
+
+      & .spinner {
+        @apply w-9 h-9 border-4 rounded-full animate-spin;
+        border-color: var(--color-srf);
+        border-top-color: var(--color-text);
+      }
     }
   }
 }

@@ -13,6 +13,7 @@ import {
   useSelectDatabaseMutation,
   useImportDataMutation,
 } from './useWriteHooks';
+import { MutationRequestMeta } from './defs';
 
 export const useSelectDatabaseWrap = () => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ export const useSelectDatabaseWrap = () => {
   return mutation;
 };
 
-export const useImportDataWrap = () => {
+export const useImportDataWrap = (metaOptions?: MutationRequestMeta) => {
   const callbacks = {
     onSuccess: (data: ImportDataResponse) => {
       accountStoreActions.setActiveDatabase(null);
@@ -81,6 +82,7 @@ export const useImportDataWrap = () => {
       response: state,
     }),
     callbacks,
+    metaOptions,
   );
 
   return mutation;

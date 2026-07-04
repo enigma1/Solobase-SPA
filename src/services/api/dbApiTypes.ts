@@ -13,10 +13,20 @@ import {
   TableShape,
   TableData,
   TableBasics,
-  GroupByModes,
+  SqlQueryModes,
   UserCapabilities,
   UserShape,
 } from '>/types';
+
+export type ApiOptions = {
+  timeout?: number;
+  signal?: AbortSignal;
+  headers?: Record<string, string>;
+};
+export type ApiFunction<TData = void, TResponse = any> = (
+  data?: TData,
+  options?: ApiOptions,
+) => Promise<TResponse>;
 
 export type BasicResponse = {
   ok: boolean;
@@ -30,6 +40,8 @@ export type BasicRowsShape = {
   cols: SqlColumnsShape;
   columnsOrder: string[];
 };
+
+export type AbortResponse = BasicResponse;
 
 export type SessionRestoreResponse = BasicResponse & {
   schemas: BasicRowsShape;
@@ -57,7 +69,7 @@ export type RunQueryRequest = {
 export type RunRawQueryRequest = {
   query: string;
   database?: string;
-  groupByMode?: GroupByModes;
+  groupByMode?: SqlQueryModes;
 };
 
 type ResultSetResponse = BasicResponse & {
@@ -278,7 +290,7 @@ export type GetTableColumnsInfoResponse = BasicResponse &
 export type ImportDataRequest = {
   database?: string;
   data: string;
-  groupByMode?: GroupByModes;
+  groupByMode?: SqlQueryModes;
 };
 
 export type ImportDataResponse = BasicResponse;

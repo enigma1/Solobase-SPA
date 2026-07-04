@@ -50,6 +50,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
       configStoreActions.setBackend(getValues('backend'));
       const username = getValues('username');
       accountStoreActions.setAuthenticated(true);
+      accountStoreActions.setCapabilities(data.capabilities);
       queryClient.clear();
 
       messageStoreActions.addMessage({
@@ -61,7 +62,6 @@ export const Login = ({ formHandlers }: LoginProps) => {
       });
     },
     onError: () => {
-      console.log('callback-error');
       messageStoreActions.addMessage({
         content: {
           text: 'Login failed. Please check endpoint and your credentials and try again.',

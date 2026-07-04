@@ -108,7 +108,7 @@ export type TableShape = TableShapeBasics & {
   cols: TableShapeColumn[];
 };
 
-export type GroupByModes = 'default' | 'legacy' | 'strict';
+export type SqlQueryModes = 'default' | 'legacy' | 'strict';
 export type ViewRow<T> = {
   row: T;
   uiKey: string;

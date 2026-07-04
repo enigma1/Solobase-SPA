@@ -1,26 +1,19 @@
 import {
   MutationFunction,
-  QueryClient,
   useMutation,
   useQueryClient,
+  MutationFunctionContext,
 } from '@tanstack/react-query';
 
 import {
+  MutationRequestMeta,
   MutationCallbacks,
   MutationHookProps,
   getMutationResult,
+  MutationCacheEffect,
+  InferVariables,
+  InferData,
 } from './defs';
-
-type InferData<T> = T extends MutationFunction<infer R, any> ? R : never;
-type InferVariables<T> = T extends MutationFunction<any, infer V> ? V : never;
-
-type MutationCacheEffect<TMutationFn extends MutationFunction<any, any>> = {
-  cache?: (
-    queryClient: QueryClient,
-    data: InferData<TMutationFn>,
-    variables: InferVariables<TMutationFn>,
-  ) => void | Promise<void>;
-};
 
 type CreateMutationHookProps<TMutationFn extends MutationFunction<any, any>> = {
   fn: TMutationFn;
@@ -50,16 +43,21 @@ export const createMutationHook =
       InferData<TMutationFn>,
       InferVariables<TMutationFn>
     >,
+    meta?: MutationRequestMeta,
   ) => {
     const queryClient = useQueryClient();
     const mutation = useMutation({
       mutationFn: fn,
+      meta,
       onSuccess: async (data, variables, onMutateResult, context) => {
         await options?.cache?.(queryClient, data, variables);
         await callbacks?.onSuccess?.(data, variables, onMutateResult, context);
       },
-      // onSuccess: callbacks?.onSuccess,
-      onError: callbacks?.onError,
+      onError: async (error, variables, onMutateResult, context) => {
+        await options?.cacheError?.(queryClient, error, variables);
+        await callbacks?.onError?.(error, variables, onMutateResult, context);
+      },
+      // onError: callbacks?.onError,
     });
 
     const args: MutationHookProps<

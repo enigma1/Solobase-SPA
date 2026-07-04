@@ -28,7 +28,7 @@ export default defineConfig({
     tsconfigPaths: true, // Enable tsconfig paths resolution
   },
 
-  // compilerOptions: ['vite/client'],
+  compilerOptions: ['vite/client'],
   plugins: [
     ssl(),
     react(),

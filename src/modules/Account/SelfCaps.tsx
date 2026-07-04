@@ -13,7 +13,7 @@ export const SelfCaps = () => {
     ['Manage Tables', capabilities.canManageTables],
     ['Edit Data', capabilities.canEditData],
   ];
-
+  console.log('privileges', items);
   return (
     <div className='area-container'>
       <div className='area-spacer'>

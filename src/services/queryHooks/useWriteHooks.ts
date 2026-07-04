@@ -34,7 +34,7 @@ import type {
   UpdateDataRowsRequest,
   UpdateDataRowsResponse,
 } from '>/services/api';
-import { queryKeys, MutationCallbacks, MutationHookProps } from './defs';
+import { MutationRequestMeta, queryKeys, invalidateOptions } from './defs';
 import {
   defaultResponse,
   defaultCapabilities,
@@ -208,7 +208,13 @@ export const useEditTableMutation = createMutationHook<
 export const useRawQueryMutation = createMutationHook<
   MutationFunction<RunRawQueryResponse, RunRawQueryRequest>
 >({
-  fn: dbApi.runRawQuery,
+  fn: (data, context) => {
+    const signal = (context as any).signal;
+    return dbApi.runRawQuery(data, {
+      signal,
+    });
+  },
+
   state: {
     ...defaultResponse,
     mode: 'resultset',
@@ -216,14 +222,21 @@ export const useRawQueryMutation = createMutationHook<
     rows: [],
     columnsOrder: [],
   },
-  options: {
-    cache: async (qc, data) => {
-      accountStoreActions.setActiveDatabase(null);
-      await qc.invalidateQueries({
-        queryKey: queryKeys.databases(),
-      });
-    },
+  options: invalidateOptions(),
+});
+
+export const useImportDataMutation = createMutationHook<
+  MutationFunction<ImportDataResponse, ImportDataRequest>
+>({
+  fn: (data, { meta }) => {
+    const req = meta as MutationRequestMeta;
+    const signal = req?.ctrl?.current?.signal;
+    return dbApi.importData(data, {
+      signal,
+    });
   },
+  state: defaultResponse,
+  options: invalidateOptions(),
 });
 
 export const useLoginMutation = createMutationHook<
@@ -284,21 +297,6 @@ export const useUpdateRowsMutation = createMutationHook<
     cache: async (qc, data) => {
       await qc.invalidateQueries({
         queryKey: queryKeys.rows(data.database, data.table),
-      });
-    },
-  },
-});
-
-export const useImportDataMutation = createMutationHook<
-  MutationFunction<ImportDataResponse, ImportDataRequest>
->({
-  fn: dbApi.importData,
-  state: defaultResponse,
-  options: {
-    cache: async (qc, data) => {
-      accountStoreActions.setActiveDatabase(null);
-      await qc.invalidateQueries({
-        queryKey: queryKeys.databases(),
       });
     },
   },

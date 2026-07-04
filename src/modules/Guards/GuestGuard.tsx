@@ -6,7 +6,7 @@ export const GuestGuard = () => {
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
 
   if (isAuthenticated) {
-    return <Navigate to={routes.front.tableView} replace />;
+    return <Navigate to={routes.front.listDatabases} replace />;
   }
 
   return <Outlet />;
