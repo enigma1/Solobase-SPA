@@ -44,22 +44,23 @@ export const UserNew = ({ wizardHandlers }: UserNewProps) => {
     },
   };
 
-  const { mutate, isPending, response } = useCreateUserMutation(
+  const { mutate, mutateAsync, isPending, response } = useCreateUserMutation(
     ({ api, state, query }) => ({
       isPending: query.isPending,
       mutate: api.mutate,
+      mutateAsync: api.mutateAsync,
       response: state,
     }),
     createUserCallbacks,
   );
 
-  const handleSubmit = (data: UserFormShape) => {
+  const handleSubmit = async (data: UserFormShape) => {
     const serverData = {
       ...data,
       profile:
         data.profile !== KEEP_EXISTING_PROFILE ? data.profile : undefined,
     };
-    mutate(serverData);
+    await mutateAsync(serverData);
   };
 
   const isBusy = isPending;

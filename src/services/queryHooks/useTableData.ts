@@ -1,20 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { dbApi, FetchRowsResponse, BasicResponse } from '>/services/api';
-import { useAccountStore, useTablesDataStore } from '>/services/stores';
+import { dbApi, FetchRowsResponse, BasicDataResponse } from '>/services/api';
+import { useAccountStore } from '>/services/stores';
 import { defaultResponse } from '>/services/utils';
-import { CollectionColumns, TableData } from '>/types';
 import { queryKeys, STALE_TIME } from './defs';
 
-type TableDataHookState = TableData & BasicResponse;
 type TablesHookProps = {
-  state: TableDataHookState;
+  state: BasicDataResponse;
   query: ReturnType<typeof useQuery>;
 };
 
-const defaultCollectionColumns = {
-  _id: 'string',
-  doc: {},
-} satisfies CollectionColumns;
+const defaultCollectionColumns = {};
 
 export const useTableDataHook = <TSelected = TablesHookProps>(
   selector?: (args: TablesHookProps) => TSelected,
@@ -23,9 +18,9 @@ export const useTableDataHook = <TSelected = TablesHookProps>(
     ...defaultResponse,
     rows: [],
     cols: defaultCollectionColumns,
-    type: 'collection',
     columnsOrder: [],
-  } satisfies TableDataHookState;
+    rowTokens: undefined,
+  } satisfies BasicDataResponse;
 
   const { dbSelected, isAuthenticated, activeTable } = useAccountStore(
     ({ state }) => ({
@@ -40,7 +35,10 @@ export const useTableDataHook = <TSelected = TablesHookProps>(
     queryKey: queryKeys.rows(dbSelected, activeTable),
     queryFn: async () => {
       if (!dbSelected || !activeTable) return { ...initialData };
-      const data = await dbApi.fetchRows({ table: activeTable });
+      const data = await dbApi.fetchRows({
+        database: dbSelected,
+        table: activeTable,
+      });
       return data;
     },
     staleTime: STALE_TIME,

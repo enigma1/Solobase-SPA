@@ -10,6 +10,7 @@ import {
   TableColumnsSplitIcon,
   MapPlusIcon,
   DatabaseBackupIcon,
+  SquareArrowLeftIcon,
 } from 'lucide-react';
 import { compactTable } from '>/services/utils';
 import type { FactoryTableStore } from '>/services/stores';
@@ -21,6 +22,7 @@ export type PageTableShellActions = {
   onCreate?: () => void;
   onDelete?: () => void;
   onFilterColumns?: () => void;
+  onBack?: () => void;
 };
 
 type PageTableShellProps = {
@@ -52,13 +54,21 @@ export const PageTableShell = ({
     onCreate,
     onDelete,
     onFilterColumns,
+    onBack,
   } = shellActions;
   const [isPacked, setIsPacked] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
   return (
     <div className='page-top-container'>
       <div className='page-toolbar'>
-        <div className='page-title'>{title}</div>
+        <div className='page-title'>
+          {onBack && (
+            <button className='btn-micro' onClick={onBack} title='Go Back'>
+              <SquareArrowLeftIcon size={18} />
+            </button>
+          )}
+          {title}
+        </div>
         <div className='page-actions'>
           {onCreate && (
             <button className='btn' onClick={onCreate} title='Create New Entry'>

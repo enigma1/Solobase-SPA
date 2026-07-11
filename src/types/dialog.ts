@@ -38,7 +38,7 @@ export type WizardHandlers = {
   next?: () => void;
   previous?: () => void;
   skip?: () => void;
-  finish?: () => void;
+  finish?: () => void | Promise<void>;
 };
 
 export type ComponentFormHandlers = {

@@ -1,7 +1,7 @@
 import { makeStore } from '>/services/utils/emitter';
-import { CollectionColumns, ScalarObject, CollectionRow } from '>/types';
+import { SqlObject } from '>/types';
 
-type EditedRow = Record<number, ScalarObject>;
+type EditedRow = Record<number, SqlObject>;
 type TablesState = {
   editedRow: EditedRow;
 };

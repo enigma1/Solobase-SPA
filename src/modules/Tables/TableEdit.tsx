@@ -19,8 +19,6 @@ export const TableEdit = ({
   table,
   wizardHandlers,
 }: TableEditProps) => {
-  const queryClient = useQueryClient();
-
   const request = { database, table };
   const {
     engine,
@@ -86,17 +84,18 @@ export const TableEdit = ({
     },
   };
 
-  const { mutate, isPending, response } = useEditTableMutation(
+  const { mutate, mutateAsync, isPending, response } = useEditTableMutation(
     ({ api, state, query }) => ({
       isPending: query.isPending,
       mutate: api.mutate,
+      mutateAsync: api.mutateAsync,
       response: state,
     }),
     editTableCallbacks,
   );
 
   const onSubmit = async (values: TableFormShape) => {
-    mutate({
+    await mutateAsync({
       original: originalTable,
       modified: {
         ...values,

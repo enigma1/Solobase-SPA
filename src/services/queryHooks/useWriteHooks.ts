@@ -107,12 +107,9 @@ export const useSelectDatabaseMutation = createMutationHook<
   state: dbDefaults,
   options: {
     cache: async (qc, data, vars) => {
-      if (!data.ok || !data.database) {
-        return;
-      }
-      accountStoreActions.setActiveDatabase(data.database);
+      accountStoreActions.setActiveDatabase(data.database ?? null);
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database),
+        queryKey: queryKeys.tables(data.database ?? null),
       });
     },
   },
@@ -199,7 +196,7 @@ export const useEditTableMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database),
+        queryKey: queryKeys.tableDetails(data.database, data.table),
       });
     },
   },
@@ -275,6 +272,7 @@ export const useDeleteRowsMutation = createMutationHook<
   fn: dbApi.deleteDataRows,
   state: {
     ...tableDefaults,
+    rows: [],
   },
   options: {
     cache: async (qc, data) => {

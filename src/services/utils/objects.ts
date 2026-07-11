@@ -18,14 +18,16 @@ export const defaultListResponse: BasicRowsShape = {
   columnsOrder: [],
 };
 
-export const defaultCapabilities: UserCapabilities = {
-  canGrantPrivileges: true,
-  canViewUsers: true,
-  canManageUsers: true,
-  canCreateDatabases: true,
-  canManageTables: true,
-  canEditData: true,
-} as const;
+// export const defaultCapabilities: UserCapabilities = {
+//   canGrantPrivileges: true,
+//   canViewUsers: true,
+//   canManageUsers: true,
+//   canCreateDatabases: true,
+//   canManageTables: true,
+//   canEditData: true,
+// } as const;
+
+export const defaultCapabilities: string[] = [];
 
 export const hasObject = <T extends Record<string, unknown>>(
   target: T,

@@ -6,7 +6,6 @@ import { queryKeys, STALE_TIME, DataHookProps, HookStore } from './defs';
 import {
   FetchDatabasesResponse,
   SessionRestoreResponse,
-  BasicRowsShape,
   GetTableDetailsResponse,
   GetTableColumnsInfoResponse,
   FetchUsersResponse,
@@ -16,7 +15,7 @@ import {
   defaultResponse,
   defaultListResponse,
 } from '>/services/utils';
-import { BaseTableData } from '>/types';
+import { BasicRowsShape } from '>/types';
 // import { createDataQueryHook } from './dataQueryBuilder';
 
 type RestoreHookProps = DataHookProps<SessionRestoreResponse>;
@@ -105,7 +104,7 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
   const initialData = {
     ...defaultResponse,
     ...defaultListResponse,
-  } satisfies BaseTableData;
+  } satisfies BasicRowsShape;
 
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
   // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
@@ -269,7 +268,7 @@ export const useUsers = <TSelected = DatabaseHookProps>(
   const initialData = {
     ...defaultResponse,
     ...defaultListResponse,
-  } satisfies BaseTableData;
+  } satisfies BasicRowsShape;
 
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
   // const q = useQuery<FetchDatabasesResponse, Error, string[]>({

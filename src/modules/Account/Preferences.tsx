@@ -5,6 +5,7 @@ import {
   useConfigStore,
   messageStoreActions,
   configStoreActions,
+  accountStoreActions,
 } from '>/services/stores';
 import {
   ThemeSelect,
@@ -60,7 +61,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
     <>
       <div className='area-container'>
         <div className='area-spacer'>
-          <h1 className='area-title'>Preferences</h1>
+          <h1 className='area-title'>{`Preferences for [${accountStoreActions.getUsername()}]`}</h1>
           <div className='area-actions'>
             <button
               className='btn-secondary'

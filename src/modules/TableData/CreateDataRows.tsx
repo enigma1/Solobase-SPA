@@ -77,10 +77,13 @@ export const CreateDataRows = ({
     //updateButtons(next, false);
   };
 
+  const onValidation = (valid: boolean) => updateButtons(step, valid);
+
   useEffect(() => {
     wizardHandlers.next = goNextStep;
     wizardHandlers.previous = goPrevStep;
-    wizardHandlers.finish = handleSubmit((data) => onSubmit(data));
+    wizardHandlers.finish = async () =>
+      await handleSubmit((data) => onSubmit(data))();
 
     return () => {
       wizardHandlers.next = undefined;
@@ -171,7 +174,12 @@ export const CreateDataRows = ({
   return (
     <form className='space-y-4 flex flex-1 flex-col min-h-0'>
       {step === 'insert' && (
-        <DataRowsForm form={form} cols={cols} columnsOrder={columnsOrder} />
+        <DataRowsForm
+          form={form}
+          cols={cols}
+          columnsOrder={columnsOrder}
+          onValidation={onValidation}
+        />
       )}
       {step === 'review' && (
         <DataRowsReview
@@ -179,6 +187,7 @@ export const CreateDataRows = ({
           table={table}
           form={form}
           columnsOrder={columnsOrder}
+          onValidation={onValidation}
         />
       )}
     </form>

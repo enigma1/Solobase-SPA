@@ -35,7 +35,7 @@ import type {
   ViewRow,
   SqlColumnsShape,
   SqlRow,
-  ScalarObject,
+  SqlObject,
   CommonDialogHandlers,
 } from '>/types';
 import type { DeleteDatabasesResponse } from '>/services/api/dbApiTypes';
@@ -70,7 +70,7 @@ export const DatabasesList = ({
   }));
 
   const { editedRow, markEditedRow } = useDatabasesStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, ScalarObject>,
+    editedRow: state.editedRow as Record<number, SqlObject>,
     markEditedRow: api.markEditedRow,
   }));
 

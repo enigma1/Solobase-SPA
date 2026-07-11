@@ -26,8 +26,8 @@ export const handleLogin = (
       variant: 'error',
       actions: dialogActions
         .enabledConfirmCancel({
-          onConfirm: () => {
-            handlers.confirm();
+          onConfirm: async () => {
+            await handlers.confirm();
             dialogStoreActions.closeDialog();
           },
         })

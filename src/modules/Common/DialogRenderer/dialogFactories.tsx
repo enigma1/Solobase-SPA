@@ -107,8 +107,8 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
       component: <DatabaseNew formHandlers={handlers} />,
       actions: dialogActions
         .enabledConfirmCancel({
-          onConfirm: () => {
-            handlers.confirm();
+          onConfirm: async () => {
+            await handlers.confirm();
             dialogStoreActions.closeDialog();
           },
         })
@@ -134,8 +134,8 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         onPrevious: () => {
           handlers.previous?.();
         },
-        onFinish: () => {
-          handlers.finish?.();
+        onFinish: async () => {
+          await handlers.finish?.();
           dialogStoreActions.closeDialog();
         },
       }),
@@ -162,9 +162,9 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         onPrevious: () => {
           handlers.previous?.();
         },
-        onFinish: () => {
+        onFinish: async () => {
+          await handlers.finish?.();
           dialogStoreActions.closeDialog();
-          handlers.finish?.();
         },
       }),
     };
@@ -197,9 +197,9 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         onPrevious: () => {
           handlers.previous?.();
         },
-        onFinish: () => {
+        onFinish: async () => {
+          await handlers.finish?.();
           dialogStoreActions.closeDialog();
-          handlers.finish?.();
         },
       }),
     };
@@ -233,7 +233,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
     const labels = [undefined, 'Save Preferences'];
     const payload: DialogPayload = {
       initialSize: 'md',
-      caption: 'Preferences',
+      caption: 'Settings',
       component: <Preferences formHandlers={handlers} />,
       variant: 'info',
       actions: dialogActions
@@ -265,8 +265,8 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         onPrevious: () => {
           handlers.previous?.();
         },
-        onFinish: () => {
-          handlers.finish?.();
+        onFinish: async () => {
+          await handlers.finish?.();
           dialogStoreActions.closeDialog();
         },
       }),

@@ -23,12 +23,14 @@ type DataRowsFormProps = {
   cols: SqlColumnsShape;
   columnsOrder: string[];
   form: UseFormReturn<CreateDataRowsForm>;
+  onValidation: (valid: boolean) => void;
 };
 
 export const DataRowsForm = ({
   form,
   cols,
   columnsOrder,
+  onValidation,
 }: DataRowsFormProps) => {
   const rowDefaults = useMemo(() => transformColumnsToDefaults(cols), [cols]);
 
@@ -65,6 +67,10 @@ export const DataRowsForm = ({
     append(item);
   };
 
+  useEffect(() => {
+    onValidation(form.formState.isValid);
+  }, [form.formState.isValid]);
+
   return (
     <div className='area-container'>
       <div className='area-spacer'>
@@ -81,7 +87,7 @@ export const DataRowsForm = ({
           </button>
         </div>
       </div>
-      <div className='area-content'>
+      <div className='area-content' onClick={() => clearErrors()}>
         <FormProvider {...form}>
           {fields.map((field, index) => {
             const bg = index % 2 ? 'odd' : 'even';

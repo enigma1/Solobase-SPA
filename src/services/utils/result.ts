@@ -1,4 +1,4 @@
-import { Scalar } from '>/types';
+import { SqlTypes, SqlRow } from '>/types';
 
 // export type Result<T> =
 //   | { success: true; data: T }
@@ -28,7 +28,7 @@ import { Scalar } from '>/types';
 // })();
 
 type GetCellValueProps = {
-  row: Scalar[];
+  row: SqlRow;
   columnsOrder: string[];
   colName: string;
 };
@@ -36,14 +36,14 @@ export const getCellValue = ({
   row,
   columnsOrder,
   colName,
-}: GetCellValueProps): Scalar | undefined => {
+}: GetCellValueProps): SqlTypes | undefined => {
   const index = columnsOrder.indexOf(colName);
   if (index === -1) return null;
   return row[index];
 };
 
 type SingleColumnProps = {
-  rows: Scalar[][];
+  rows: SqlRow[];
   columnsOrder: string[];
   field: string;
 };
@@ -62,7 +62,7 @@ export const getSingleColumnFromResult = ({
 };
 
 type ColumnsFromResultProps = {
-  rows: Scalar[][];
+  rows: SqlRow[];
   columnsOrder: string[];
   fields: string[];
 };
@@ -90,7 +90,7 @@ export const getColumnsFromResult = ({
 };
 
 type ColumnsFromRowProps = {
-  row: Scalar[];
+  row: SqlRow;
   columnsOrder: string[];
   fields: string[];
 };
@@ -98,8 +98,8 @@ export const getColumnsFromRow = ({
   row,
   columnsOrder,
   fields,
-}: ColumnsFromRowProps): Record<string, Scalar | null> => {
-  const obj: Record<string, Scalar | null> = {};
+}: ColumnsFromRowProps): Record<string, SqlTypes | null> => {
+  const obj: Record<string, SqlTypes | null> = {};
 
   for (const field of fields) {
     const index = columnsOrder.indexOf(field);

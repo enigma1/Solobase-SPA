@@ -49,6 +49,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
     onSuccess: (data: LoginResponse) => {
       configStoreActions.setBackend(getValues('backend'));
       const username = getValues('username');
+      accountStoreActions.setUsername(username);
       accountStoreActions.setAuthenticated(true);
       accountStoreActions.setCapabilities(data.capabilities);
       queryClient.clear();
@@ -111,6 +112,12 @@ export const Login = ({ formHandlers }: LoginProps) => {
           className='space-y-4'
           onSubmit={handleSubmit(onLoginSubmit)}
           onClick={() => clearErrors()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              void handleSubmit(onLoginSubmit)();
+            }
+          }}
         >
           <div className='space-y-1'>
             <FormTextField

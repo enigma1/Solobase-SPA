@@ -1,6 +1,6 @@
-import ReactJsonView from '@microlink/react-json-view';
 import { FormFieldWrapper } from './FormCommon';
 import { FieldValues, Controller } from 'react-hook-form';
+import { JsonEditor } from '>/modules';
 import { FormCommonFieldProps } from './commonTypes';
 
 type FormJsonFieldProps<T extends FieldValues> = FormCommonFieldProps<T>;
@@ -19,12 +19,7 @@ export const FormJsonField = <T extends FieldValues>({
           $status={fieldState.error ? 'error' : undefined}
           $notice={fieldState.error?.message}
         >
-          <ReactJsonView
-            src={field.value ?? {}}
-            onEdit={(e) => field.onChange(e.updated_src)}
-            onAdd={(e) => field.onChange(e.updated_src)}
-            onDelete={(e) => field.onChange(e.updated_src)}
-          />
+          <JsonEditor value={field.value} onChange={(v) => field.onChange(v)} />
         </FormFieldWrapper>
       )}
     />

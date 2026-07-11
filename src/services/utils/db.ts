@@ -1,6 +1,6 @@
 import {
-  Scalar,
-  ScalarObject,
+  SqlTypes,
+  SqlObject,
   SqlRow,
   SqlColumns,
   TableShapeKey,
@@ -143,19 +143,20 @@ export const buildRulesFromColumn = (col: SqlColumns) => {
   }
 
   if (type.includes('int')) {
-    rules.validate = (v: Scalar) =>
+    rules.validate = (v: SqlTypes) =>
       v === null || v === '' || !isNaN(Number(v)) || 'Must be number';
   }
 
   if (type === 'json') {
-    rules.validate = (v: unknown) => {
-      try {
-        JSON.parse(v as string);
-        return true;
-      } catch {
-        return 'Invalid JSON';
-      }
-    };
+    // rules.validate = (v: unknown) => {
+    //   try {
+    //     JSON.parse(v as string);
+    //     return true;
+    //   } catch {
+    //     console.log('invalid is what', v);
+    //     return 'Invalid JSON';
+    //   }
+    // };
   }
 
   return rules;
@@ -236,13 +237,17 @@ export const tableColumnKeyList = [
 // and everything else becomes a "where" condition because is untouched
 export const getMergedSqlColumnData = (
   row: SqlRow,
-  editedColumns?: ScalarObject,
+  editedColumns?: SqlObject,
 ) => {
   if (!editedColumns) return row;
 
   const mergedData = [...row];
   Object.entries(editedColumns).forEach(([index, value]) => {
-    mergedData[Number(index)] = value;
+    if (!value) {
+      delete mergedData[Number(index)];
+    } else {
+      mergedData[Number(index)] = value;
+    }
   });
   return mergedData;
 };

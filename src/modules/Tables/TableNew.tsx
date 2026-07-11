@@ -45,17 +45,18 @@ export const TableNew = ({ database, wizardHandlers }: TableNewProps) => {
     },
   };
 
-  const { mutate, isPending, response } = useCreateTableMutation(
+  const { mutate, mutateAsync, isPending, response } = useCreateTableMutation(
     ({ api, state, query }) => ({
       isPending: query.isPending,
       mutate: api.mutate,
+      mutateAsync: api.mutateAsync,
       response: state,
     }),
     createTableCallbacks,
   );
 
   const onNewSubmit = async (values: TableFormShape) => {
-    mutate({ ...values, database });
+    await mutateAsync({ ...values, database });
   };
 
   const isBusy = isPending;

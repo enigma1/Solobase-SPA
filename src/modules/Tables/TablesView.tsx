@@ -7,7 +7,7 @@ import {
 } from '>/services/stores';
 import { queryKeys, useTablesHook } from '>/services/queryHooks';
 import { EmptyPage, ScreenLoader, dialogFactories } from '>/modules';
-import type { ViewRow, Scalar } from '>/types';
+import type { ViewRow, SqlTypes, SqlRow } from '>/types';
 import { TablesList } from './TablesList';
 
 export const TablesMainView = () => {
@@ -37,7 +37,7 @@ export const TablesMainView = () => {
     };
   });
 
-  const viewRows: ViewRow<Scalar[]>[] = useMemo(() => {
+  const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
       row,
       uiKey: idx.toString(),

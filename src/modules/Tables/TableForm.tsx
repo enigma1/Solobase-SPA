@@ -43,7 +43,6 @@ export const TableForm = ({
     return stepOrder[Math.max(idx - 1, 0)];
   };
 
-  const queryClient = useQueryClient();
   const { collationsByCharset, engines, defaults, isFetching, isSuccess } =
     useDatabaseServerInfo(({ state, query }) => ({
       collationsByCharset: state.collationsByCharset,
@@ -98,7 +97,9 @@ export const TableForm = ({
   useEffect(() => {
     wizardHandlers.next = goNextStep;
     wizardHandlers.previous = goPrevStep;
-    wizardHandlers.finish = handleSubmit((values) => onSubmit({ ...values }));
+    wizardHandlers.finish = async () => {
+      await handleSubmit((values) => onSubmit({ ...values }))();
+    };
 
     return () => {
       wizardHandlers.next = undefined;
@@ -106,13 +107,6 @@ export const TableForm = ({
       wizardHandlers.finish = undefined;
     };
   }, [step]);
-
-  // useEffect(() => {
-  //   queryClient.invalidateQueries({
-  //     queryKey: queryKeys.databaseServerInfo(),
-  //     exact: true,
-  //   });
-  // }, []);
 
   const { setButtonsStatuses } = useModal();
   const updateButtons = (step: TableFormStep, valid: boolean) => {

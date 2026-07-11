@@ -78,7 +78,8 @@ export const UserForm = ({
   useEffect(() => {
     wizardHandlers.next = goNextStep;
     wizardHandlers.previous = goPrevStep;
-    wizardHandlers.finish = handleSubmit((values) => onSubmit({ ...values }));
+    wizardHandlers.finish = async () =>
+      await handleSubmit((values) => onSubmit({ ...values }))();
 
     return () => {
       wizardHandlers.next = undefined;

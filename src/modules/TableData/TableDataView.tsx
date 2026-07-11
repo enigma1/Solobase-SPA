@@ -6,14 +6,12 @@ import {
   dialogStoreActions,
 } from '>/services/stores';
 import {
-  CollectionView,
-  CollectionViewType,
   SqlView,
   ScreenLoader,
   EmptyListing,
   dialogFactories,
 } from '>/modules';
-import { SqlColumnsShape, SqlRow, CollectionRow, ViewRow } from '>/types';
+import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
   const { dbSelected, activeTable } = useAccountStore(({ state, api }) => ({
@@ -21,20 +19,27 @@ export const TableDataView = () => {
     dbSelected: state.dbSelected,
   }));
 
-  const { rows, cols, columnsOrder, type, isSuccess, isError, isFetching } =
-    useTableDataHook(({ state, query }) => {
-      return {
-        rows: state.rows,
-        cols: state.cols,
-        columnsOrder: state.columnsOrder,
-        type: state.type,
-        isSuccess: query.isSuccess,
-        isError: query.isError,
-        isFetching: query.isFetching,
-      };
-    });
+  const {
+    rows,
+    cols,
+    columnsOrder,
+    rowTokens,
+    isSuccess,
+    isError,
+    isFetching,
+  } = useTableDataHook(({ state, query }) => {
+    return {
+      rows: state.rows,
+      cols: state.cols,
+      rowTokens: state.rowTokens,
+      columnsOrder: state.columnsOrder,
+      isSuccess: query.isSuccess,
+      isError: query.isError,
+      isFetching: query.isFetching,
+    };
+  });
 
-  const viewRows: ViewRow<SqlRow | CollectionRow>[] = useMemo(() => {
+  const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
       row,
       uiKey: idx.toString(),
@@ -72,15 +77,10 @@ export const TableDataView = () => {
     );
   }
 
-  return type === 'collection' ? (
-    <CollectionView
-      rows={rows as CollectionViewType}
-      activeTable={activeTable}
-      dbSelected={dbSelected}
-    />
-  ) : (
+  return (
     <SqlView
       rows={viewRows as ViewRow<SqlRow>[]}
+      rowTokens={rowTokens}
       cols={cols as SqlColumnsShape}
       columnsOrder={columnsOrder}
       activeTable={activeTable}

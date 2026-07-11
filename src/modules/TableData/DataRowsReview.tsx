@@ -22,6 +22,7 @@ type DataRowsReviewProps = {
   table: string;
   form: UseFormReturn<CreateDataRowsForm>;
   columnsOrder: string[];
+  onValidation: (valid: boolean) => void;
 };
 
 export const DataRowsReview = ({
@@ -29,9 +30,14 @@ export const DataRowsReview = ({
   table,
   form,
   columnsOrder,
+  onValidation,
 }: DataRowsReviewProps) => {
   const { getValues } = form;
   const { rowsData } = getValues();
+
+  useEffect(() => {
+    onValidation(true);
+  }, []);
 
   return (
     <div className='area-container'>

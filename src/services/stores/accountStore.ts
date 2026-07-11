@@ -13,7 +13,7 @@ export type AccountStoreState = {
   activeTable: string | null;
   isAuthenticated: boolean;
   online: boolean;
-  capabilities: UserCapabilities;
+  capabilities: string[];
 };
 
 export type AccountStoreActions = {
@@ -27,8 +27,9 @@ export type AccountStoreActions = {
   setAuthenticated: (value: boolean) => void;
   getAppStatus: () => boolean;
   setAppStatus: (value: boolean) => void;
-  setCapabilities: (capabilities: UserCapabilities) => void;
+  setCapabilities: (capabilities: string[]) => void;
   getUsername: () => string;
+  setUsername: (username: string) => void;
 };
 
 export type AccountStore = AccountStoreState & AccountStoreActions;
@@ -67,6 +68,9 @@ export const accountStoreActions: AccountStoreActions = {
     return null;
   },
   getUsername: () => get().username,
+  setUsername: (username) => {
+    setAuto({ username });
+  },
   getActiveDatabase: () => get().dbSelected,
   setActiveDatabase: (database) => {
     setAuto({ dbSelected: database, activeTable: null });
@@ -75,7 +79,7 @@ export const accountStoreActions: AccountStoreActions = {
   setActiveTable: (table) => {
     setAuto({ activeTable: table });
   },
-  setCapabilities: (capabilities: UserCapabilities) => {
+  setCapabilities: (capabilities: string[]) => {
     setAuto({ capabilities });
   },
 

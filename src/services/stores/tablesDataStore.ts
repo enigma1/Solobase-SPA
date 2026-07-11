@@ -1,7 +1,7 @@
 import { makeStore } from '>/services/utils/emitter';
-import { CollectionColumns, ScalarObject, CollectionRow } from '>/types';
+import { SqlObject } from '>/types';
 
-type EditedRow = Record<number, ScalarObject> | Record<string, CollectionRow>;
+type EditedRow = Record<number, SqlObject> | Record<string, SqlObject>;
 type TablesDataState = {
   editedRow: EditedRow;
 };
@@ -15,10 +15,7 @@ export type TablesDataActions = {
 
 export type TablesDataStore = TablesDataState & TablesDataActions;
 
-export const defaultCollectionColumns = {
-  _id: 'string',
-  doc: {},
-} satisfies CollectionColumns;
+export const defaultCollectionColumns = {};
 
 const initialState: TablesDataState = {
   editedRow: {},

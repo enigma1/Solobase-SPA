@@ -24,7 +24,6 @@ import {
   ViewRow,
   SqlColumnsShape,
   SqlRow,
-  ScalarObject,
   CommonDialogHandlers,
   WizardHandlers,
 } from '>/types';

@@ -3,25 +3,25 @@ import { SquarePenIcon, PencilLineIcon } from 'lucide-react';
 import { useColumnResize } from '>/services/hooks';
 import { CheckboxField } from '>/modules';
 import { getMergedSimpleColumnData } from '>/services/utils';
-import { ViewRow, ScalarObject, Scalar, PrimeRow } from '>/types';
+import { ViewRow, SqlTypes, SqlObject, SqlRow } from '>/types';
 import type { FactoryTableStore } from '>/services/stores';
 
 type EditHandlerProps = {
-  row: Scalar[];
+  row: SqlTypes[];
   rId: number;
   cId: number;
   colName: string;
 };
 
 type SimpleTableContainerProps = {
-  rows: ViewRow<PrimeRow>[];
+  rows: ViewRow<SqlRow>[];
   activeCols: string[];
   columnsOrder: string[];
   store: FactoryTableStore;
   outerRef: RefObject<HTMLDivElement | null>;
   tableRef: React.RefObject<HTMLTableElement | null>;
   resizeLineRef: RefObject<HTMLDivElement | null>;
-  editedRow?: Record<string, ScalarObject>;
+  editedRow?: Record<string, SqlObject>;
   onEditCell?: (props: EditHandlerProps) => void;
   onEditRow?: (uid: string) => void;
 };

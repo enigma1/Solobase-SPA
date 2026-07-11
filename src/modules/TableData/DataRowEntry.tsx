@@ -1,9 +1,7 @@
 import { useFormContext, ControllerFieldState } from 'react-hook-form';
-import ReactJsonView, { InteractionProps } from '@microlink/react-json-view';
 import { buildRulesFromColumn } from '>/services/utils';
-import { FormCellField } from '>/modules';
+import { FormCellField, JsonEditor } from '>/modules';
 import { AnyControlField } from '>/modules/Common/Forms/commonTypes';
-
 import { DataCell, DataEditorType, SqlColumnsShape } from '>/types';
 import { CreateDataRowsForm, DataRowForm } from './commonTypes';
 
@@ -15,16 +13,16 @@ type RenderEditorProps = {
 const renderEditor = ({ field, fieldState, editorType }: RenderEditorProps) => {
   switch (editorType) {
     case 'textarea':
-      return <textarea className='text-dialog-area resize-y' {...field} />;
+      return (
+        <textarea
+          className='text-dialog-area border input resize-y'
+          {...field}
+        />
+      );
 
     case 'json':
       return (
-        <ReactJsonView
-          src={field.value ?? {}}
-          onEdit={(e) => field.onChange(e.updated_src)}
-          onAdd={(e) => field.onChange(e.updated_src)}
-          onDelete={(e) => field.onChange(e.updated_src)}
-        />
+        <JsonEditor value={field.value} onChange={(v) => field.onChange(v)} />
       );
 
     case 'boolean':

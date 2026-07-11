@@ -1,17 +1,15 @@
 import {
-  TableDataColumns,
-  TableDataRow,
+  SqlTypes,
+  SqlObject,
   SqlRow,
-  Scalar,
-  ScalarObject,
+  TokenRow,
+  BasicRowsShape,
   PrimeObject,
-  CollectionRow,
   SqlColumns,
   SqlColumnsShape,
   TableShapeKey,
   TableShapeColumn,
   TableShape,
-  TableData,
   TableBasics,
   SqlQueryModes,
   UserCapabilities,
@@ -35,11 +33,7 @@ export type BasicResponse = {
   queries: string[];
 };
 
-export type BasicRowsShape = {
-  rows: SqlRow[];
-  cols: SqlColumnsShape;
-  columnsOrder: string[];
-};
+export type BasicDataResponse = BasicResponse & BasicRowsShape;
 
 export type AbortResponse = BasicResponse;
 
@@ -58,7 +52,7 @@ export type LoginRequest = {
 export type LoginResponse = BasicResponse & {
   schemas: string[];
   preferences: Record<string, any>;
-  capabilities: UserCapabilities;
+  capabilities: string[];
 };
 
 export type RunQueryRequest = {
@@ -74,7 +68,7 @@ export type RunRawQueryRequest = {
 
 type ResultSetResponse = BasicResponse & {
   mode: 'resultset';
-  rows: Scalar[][];
+  rows: SqlRow[];
   columnsOrder: string[];
   cols: SqlColumnsShape;
 };
@@ -87,15 +81,16 @@ type CommandResponse = BasicResponse & {
 };
 export type RunRawQueryResponse = ResultSetResponse | CommandResponse;
 
-export type FetchDatabasesResponse = BasicResponse & BasicRowsShape;
+export type FetchDatabasesResponse = BasicDataResponse;
 
 export type FetchTablesRequest = {
   database?: string;
 };
 
-export type FetchTablesResponse = BasicResponse & BasicRowsShape;
+export type FetchTablesResponse = BasicDataResponse;
 
 export type FetchRowsRequest = {
+  database: string;
   table: string;
   offset?: number;
   limit?: number;
@@ -107,44 +102,42 @@ export type FetchRowsRequest = {
   )[];
 };
 
-export type FetchRowsResponse = BasicResponse & TableData;
+export type FetchRowsResponse = BasicDataResponse;
 export type CreateDataRowsRequest = BasicRowsShape & {
   database: string;
   table: string;
 };
 
-export type CreateDataRowsResponse = BasicResponse & {
-  database: string;
-  table: string;
-};
+export type CreateDataRowsResponse = BasicResponse & TableBasics;
 
 type ChangedRow = {
-  originalRow: TableDataRow; // original row as fetched from the database
-  updatedValues: ScalarObject | CollectionRow; // column name with new value
-  rowIndex?: number; // optional original row index as it was fetched
+  originalRow: SqlRow; // original row as fetched from the database
+  updatedValues: SqlObject; // column name with new value
+  rowToken?: TokenRow;
 };
 
-export type UpdateDataRowsRequest = {
+export type UpdateDataRowsRequest = TableBasics & {
   dataRows: ChangedRow[]; // All changed rows
-  table: string; // Table being edited
   command?: string; // original SQL command
 };
 
-export type UpdateDataRowsResponse = BasicResponse & {
-  rows: TableDataRow[];
-  database: string;
-  table: string;
+export type UpdateDataRowsResponse = BasicResponse &
+  TableBasics & {
+    rows: SqlRow[];
+  };
+
+export type DeletedRow = {
+  originalRow: SqlRow; // original row as fetched from the database
+  rowToken?: TokenRow;
 };
 
-export type DeleteDataRowsRequest = {
-  database: string;
-  table: string; // Table being edited
-  rows: SqlRow[];
+export type DeleteDataRowsRequest = TableBasics & {
+  dataRows: DeletedRow[]; // All changed rows
 };
-export type DeleteDataRowsResponse = BasicResponse & {
-  database: string;
-  table: string; // Table being edited
-};
+export type DeleteDataRowsResponse = BasicResponse &
+  TableBasics & {
+    rows: SqlRow[];
+  };
 
 // export type InsertDataRowsRequest = {
 //   dataRows: ChangedRow[]; // All changed rows
@@ -195,14 +188,14 @@ export type FetchDatabaseInfoResponse = BasicResponse & {
 };
 
 export type FetchUsersRequest = {};
-export type FetchUsersResponse = BasicResponse & BasicRowsShape;
+export type FetchUsersResponse = BasicDataResponse;
 
 export type DeleteUsersRequest = {
-  rows: Scalar[][];
+  rows: SqlRow[];
   columnsOrder: string[];
 };
 export type DeleteUsersResponse = BasicResponse & {
-  rows: Scalar[][];
+  rows: SqlRow[];
   columnsOrder: string[];
 };
 
@@ -248,10 +241,7 @@ export type DeleteTablesRequest = {
 };
 
 export type CreateTableRequest = TableShape;
-export type CreateTableResponse = BasicResponse & {
-  database: string;
-  table: string;
-};
+export type CreateTableResponse = BasicResponse & TableBasics;
 
 export type EditTableRequest = {
   original: TableShape;
@@ -283,9 +273,7 @@ export type GetTableDetailsResponse = BasicResponse &
   };
 
 export type GetTableColumnsInfoRequest = TableBasics;
-export type GetTableColumnsInfoResponse = BasicResponse &
-  TableBasics &
-  BasicRowsShape;
+export type GetTableColumnsInfoResponse = BasicDataResponse & TableBasics;
 
 export type ImportDataRequest = {
   database?: string;

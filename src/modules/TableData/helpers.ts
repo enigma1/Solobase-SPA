@@ -1,52 +1,26 @@
-import { UpdateDataRowsRequest } from '>/services/api';
-import {
-  CollectionRow,
-  TableDataRow,
-  ScalarObject,
-  SqlColumnsShape,
-  SqlRow,
-} from '>/types';
-
-type UpdateDataRowsCollectionProps = {
-  componentShape: Record<string, CollectionRow>;
-  table: string;
-  originalRows: CollectionRow[];
-};
-
-export const updateRowsCollectionTransformer = (
-  props: UpdateDataRowsCollectionProps,
-): UpdateDataRowsRequest => {
-  const { componentShape, table, originalRows } = props;
-  const rowsToUpdate = Object.entries(componentShape).map(([_id, doc]) => {
-    const row = originalRows.find((row) => row._id === _id);
-    if (!row) {
-      throw new Error(`Row with _id ${_id} not found`);
-    }
-    const updatedValues = doc;
-    return {
-      updatedValues,
-      originalRow: row,
-    };
-  });
-  return { table, dataRows: rowsToUpdate };
-};
+import { UpdateDataRowsRequest, DeleteDataRowsRequest } from '>/services/api';
+import { SqlColumnsShape, SqlObject, SqlRow, TokenRow } from '>/types';
 
 type UpdateDataRowsSqlProps = {
-  componentShape: Record<number, ScalarObject>;
+  componentShape: Record<number, SqlObject>;
   cols: SqlColumnsShape;
+  database: string;
   table: string;
-  originalRows: TableDataRow[];
+  originalRows: SqlRow[];
+  rowTokens?: TokenRow[];
 };
 
 export const updateRowsSqlTransformer = (
   props: UpdateDataRowsSqlProps,
 ): UpdateDataRowsRequest => {
-  const { componentShape, table, originalRows, cols } = props;
+  const { componentShape, database, table, originalRows, rowTokens, cols } =
+    props;
 
   // Transformer - componentShape into API format
   const rowsToUpdate = Object.entries(componentShape).map(([rId, row]) => {
+    const rowToken = rowTokens?.[Number(rId)];
     const originalRow = originalRows[Number(rId)] as SqlRow;
-    const updatedValues: ScalarObject = {};
+    const updatedValues: SqlObject = {};
 
     // Create an object of the updated values with column names as keys
     const colNames = Object.keys(cols);
@@ -54,7 +28,31 @@ export const updateRowsSqlTransformer = (
       const colName = colNames[Number(key)];
       updatedValues[colName] = value;
     });
-    return { updatedValues, originalRow, rowIndex: Number(rId) };
+    return {
+      updatedValues,
+      originalRow,
+      ...(rowToken ? { rowToken } : {}),
+    };
   });
-  return { table, dataRows: rowsToUpdate };
+  return { database, table, dataRows: rowsToUpdate };
+};
+
+type DeleteDataRowsSqlProps = {
+  database: string;
+  table: string;
+  originalRows: SqlRow[];
+  rowTokens?: TokenRow[];
+};
+
+export const deleteRowsSqlTransformer = (
+  props: DeleteDataRowsSqlProps,
+): DeleteDataRowsRequest => {
+  const { database, table, originalRows, rowTokens } = props;
+
+  // Transformer - componentShape into API format
+  const rowsToDelete = originalRows.map((originalRow, idx) => ({
+    originalRow,
+    ...(rowTokens?.[idx] ? { rowToken: rowTokens[idx] } : {}),
+  }));
+  return { database, table, dataRows: rowsToDelete };
 };

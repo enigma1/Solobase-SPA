@@ -79,18 +79,16 @@ const AuthMenu = () => {
         </DropdownMenu>
         <div className='menu-separator'>|</div>
         <DropdownMenu label='Database'>
-          {capabilities.canCreateDatabases && (
-            <a
-              href='#'
-              onClick={() =>
-                dialogStoreActions.openDialog({
-                  payload: dialogFactories.createDatabase(),
-                })
-              }
-            >
-              New Database
-            </a>
-          )}
+          <a
+            href='#'
+            onClick={() =>
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.createDatabase(),
+              })
+            }
+          >
+            New Database
+          </a>
           <Link to={routes.front.listDatabases}>List Databases</Link>
           <a
             href='#'
@@ -110,18 +108,16 @@ const AuthMenu = () => {
           disabled={!dbSelected}
           title={!dbSelected ? 'Select a database first' : undefined}
         >
-          {capabilities.canManageTables && (
-            <a
-              href='#'
-              onClick={() => {
-                dialogStoreActions.openDialog({
-                  payload: dialogFactories.createTable(dbSelected),
-                });
-              }}
-            >
-              New Table
-            </a>
-          )}
+          <a
+            href='#'
+            onClick={() => {
+              dialogStoreActions.openDialog({
+                payload: dialogFactories.createTable(dbSelected),
+              });
+            }}
+          >
+            New Table
+          </a>
           <Link to={routes.front.listTables}>Show Tables</Link>
         </DropdownMenu>
         <div className='menu-separator'>|</div>
@@ -148,19 +144,15 @@ const AuthMenu = () => {
             Executed Queries
           </a>
         </DropdownMenu>
-        {capabilities.canViewUsers && (
-          <>
-            <div className='menu-separator'>|</div>
-            {capabilities.canManageUsers && (
-              <DropdownMenu label='Users'>
-                <a href='#' onClick={handleCreateUser}>
-                  Create User
-                </a>
-                <Link to={routes.front.listUsers}>List Users</Link>
-              </DropdownMenu>
-            )}
-          </>
-        )}
+        <>
+          <div className='menu-separator'>|</div>
+          <DropdownMenu label='Users'>
+            <a href='#' onClick={handleCreateUser}>
+              Create User
+            </a>
+            <Link to={routes.front.listUsers}>List Users</Link>
+          </DropdownMenu>
+        </>
       </div>
     </Auth>
   );

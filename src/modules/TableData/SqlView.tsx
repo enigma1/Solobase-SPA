@@ -1,11 +1,5 @@
 import { useRef, useMemo } from 'react';
-import {
-  Scalar,
-  ScalarObject,
-  SqlColumnsShape,
-  SqlRow,
-  ViewRow,
-} from '>/types';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   useConfigStore,
   useTablesDataStore,
@@ -15,7 +9,6 @@ import {
 } from '>/services/stores';
 import {
   MutationCallbacks,
-  queryKeys,
   useUpdateRowsMutation,
   useDeleteRowsMutation,
 } from '>/services/queryHooks';
@@ -26,21 +19,31 @@ import {
   ScreenLoader,
   PageTableShell,
   DialogContent,
-  FilterColumns,
   EditDataCellRaw,
   dialogFactories,
 } from '>/modules';
+import { routes } from '>/config';
 import {
   UpdateDataRowsRequest,
   UpdateDataRowsResponse,
   DeleteDataRowsRequest,
   DeleteDataRowsResponse,
+  DeletedRow,
 } from '>/services/api/dbApiTypes';
-import { updateRowsSqlTransformer } from './helpers';
+import {
+  SqlColumnsShape,
+  SqlRow,
+  SqlObject,
+  SqlTypes,
+  ViewRow,
+  TokenRow,
+} from '>/types';
+import { updateRowsSqlTransformer, deleteRowsSqlTransformer } from './helpers';
 import { DataRowsDeletePreview } from './DataRowsPreview';
 
 type TableViewProps = {
   rows: ViewRow<SqlRow>[];
+  rowTokens?: TokenRow[];
   cols: SqlColumnsShape;
   columnsOrder: string[];
   dbSelected: string;
@@ -50,13 +53,18 @@ type TableViewProps = {
 export const SqlView = ({
   cols,
   rows,
+  rowTokens,
   columnsOrder,
   dbSelected,
   activeTable,
 }: TableViewProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
+
   const tableStore = useMemo(() => createFactoryTableStore(), []);
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
@@ -69,7 +77,7 @@ export const SqlView = ({
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
   const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, ScalarObject>,
+    editedRow: state.editedRow as Record<number, SqlObject>,
     markEditedRow: api.markEditedRow,
   }));
 
@@ -138,16 +146,15 @@ export const SqlView = ({
     cId,
     colName,
   }: {
-    row: Scalar[];
+    row: SqlRow;
     rId: number;
     cId: number;
     colName: string;
   }) => {
     const valueRef = { current: row[cId] };
-    const saveChanges = (newValue: Scalar) => {
+    const saveChanges = (newValue: SqlTypes) => {
       markEditedRow((previousState) => {
-        const prevRow =
-          (previousState as Record<number, ScalarObject>)[rId] || {};
+        const prevRow = (previousState as Record<number, SqlObject>)[rId] || {};
         const updatedRow = { ...prevRow };
         updatedRow[cId] = newValue;
         return {
@@ -163,8 +170,11 @@ export const SqlView = ({
         component: (
           <DialogContent note={`Table: ${colName} @row:[${rId}]`}>
             <EditDataCellRaw
-              value={row[cId]}
-              onChange={(v: Scalar) => (valueRef.current = v)}
+              type={cols[colName].type}
+              value={valueRef.current}
+              onChange={(v) => {
+                valueRef.current = v;
+              }}
             />
           </DialogContent>
         ),
@@ -205,8 +215,10 @@ export const SqlView = ({
 
   const handleSaveRows = () => {
     const rowsTransformed = updateRowsSqlTransformer({
+      rowTokens,
       componentShape: editedRow,
       cols,
+      database: dbSelected,
       table: activeTable,
       originalRows: rows.map((r) => r.row) as SqlRow[],
     });
@@ -219,12 +231,14 @@ export const SqlView = ({
       return;
     }
 
-    const rowEntries: SqlRow[] = [];
+    const originalRows = [...sRows].map((key) => rowMap.get(key)!);
 
-    for (const id of sRows) {
-      const row = rowMap.get(id);
-      if (row) rowEntries.push(row);
-    }
+    const rowsTransformed = deleteRowsSqlTransformer({
+      database: dbSelected,
+      table: activeTable,
+      originalRows,
+      rowTokens,
+    });
 
     dialogStoreActions.openDialog({
       payload: {
@@ -232,18 +246,14 @@ export const SqlView = ({
         variant: 'error',
         component: (
           <DataRowsDeletePreview
-            rows={rowEntries}
+            rows={originalRows}
             columnsOrder={columnsOrder}
           />
         ),
         actions: dialogActions.confirmCancel({
           onConfirm: () => {
             dialogStoreActions.closeDialog();
-            mutateDelete({
-              database: dbSelected,
-              table: activeTable,
-              rows: rowEntries,
-            });
+            mutateDelete(rowsTransformed);
           },
         }),
       },
@@ -263,6 +273,12 @@ export const SqlView = ({
     });
   };
 
+  const handleBack = () => {
+    navigate(routes.front.listTables, {
+      replace: true,
+    });
+  };
+
   const shellHandlers = {
     onExport: handleSelectedExports,
     onDiscardEdits:
@@ -273,15 +289,9 @@ export const SqlView = ({
       makeColumnsActive(columnsOrder);
     },
     onCreate: handleCreateRows,
+    onBack: handleBack,
   };
 
-  // useEffect(() => {
-  //   console.log('TableView MOUNT');
-
-  //   return () => {
-  //     console.log('TableView UNMOUNT');
-  //   };
-  // }, []);
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
   const isBusy = isPending || isDeletePending;
 

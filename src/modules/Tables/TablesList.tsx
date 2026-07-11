@@ -1,4 +1,5 @@
 import { useRef, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDeleteTablesMutation } from '>/services/queryHooks';
 import {
   useConfigStore,
@@ -7,13 +8,14 @@ import {
   messageStoreActions,
   createFactoryTableStore,
   dialogStoreActions,
+  accountStoreActions,
 } from '>/services/stores';
 import type {
   SqlColumnsShape,
-  Scalar,
+  SqlTypes,
   SqlRow,
+  SqlObject,
   ViewRow,
-  ScalarObject,
 } from '>/types';
 import {
   PageTableShell,
@@ -30,12 +32,13 @@ import {
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
+import { routes } from '>/config';
 import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
 import { TablesDeletePreview } from './TablesPreviews';
 
 type TablesListProps = {
   dbSelected: string;
-  rows: ViewRow<Scalar[]>[];
+  rows: ViewRow<SqlRow>[];
   cols: SqlColumnsShape;
   columnsOrder: string[];
 };
@@ -46,6 +49,9 @@ export const TablesList = ({
   cols,
   columnsOrder,
 }: TablesListProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +66,7 @@ export const TablesList = ({
   }));
 
   const { editedRow, markEditedRow } = useTablesStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, ScalarObject>,
+    editedRow: state.editedRow as Record<number, SqlObject>,
     markEditedRow: api.markEditedRow,
   }));
 
@@ -122,6 +128,23 @@ export const TablesList = ({
         }),
       },
     });
+  };
+
+  const onSelectRow = (uid: string) => {
+    const row = rowMap.get(uid);
+    if (!row) return;
+    const fields = getColumnsFromRow({
+      row,
+      columnsOrder,
+      fields: ['TABLE_NAME'],
+    });
+
+    if (typeof fields['TABLE_NAME'] !== 'string') return;
+
+    accountStoreActions.setActiveTable(fields['TABLE_NAME']);
+    if (location.pathname !== routes.front.listData) {
+      navigate(routes.front.listData);
+    }
   };
 
   const onEditRow = (uid: string) => {
@@ -197,6 +220,12 @@ export const TablesList = ({
     });
   };
 
+  const handleBack = () => {
+    navigate(routes.front.listDatabases, {
+      replace: true,
+    });
+  };
+
   const shellHandlers = {
     onDiscardEdits:
       Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
@@ -208,6 +237,7 @@ export const TablesList = ({
     onFilterColumns: () => {
       makeColumnsActive(columnsOrder);
     },
+    onBack: handleBack,
   };
 
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
@@ -239,6 +269,7 @@ export const TablesList = ({
           resizeLineRef={resizeLineRef}
           editedRow={editedRow}
           onEditRow={onEditRow}
+          onSelectRow={onSelectRow}
         />
       </EffectiveTableWrapper>
     </>

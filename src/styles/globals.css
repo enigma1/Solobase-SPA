@@ -8,6 +8,7 @@
   --color-srf-elevated: var(--tone-2);
   --color-srf-muted: var(--tone-3);
   --color-srf-dim: var(--tone-4);
+  --color-srf-high: var(--tone-9);
   --color-srf-peak: var(--tone-11);
 
   /* text */

@@ -2,18 +2,12 @@ import { useMemo, type RefObject } from 'react';
 import { SquarePenIcon, PencilLineIcon } from 'lucide-react';
 import { useColumnResize } from '>/services/hooks';
 import type { FactoryTableStore } from '>/services/stores';
-import {
-  ViewRow,
-  ScalarObject,
-  Scalar,
-  SqlColumnsShape,
-  SqlRow,
-} from '>/types';
+import { ViewRow, SqlTypes, SqlObject, SqlColumnsShape, SqlRow } from '>/types';
 import { getMergedSqlColumnData } from '>/services/utils';
 import { CheckboxField } from '>/modules';
 
 type EditHandlerProps = {
-  row: Scalar[];
+  row: SqlRow;
   rId: number;
   cId: number;
   colName: string;
@@ -28,7 +22,7 @@ type SqlTableContainerProps = {
   outerRef: RefObject<HTMLDivElement | null>;
   tableRef: React.RefObject<HTMLTableElement | null>;
   resizeLineRef: RefObject<HTMLDivElement | null>;
-  editedRow?: Record<string, ScalarObject>;
+  editedRow?: Record<string, SqlObject>;
   onEditCell?: (props: EditHandlerProps) => void;
   onEditRow?: (uid: string) => void;
   onSelectRow?: (uid: string) => void;

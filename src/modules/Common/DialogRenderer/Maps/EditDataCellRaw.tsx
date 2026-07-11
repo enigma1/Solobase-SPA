@@ -1,30 +1,51 @@
-import ReactJsonView from '@microlink/react-json-view';
+import { useState } from 'react';
 import { useModal } from '>/services/hooks';
-import { Scalar } from '>/types';
-import { TextAreaField } from '>/modules';
+import { TextAreaField, JsonEditor } from '>/modules';
+import { SqlTypes, SqlObject } from '>/types';
+
+type HasitProps = {
+  input: string;
+  part: string;
+  at?: number;
+};
+export const hasit = ({ input, part, at = 0 }: HasitProps) => {
+  return input.toLowerCase().indexOf(part.toLowerCase(), at) !== -1;
+};
+
+const getModeType = (type?: string) => {
+  if (!type) return 'text';
+  if (type === 'json') return 'tree';
+  if (hasit({ input: type, part: 'varbinary' })) {
+    return 'text';
+  }
+};
 
 type EditDataCellRawProps = {
-  value: Scalar;
-  onChange: (value: Scalar) => void;
+  value: SqlTypes;
+  onChange: (value: SqlTypes) => void;
+  type?: string;
 };
 
 export const EditDataCellRaw = ({
   value: cellValue,
   onChange,
+  type,
 }: EditDataCellRawProps) => {
   const { setButtonStatus } = useModal();
+  // const [value, setValue] = useState(cellValue);
+  const mode = getModeType(type);
 
-  const isObject = typeof cellValue === 'object' && cellValue !== null;
-  if (isObject) {
+  if (mode) {
     return (
-      <ReactJsonView
-        theme='bright:inverted'
-        src={cellValue}
-        name={false}
-        // collapsed={true}
-        onEdit={(e) => onChange(e.updated_src as Scalar)}
-        onAdd={(e) => onChange(e.updated_src as Scalar)}
-        onDelete={(e) => onChange(e.updated_src as Scalar)}
+      <JsonEditor
+        value={cellValue}
+        onChange={(v) => {
+          onChange(v);
+          setButtonStatus('confirm');
+        }}
+        options={{
+          mode,
+        }}
       />
     );
   } else {

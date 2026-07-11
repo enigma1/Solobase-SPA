@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import ReactJsonView from '@microlink/react-json-view';
 import { FormFieldWrapper } from './FormCommon';
 import {
   FieldValues,
