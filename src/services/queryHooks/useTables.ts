@@ -1,20 +1,30 @@
-import { useRef, useMemo, useEffect } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { dbApi, FetchTablesResponse, BasicResponse } from '>/services/api';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  dbApi,
+  FetchTablesRequest,
+  FetchTablesResponse,
+  BasicResponse,
+} from '>/services/api';
 import { useAccountStore } from '>/services/stores';
-import { defaultResponse, getSingleColumnFromResult } from '>/services/utils';
-import { SqlTableData } from '>/types';
+import {
+  defaultResponse,
+  defaultListResponse,
+  defaultPageResponse,
+  getSingleColumnFromResult,
+} from '>/services/utils';
+import { BasicRowsShape } from '>/types';
 import { queryKeys, STALE_TIME, DataHookProps } from './defs';
 
 type TablesHookProps = DataHookProps<FetchTablesResponse>;
-export const useTablesHook = <TSelected = TablesHookProps>(
+export const useTables = <TSelected = TablesHookProps>(
+  request?: FetchTablesRequest,
   selector?: (args: TablesHookProps) => TSelected,
 ) => {
-  const initialData: BasicResponse & SqlTableData = {
+  const initialData: BasicResponse & BasicRowsShape = {
     ...defaultResponse,
-    rows: [],
-    cols: {},
-    columnsOrder: [],
+    ...defaultListResponse,
+    ...defaultPageResponse,
   };
 
   const { dbSelected, isAuthenticated } = useAccountStore(({ state }) => ({
@@ -22,17 +32,17 @@ export const useTablesHook = <TSelected = TablesHookProps>(
     isAuthenticated: state.isAuthenticated,
   }));
 
-  const database = dbSelected ?? null;
+  const database = request?.database ?? dbSelected ?? null;
 
   // React Query data fetch
   const q = useQuery<FetchTablesResponse, Error>({
-    queryKey: queryKeys.tables(database),
+    queryKey: queryKeys.tables(database, request?.paging),
     queryFn: async () => {
       // const delay = (ms: number) =>
       //   new Promise((resolve) => setTimeout(resolve, ms));
       // await delay(5000);
       if (!database) return { ...initialData };
-      const data = await dbApi.fetchTables({ database });
+      const data = await dbApi.fetchTables({ ...request, database });
       return data;
     },
     staleTime: STALE_TIME,
@@ -55,19 +65,6 @@ export const useTablesHook = <TSelected = TablesHookProps>(
         }),
     };
   }, [data.rows, data.columnsOrder]);
-
-  // state object
-  // const api = useMemo(() => {
-  //   return {
-  //     getTablesCount: () => data.rows.length,
-  //     getTablesNames: () => {
-  //       const nameIndex = data.columnsOrder.indexOf('TABLE_NAME');
-  //       if (nameIndex === -1) return [];
-  //       const result = data.rows.map((row) => row[nameIndex]);
-  //       return result;
-  //     },
-  //   };
-  // }, [data.rows, data.columnsOrder]);
 
   // return selector pattern
   const store = {

@@ -33,12 +33,9 @@ export type BasicResponse = {
   queries: string[];
 };
 
-export type BasicDataResponse = BasicResponse & BasicRowsShape;
-
 export type AbortResponse = BasicResponse;
 
 export type SessionRestoreResponse = BasicResponse & {
-  schemas: BasicRowsShape;
   username: string;
   dbSelected: string | null;
   preferences: Record<string, any>;
@@ -50,7 +47,6 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = BasicResponse & {
-  schemas: string[];
   preferences: Record<string, any>;
   capabilities: string[];
 };
@@ -66,12 +62,10 @@ export type RunRawQueryRequest = {
   groupByMode?: SqlQueryModes;
 };
 
-type ResultSetResponse = BasicResponse & {
-  mode: 'resultset';
-  rows: SqlRow[];
-  columnsOrder: string[];
-  cols: SqlColumnsShape;
-};
+type ResultSetResponse = BasicResponse &
+  BasicRowsShape & {
+    mode: 'resultset';
+  };
 
 type CommandResponse = BasicResponse & {
   mode: 'command';
@@ -79,30 +73,49 @@ type CommandResponse = BasicResponse & {
     affectedRows: number;
   };
 };
+
 export type RunRawQueryResponse = ResultSetResponse | CommandResponse;
 
+type SortBy = {
+  column: string;
+  direction: 'ASC' | 'DESC';
+};
+
+export type SortRequest = {
+  sortBy?: SortBy[];
+};
+
+export type PagingRequest = {
+  paging?: {
+    offset: number;
+    limit: number;
+  };
+};
+
+export type PagingResponse = {
+  paging?: {
+    hasNext: boolean;
+    hasPrevious: boolean;
+  };
+};
+
+export type BasicDataRequest = SortRequest & PagingRequest;
+export type BasicDataResponse = BasicResponse & BasicRowsShape & PagingResponse;
+
+export type FetchUsersRequest = BasicDataRequest;
+export type FetchUsersResponse = BasicDataResponse;
+
+export type FetchDatabasesRequest = BasicDataRequest;
 export type FetchDatabasesResponse = BasicDataResponse;
 
-export type FetchTablesRequest = {
+export type FetchTablesRequest = BasicDataRequest & {
   database?: string;
 };
-
 export type FetchTablesResponse = BasicDataResponse;
 
-export type FetchRowsRequest = {
-  database: string;
-  table: string;
-  offset?: number;
-  limit?: number;
-  sortBy?: (
-    | `${string} ASC`
-    | `${string} DESC`
-    | `${string} asc`
-    | `${string} desc`
-  )[];
-};
-
+export type FetchRowsRequest = TableBasics & BasicDataRequest;
 export type FetchRowsResponse = BasicDataResponse;
+
 export type CreateDataRowsRequest = BasicRowsShape & {
   database: string;
   table: string;
@@ -138,15 +151,6 @@ export type DeleteDataRowsResponse = BasicResponse &
   TableBasics & {
     rows: SqlRow[];
   };
-
-// export type InsertDataRowsRequest = {
-//   dataRows: ChangedRow[]; // All changed rows
-//   table: string; // Table being edited
-//   rows: SqlRow[];
-// };
-// export type InsertDataRowsResponse = BasicResponse & {
-//   rows: TableDataRow[];
-// };
 
 export type RunQueryResponse = BasicRowsShape & {
   query: string;
@@ -186,9 +190,6 @@ export type FetchDatabaseInfoResponse = BasicResponse & {
     engine: string;
   };
 };
-
-export type FetchUsersRequest = {};
-export type FetchUsersResponse = BasicDataResponse;
 
 export type DeleteUsersRequest = {
   rows: SqlRow[];

@@ -2,8 +2,34 @@ import { z } from 'zod';
 import isEqual from 'lodash-es/isEqual';
 import cloneDeep from 'lodash-es/cloneDeep';
 import merge from 'lodash-es/merge';
-import type { BasicResponse, BasicRowsShape } from '>/services/api';
-import type { UserCapabilities } from '>/types';
+import { pageSizeValues } from './appSettings';
+import type {
+  BasicResponse,
+  PagingRequest,
+  PagingResponse,
+} from '>/services/api';
+import type { BasicRowsShape, PagingParams } from '>/types';
+
+export const defaultPageRequest: PagingRequest = {
+  paging: {
+    limit: pageSizeValues[0],
+    offset: 0,
+  },
+};
+
+export const defaultPageResponse: PagingResponse = {
+  paging: {
+    hasPrevious: false,
+    hasNext: false,
+  },
+};
+
+export const defaultPaging: PagingParams = {
+  limit: pageSizeValues[0],
+  offset: 0,
+  hasNext: false,
+  hasPrevious: false,
+};
 
 export const defaultResponse: BasicResponse = {
   ok: false,
@@ -17,15 +43,6 @@ export const defaultListResponse: BasicRowsShape = {
   cols: {},
   columnsOrder: [],
 };
-
-// export const defaultCapabilities: UserCapabilities = {
-//   canGrantPrivileges: true,
-//   canViewUsers: true,
-//   canManageUsers: true,
-//   canCreateDatabases: true,
-//   canManageTables: true,
-//   canEditData: true,
-// } as const;
 
 export const defaultCapabilities: string[] = [];
 

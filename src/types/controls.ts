@@ -32,3 +32,9 @@ export type OptionGroup = {
   label: string;
   options: Option[];
 };
+
+export type ListScrollInfo = {
+  scrollHeight: number;
+  scrollTop: number;
+  clientHeight: number;
+};

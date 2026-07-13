@@ -20,7 +20,7 @@ import {
   dialogStoreActions,
   queriesStoreActions,
 } from '>/services/stores';
-import { useTablesHook } from '>/services/queryHooks';
+import { useTables } from '>/services/queryHooks';
 import { SidebarOptions } from '>/types';
 
 export const Sidebar = () => {
@@ -30,17 +30,14 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { sidebarVisibility } = useConfigStore(({ state }) => ({
+  const { sidebarVisibility, pageSizes } = useConfigStore(({ state }) => ({
     sidebarVisibility: state.sidebarVisibility,
+    pageSizes: state.pageSizes,
   }));
 
   const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
-  }));
-
-  const { getTablesCount } = useTablesHook(({ api }) => ({
-    getTablesCount: () => api.getTablesCount(),
   }));
 
   type SidebarItem = {
@@ -54,7 +51,8 @@ export const Sidebar = () => {
   const sideSections: SidebarItem[] = [
     {
       id: 'sideDatabases',
-      getTitle: () => (dbSelected ? dbSelected : 'Databases'),
+      getTitle: () =>
+        `${dbSelected ? dbSelected : 'Databases'} (${pageSizes.dbRows}/page)`,
       getRoute: () => routes.front.listDatabases,
       component: <DatabasesSideList />,
       icon: (
@@ -72,7 +70,7 @@ export const Sidebar = () => {
     },
     {
       id: 'sideTables',
-      getTitle: () => `Tables: ${getTablesCount()}`,
+      getTitle: () => `Tables (${pageSizes.tableRows}/page)`,
       getRoute: () => {
         if (activeTable && expandedSection === 'sideTables') {
           return routes.front.listTables;
@@ -98,7 +96,7 @@ export const Sidebar = () => {
     },
     {
       id: 'sideQueries',
-      getTitle: () => `Queries: ${queriesStoreActions.getQueriesCount()}`,
+      getTitle: () => `Queries`,
       getRoute: () => routes.front.listQueries,
       component: <QueriesSideList />,
       icon: (

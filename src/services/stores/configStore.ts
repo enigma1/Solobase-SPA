@@ -6,6 +6,7 @@ import {
 } from '>/services/utils';
 import { apiClient } from '>/services/api/client';
 import { StorageConfig, SidebarVisibilityType } from '>/types';
+import { PageListings } from '>/services/utils/appSettings';
 
 export type ConfigActions = {
   setTheme: (value?: string) => void;
@@ -20,6 +21,7 @@ export type ConfigActions = {
   getBackend: () => string;
   setFrontPort: (port: number) => void;
   getFrontPort: () => number;
+  getPageSizes: () => Record<PageListings, number>;
 };
 
 export type ConfigStore = StorageConfig & ConfigActions;
@@ -45,6 +47,7 @@ export const configStoreActions: ConfigActions = {
     setAuto({ hiddenColumns: cols });
   },
   getHiddenColumns: () => get().hiddenColumns,
+  getPageSizes: () => get().pageSizes,
 
   getBackend: () => get().backend,
   setBackend: (url, updateClient = true) => {

@@ -14,7 +14,7 @@ import {
   autoUpdate,
 } from '@floating-ui/react-dom';
 import { ChevronLeftIcon } from 'lucide-react';
-import { StatusType } from '>/types';
+import { StatusType, ListScrollInfo } from '>/types';
 import { Option, OptionGroup } from '>/modules/Common/Forms/commonTypes';
 
 type ComboBoxProps = {
@@ -25,6 +25,7 @@ type ComboBoxProps = {
   $placeholder?: string;
   $status?: StatusType;
   onChange: (value: string | string[]) => void;
+  onListScroll?: (info: ListScrollInfo) => void;
   $options?: Option[];
   $groups?: OptionGroup[];
   // $open?: boolean;
@@ -233,6 +234,16 @@ export const ComboBox = (props: ComboBoxProps) => {
     }
   };
 
+  const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
+    const el = e.currentTarget;
+    const scrollInfo = {
+      scrollTop: el.scrollTop,
+      clientHeight: el.clientHeight,
+      scrollHeight: el.scrollHeight,
+    };
+    props.onListScroll?.(scrollInfo);
+  };
+
   return (
     <div
       className='combo-shell'
@@ -311,6 +322,7 @@ export const ComboBox = (props: ComboBoxProps) => {
             refs.setFloating(node);
             floatingRef.current = node;
           }}
+          onScroll={handleScroll}
           style={{
             ...floatingStyles,
             width: menuWidth,

@@ -75,6 +75,35 @@ export const handleLogout = () => {
   });
 };
 
+export const handleClearSession = () => {
+  dialogStoreActions.openDialog({
+    anonymous: true,
+    payload: {
+      caption: 'Sessions',
+      component: (
+        <DialogContent note='ClearSession'>
+          {'Are you sure you want to erase all session data?'}
+        </DialogContent>
+      ),
+      variant: 'warn',
+      actions: dialogActions.confirmCancel({
+        onConfirm: async () => {
+          dialogStoreActions.closeDialog();
+          sessionStorage.removeItem('can-restore');
+          sessionStorage.removeItem('sessionPrefs');
+          messageStoreActions.addMessage({
+            type: 'info',
+            content: {
+              text: `Session data erased`,
+              duration: 3000,
+            },
+          });
+        },
+      }),
+    },
+  });
+};
+
 export const handlePreferences = () => {
   dialogStoreActions.openDialog({
     payload: dialogFactories.editPreferences(),

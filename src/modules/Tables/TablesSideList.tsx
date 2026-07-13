@@ -1,17 +1,34 @@
+import { useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useTablesHook } from '>/services/queryHooks';
+import { useTables } from '>/services/queryHooks';
 import { isObjectEmpty, dialogActions } from '>/services/utils';
 import {
   useAccountStore,
   useTablesDataStore,
   dialogStoreActions,
+  createFactoryTableStore,
+  useConfigStore,
 } from '>/services/stores';
-import { ScreenLoader, DialogContent } from '>/modules';
+import { ScreenLoader, DialogContent, SidePagination } from '>/modules';
 import { routes } from '>/config';
+import { PagingContext } from '>/types';
 
 export const TablesSideList = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const store = useMemo(
+    () => createFactoryTableStore({ listingType: 'tableRows' }),
+    [],
+  );
+  const { pageSizes } = useConfigStore(({ state }) => ({
+    pageSizes: state.pageSizes,
+  }));
+
+  const { paging } = store.useFactoryTableStore(({ state }) => ({
+    paging: state.paging,
+  }));
+
   const { activeTable, setActiveTable, dbSelected } = useAccountStore(
     ({ state, api }) => ({
       dbSelected: state.dbSelected,
@@ -25,14 +42,37 @@ export const TablesSideList = () => {
     markEditedRow: api.markEditedRow,
   }));
 
-  const { tables, tablesCount, isFetching, isSuccess, isLoading } =
-    useTablesHook(({ api, query }) => ({
+  const { tables, responsePaging, isFetching, isSuccess } = useTables(
+    {
+      paging: {
+        limit: paging.limit,
+        offset: paging.offset,
+      },
+    },
+    ({ api, state, query }) => ({
       tables: api.getTablesNames(),
-      tablesCount: api.getTablesCount(),
+      responsePaging: state.paging,
       isFetching: query.isFetching,
       isSuccess: query.isSuccess,
       isLoading: query.isLoading,
-    }));
+    }),
+  );
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    store.api.setPaging({
+      hasNext: responsePaging?.hasNext ?? false,
+      hasPrevious: responsePaging?.hasPrevious ?? false,
+    });
+  }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
+
+  useEffect(() => {
+    store.api.setPaging({
+      limit: pageSizes.tableRows,
+      offset: 0,
+    });
+  }, [pageSizes.tableRows]);
 
   const handleSwitchTable = (name: string) => {
     if (name === activeTable) {
@@ -72,14 +112,36 @@ export const TablesSideList = () => {
     }
   };
 
-  const isBusy = isLoading;
+  const start = paging.offset + 1;
+  const end = paging.offset + tables.length;
+
+  const pagingContext: Omit<PagingContext, 'onPageSize' | 'currentSize'> & {
+    currentSet: string;
+  } = {
+    hasNext: paging.hasNext,
+    hasPrevious: paging.hasPrevious,
+    currentSet: `${start}-${end}`,
+    onNextPage: () => {
+      store.api.setPaging({
+        offset: paging.offset + paging.limit,
+      });
+    },
+
+    onPreviousPage: () => {
+      store.api.setPaging({
+        offset: Math.max(0, paging.offset - paging.limit),
+      });
+    },
+  };
+
+  const isBusy = isFetching;
+  if (isBusy) return <ScreenLoader />;
   return (
     <>
-      {isBusy && <ScreenLoader />}
       <div className='side-list'>
-        {isSuccess ? (
-          tablesCount > 0 ? (
-            tables.map((name: string) => {
+        {tables.length > 0 ? (
+          <>
+            {tables.map((name: string) => {
               return (
                 <button
                   key={name}
@@ -90,11 +152,12 @@ export const TablesSideList = () => {
                   {name}
                 </button>
               );
-            })
-          ) : (
-            <div className='side-list-empty'>No Tables</div>
-          )
-        ) : null}
+            })}
+            <SidePagination {...pagingContext} />
+          </>
+        ) : (
+          <div className='side-list-empty'>No Tables</div>
+        )}
       </div>
     </>
   );

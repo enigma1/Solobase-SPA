@@ -1,12 +1,13 @@
 import { useEffect, useMemo } from 'react';
-import { useTableDataHook } from '>/services/queryHooks';
+import { useTableData } from '>/services/queryHooks';
 import {
   useAccountStore,
   tablesDataStoreActions,
   dialogStoreActions,
+  createFactoryTableStore,
 } from '>/services/stores';
 import {
-  SqlView,
+  DataRowsList,
   ScreenLoader,
   EmptyListing,
   dialogFactories,
@@ -14,6 +15,14 @@ import {
 import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
+  const tableStore = useMemo(
+    () => createFactoryTableStore({ listingType: 'dataRows' }),
+    [],
+  );
+  const { cPaging } = tableStore.useFactoryTableStore(({ state }) => ({
+    cPaging: state.paging,
+  }));
+
   const { dbSelected, activeTable } = useAccountStore(({ state, api }) => ({
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
@@ -24,20 +33,29 @@ export const TableDataView = () => {
     cols,
     columnsOrder,
     rowTokens,
+    responsePaging,
     isSuccess,
-    isError,
     isFetching,
-  } = useTableDataHook(({ state, query }) => {
-    return {
-      rows: state.rows,
-      cols: state.cols,
-      rowTokens: state.rowTokens,
-      columnsOrder: state.columnsOrder,
-      isSuccess: query.isSuccess,
-      isError: query.isError,
-      isFetching: query.isFetching,
-    };
-  });
+  } = useTableData(
+    {
+      paging: {
+        limit: cPaging.limit,
+        offset: cPaging.offset,
+      },
+    },
+    ({ state, query }) => {
+      return {
+        rows: state.rows,
+        cols: state.cols,
+        columnsOrder: state.columnsOrder,
+        rowTokens: state.rowTokens,
+        responsePaging: state.paging,
+        isSuccess: query.isSuccess,
+        isError: query.isError,
+        isFetching: query.isFetching,
+      };
+    },
+  );
 
   const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
@@ -49,6 +67,15 @@ export const TableDataView = () => {
   useEffect(() => {
     tablesDataStoreActions.initialize();
   }, [dbSelected, activeTable]);
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    tableStore.api.setPaging({
+      hasNext: responsePaging?.hasNext ?? false,
+      hasPrevious: responsePaging?.hasPrevious ?? false,
+    });
+  }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
 
   const isBusy = isFetching;
 
@@ -78,13 +105,14 @@ export const TableDataView = () => {
   }
 
   return (
-    <SqlView
+    <DataRowsList
       rows={viewRows as ViewRow<SqlRow>[]}
       rowTokens={rowTokens}
       cols={cols as SqlColumnsShape}
       columnsOrder={columnsOrder}
       activeTable={activeTable}
       dbSelected={dbSelected}
+      store={tableStore}
     />
   );
 };

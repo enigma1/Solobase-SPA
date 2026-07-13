@@ -242,7 +242,6 @@ export const useLoginMutation = createMutationHook<
   fn: dbApi.login,
   state: {
     ...defaultResponse,
-    schemas: [],
     preferences: {},
     capabilities: defaultCapabilities,
   },

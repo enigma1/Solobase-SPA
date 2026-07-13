@@ -4,8 +4,8 @@ import {
   useConfigStore,
   useTablesDataStore,
   useMessageStore,
-  createFactoryTableStore,
   dialogStoreActions,
+  FactoryTableStore,
 } from '>/services/stores';
 import {
   MutationCallbacks,
@@ -28,7 +28,6 @@ import {
   UpdateDataRowsResponse,
   DeleteDataRowsRequest,
   DeleteDataRowsResponse,
-  DeletedRow,
 } from '>/services/api/dbApiTypes';
 import {
   SqlColumnsShape,
@@ -37,6 +36,7 @@ import {
   SqlTypes,
   ViewRow,
   TokenRow,
+  PagingContext,
 } from '>/types';
 import { updateRowsSqlTransformer, deleteRowsSqlTransformer } from './helpers';
 import { DataRowsDeletePreview } from './DataRowsPreview';
@@ -48,15 +48,17 @@ type TableViewProps = {
   columnsOrder: string[];
   dbSelected: string;
   activeTable: string;
+  store: FactoryTableStore;
 };
 
-export const SqlView = ({
+export const DataRowsList = ({
   cols,
   rows,
   rowTokens,
   columnsOrder,
   dbSelected,
   activeTable,
+  store,
 }: TableViewProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,15 +67,22 @@ export const SqlView = ({
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
 
-  const tableStore = useMemo(() => createFactoryTableStore(), []);
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
   );
 
-  const { hiddenColumns } = useConfigStore(({ state }) => ({
-    hiddenColumns: state.hiddenColumns,
+  const { paging } = store.useFactoryTableStore(({ state }) => ({
+    paging: state.paging,
   }));
+
+  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
+    ({ state, api }) => ({
+      hiddenColumns: state.hiddenColumns,
+      savePreferences: api.savePreferences,
+      getPageSizes: api.getPageSizes,
+    }),
+  );
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
   const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
@@ -226,7 +235,7 @@ export const SqlView = ({
   };
 
   const handleDeleteRows = () => {
-    const sRows = tableStore.get().selectedRows;
+    const sRows = store.get().selectedRows;
     if (sRows.size === 0) {
       return;
     }
@@ -261,7 +270,7 @@ export const SqlView = ({
   };
 
   const handleSelectedExports = () => {
-    const selRows = tableStore.get().selectedRows;
+    const selRows = store.get().selectedRows;
   };
 
   const handleCreateRows = () => {
@@ -292,17 +301,57 @@ export const SqlView = ({
     onBack: handleBack,
   };
 
+  const getPagingContext = (): PagingContext => {
+    return {
+      hasNext: paging.hasNext,
+      hasPrevious: paging.hasPrevious,
+      currentSize: paging.limit,
+
+      onNextPage: () => {
+        store.api.setPaging({
+          offset: paging.offset + paging.limit,
+        });
+      },
+
+      onPreviousPage: () => {
+        store.api.setPaging({
+          offset: Math.max(0, paging.offset - paging.limit),
+        });
+      },
+
+      onPageSize: (limit) => {
+        store.api.setPaging({
+          limit,
+          offset: 0,
+        });
+        const pageSizes = getPageSizes();
+        savePreferences({
+          pageSizes: {
+            ...pageSizes,
+            dataRows: limit,
+          },
+        });
+      },
+    };
+  };
+
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
   const isBusy = isPending || isDeletePending;
 
   if (isBusy) return <ScreenLoader />;
+
+  const pagingContext = getPagingContext();
+  const start = paging.offset + 1;
+  const end = paging.offset + rows.length;
+
   return (
     <>
       <PageTableShell
-        store={tableStore}
+        store={store}
         tableRef={tableRef}
-        title={`${activeTable} ${rows.length}`}
+        title={`${activeTable}: ${start}–${end}`}
         actions={shellHandlers}
+        paging={pagingContext}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}
@@ -314,7 +363,7 @@ export const SqlView = ({
           rows={rows}
           columnsOrder={columnsOrder}
           activeCols={activeCols}
-          store={tableStore}
+          store={store}
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}

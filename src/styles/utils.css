@@ -85,11 +85,12 @@
     & .content {
       @apply flex flex-col items-center gap-2;
 
-      & .spinner {
-        @apply w-9 h-9 border-4 rounded-full animate-spin;
-        border-color: var(--color-srf);
-        border-top-color: var(--color-text);
-      }
     }
+  }
+
+  .spinner {
+    @apply w-9 h-9 border-4 rounded-full animate-spin;
+    border-color: var(--color-srf);
+    border-top-color: var(--color-text);
   }
 }

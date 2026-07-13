@@ -1,3 +1,5 @@
+import { PageListings } from '>/services/utils/appSettings';
+
 export type ItemPreferenceProps = {
   onModify: (tempSettings: Partial<StorageConfig>) => void;
   modified: StorageConfig;
@@ -17,4 +19,5 @@ export type StorageConfig = {
   sidebarWidth: number;
   backend: string;
   frontPort: number;
+  pageSizes: Record<PageListings, number>;
 };

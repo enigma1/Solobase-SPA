@@ -131,3 +131,10 @@ export type QueryLogEntry = {
   startedAt: number;
   durationMs: number;
 };
+
+export type PagingParams = {
+  limit: number;
+  offset: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+};

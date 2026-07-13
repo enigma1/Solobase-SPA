@@ -9,14 +9,8 @@ import {
   createFactoryTableStore,
   dialogStoreActions,
   accountStoreActions,
+  FactoryTableStore,
 } from '>/services/stores';
-import type {
-  SqlColumnsShape,
-  SqlTypes,
-  SqlRow,
-  SqlObject,
-  ViewRow,
-} from '>/types';
 import {
   PageTableShell,
   EffectiveTableWrapper,
@@ -34,6 +28,15 @@ import {
 } from '>/services/utils';
 import { routes } from '>/config';
 import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
+import type {
+  SqlColumnsShape,
+  SqlTypes,
+  SqlRow,
+  SqlObject,
+  ViewRow,
+  PagingContext,
+} from '>/types';
+
 import { TablesDeletePreview } from './TablesPreviews';
 
 type TablesListProps = {
@@ -41,6 +44,7 @@ type TablesListProps = {
   rows: ViewRow<SqlRow>[];
   cols: SqlColumnsShape;
   columnsOrder: string[];
+  store: FactoryTableStore;
 };
 
 export const TablesList = ({
@@ -48,6 +52,7 @@ export const TablesList = ({
   rows,
   cols,
   columnsOrder,
+  store,
 }: TablesListProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,15 +60,22 @@ export const TablesList = ({
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const tableStore = useMemo(() => createFactoryTableStore(), []);
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
   );
 
-  const { hiddenColumns } = useConfigStore(({ state }) => ({
-    hiddenColumns: state.hiddenColumns,
+  const { paging } = store.useFactoryTableStore(({ state }) => ({
+    paging: state.paging,
   }));
+
+  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
+    ({ state, api }) => ({
+      hiddenColumns: state.hiddenColumns,
+      savePreferences: api.savePreferences,
+      getPageSizes: api.getPageSizes,
+    }),
+  );
 
   const { editedRow, markEditedRow } = useTablesStore(({ state, api }) => ({
     editedRow: state.editedRow as Record<number, SqlObject>,
@@ -179,7 +191,7 @@ export const TablesList = ({
     });
   };
   const handleDeleteTables = () => {
-    const sRows = tableStore.get().selectedRows;
+    const sRows = store.get().selectedRows;
     if (sRows.size === 0) {
       return;
     }
@@ -240,18 +252,57 @@ export const TablesList = ({
     onBack: handleBack,
   };
 
+  const getPagingContext = (): PagingContext => {
+    return {
+      hasNext: paging.hasNext,
+      hasPrevious: paging.hasPrevious,
+      currentSize: paging.limit,
+
+      onNextPage: () => {
+        store.api.setPaging({
+          offset: paging.offset + paging.limit,
+        });
+      },
+
+      onPreviousPage: () => {
+        store.api.setPaging({
+          offset: Math.max(0, paging.offset - paging.limit),
+        });
+      },
+
+      onPageSize: (limit) => {
+        store.api.setPaging({
+          limit,
+          offset: 0,
+        });
+        const pageSizes = getPageSizes();
+        savePreferences({
+          pageSizes: {
+            ...pageSizes,
+            tableRows: limit,
+          },
+        });
+      },
+    };
+  };
+
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
 
   const isBusy = isPending;
   if (isBusy) return <ScreenLoader />;
 
+  const pagingContext = getPagingContext();
+  const start = paging.offset + 1;
+  const end = paging.offset + rows.length;
+
   return (
     <>
       <PageTableShell
-        store={tableStore}
+        store={store}
         tableRef={tableRef}
         actions={shellHandlers}
-        title={`Tables in [${dbSelected}]`}
+        title={`Tables of [${dbSelected}]: ${start}–${end}`}
+        paging={pagingContext}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}
@@ -263,7 +314,7 @@ export const TablesList = ({
           rows={rows}
           columnsOrder={columnsOrder}
           activeCols={activeCols}
-          store={tableStore}
+          store={store}
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}

@@ -15,6 +15,7 @@ import {
   RunQueryResponse,
   RunRawQueryRequest,
   RunRawQueryResponse,
+  FetchDatabasesRequest,
   FetchDatabasesResponse,
   FetchTablesRequest,
   FetchTablesResponse,
@@ -121,8 +122,8 @@ const exportDatabases = (data: ExportDatabasesRequest) =>
     false,
   );
 
-const fetchUsers = () =>
-  apiCall<FetchUsersResponse>(() => apiClient.get('/db/fetch-users'));
+const fetchUsers = (data: FetchUsersRequest) =>
+  apiCall<FetchUsersResponse>(() => apiClient.post('/db/fetch-users', data));
 const createUser = (data: CreateUserRequest) =>
   apiCall<CreateUserResponse>(() => apiClient.post('/db/create-user', data));
 const editUser = (data: EditUserRequest) =>
@@ -130,8 +131,10 @@ const editUser = (data: EditUserRequest) =>
 const deleteUsers = (data: DeleteUsersRequest) =>
   apiCall<DeleteUsersResponse>(() => apiClient.post('/db/delete-users', data));
 
-const fetchDatabases = () =>
-  apiCall<FetchDatabasesResponse>(() => apiClient.get('/db/fetch-databases'));
+const fetchDatabases = (data: FetchDatabasesRequest) =>
+  apiCall<FetchDatabasesResponse>(() =>
+    apiClient.post('/db/fetch-databases', data),
+  );
 
 const getTableDetails = (data: GetTableDetailsRequest) =>
   apiCall<GetTableDetailsResponse>(() =>

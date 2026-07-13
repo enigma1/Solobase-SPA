@@ -25,6 +25,7 @@ import {
   handlePreferences,
   handleCreateUser,
   handleYourPrivileges,
+  handleClearSession,
 } from '>/modules/Account';
 import { useDebouncer } from '>/services/hooks/common';
 import { AuthNavigationLinks } from './NavigationLinks';
@@ -37,6 +38,9 @@ const GuestMenu = () => {
         <DropdownMenu label='Guest'>
           <a href='#' onClick={handleLogin}>
             Login
+          </a>
+          <a href='#' onClick={handleClearSession}>
+            Clear Session
           </a>
         </DropdownMenu>
       </div>

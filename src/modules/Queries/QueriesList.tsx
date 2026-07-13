@@ -20,7 +20,10 @@ export const QueriesList = () => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const tableStore = useMemo(() => createFactoryTableStore(), []);
+  const tableStore = useMemo(
+    () => createFactoryTableStore({ listingType: 'queryRows' }),
+    [],
+  );
   const { queries, getQueriesCount } = useQueriesStore(({ state, api }) => ({
     getQueriesCount: api.getQueriesCount,
     queries: state.queries,

@@ -1,13 +1,8 @@
 import { SyntheticEvent, useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { DeleteIcon, RotateCcwIcon } from 'lucide-react';
 import { useModal } from '>/services/hooks';
-import {
-  messageStoreActions,
-  accountStoreActions,
-  historyStoreActions,
-} from '>/services/stores';
+import { messageStoreActions, historyStoreActions } from '>/services/stores';
 import { useDatabases, useImportDataWrap } from '>/services/queryHooks';
 import {
   ScreenLoader,
@@ -23,6 +18,7 @@ import {
 import { dbApi } from '>/services/api';
 import { routes } from '>/config';
 import { SqlQueryModes, CommonDialogHandlers } from '>/types';
+import { DatabaseCombo } from './DatabaseCombo';
 
 type ImportDataAreaProps = {
   formHandlers: CommonDialogHandlers;
@@ -36,10 +32,9 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
   const [groupByMode, setGroupByMode] = useState<SqlQueryModes>('default');
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
   const { setButtonStatus } = useModal();
 
-  const { isFetching, dbNames } = useDatabases(({ api, query }) => {
+  const { isFetching, dbNames } = useDatabases({}, ({ api, query }) => {
     return {
       dbNames: api.getDbNames(),
       isSuccess: query.isSuccess,
@@ -154,7 +149,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
       </div>
       <div className='area-content'>
         <div className='flex flex-col space-y-1'>
-          <ComboField
+          {/* <ComboField
             label='Database:'
             id='select-database'
             value={selectedDatabase}
@@ -164,6 +159,10 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
               label: name,
             }))}
             $placeholder='Select Database'
+          /> */}
+          <DatabaseCombo
+            selectedDatabase={selectedDatabase}
+            onChange={setSelectedDatabase}
           />
         </div>
         <div className='flex flex-col space-y-1'>

@@ -1,7 +1,13 @@
-import { FormFieldWrapper } from './FormCommon';
 import { FieldValues, Controller, Path } from 'react-hook-form';
+import { FormFieldWrapper } from './FormCommon';
 import { ComboBox } from '>/modules';
-import { FormCommonFieldProps, Option, OptionGroup, StatusType } from '>/types';
+import {
+  FormCommonFieldProps,
+  Option,
+  OptionGroup,
+  StatusType,
+  ListScrollInfo,
+} from '>/types';
 
 type ComboCommonFields = {
   $options?: Option[];
@@ -9,16 +15,19 @@ type ComboCommonFields = {
   $editable?: boolean;
   $multiple?: boolean;
   $placeholder?: string;
+  onListScroll?: (info: ListScrollInfo) => void;
 };
 
 type ComboFieldProps = ComboCommonFields & {
+  id?: string;
   label?: string;
   notice?: string;
   status?: StatusType;
-  id?: string;
   value: string | string[];
   onChange: (value: string | string[]) => void;
   htmlFor?: string;
+  wrapLayout?: 'stack' | 'inline';
+  wrapClass?: string;
 };
 export const ComboField = ({
   label,
@@ -26,6 +35,8 @@ export const ComboField = ({
   status,
   onChange,
   htmlFor,
+  wrapClass,
+  wrapLayout,
   ...props
 }: ComboFieldProps) => {
   return (
@@ -34,6 +45,8 @@ export const ComboField = ({
       $notice={notice}
       $status={status}
       htmlFor={htmlFor ?? props.id}
+      wrapClass={wrapClass}
+      wrapLayout={wrapLayout}
     >
       <ComboBox {...props} onChange={onChange} />
     </FormFieldWrapper>

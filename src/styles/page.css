@@ -39,6 +39,14 @@
 
   .page-actions {
     @apply flex ml-auto items-center gap-2;
+
+    & .pagination-controls {
+      @apply flex items-center gap-2;
+
+      & .combo-shell {
+        @apply max-w-24;
+      }
+    }
   }
 
   .page-content {

@@ -217,7 +217,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
   }) => {
     const payload: DialogPayload = {
       initialSize: 'xs',
-      caption: 'Preferences',
+      caption: 'Columns Preferences',
       component: <FilterColumns {...filterProps} />,
       variant: 'info',
       actions: dialogActions.ack(),

@@ -25,7 +25,7 @@ export const QueryView = () => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const tableStore = useMemo(() => createFactoryTableStore(), []);
+  const tableStore = useMemo(() => createFactoryTableStore({}), []);
   const navigate = useNavigate();
 
   const { getSelectedQuery, selectedQueryTitle } = useQueriesStore(
@@ -114,7 +114,7 @@ export const QueryView = () => {
 
   const shellHandlers = {};
 
-  const isBusy = isPending;
+  const isBusy = isPending || isPendingImport;
   if (isBusy) return <ScreenLoader />;
 
   if (!currentQuery || viewRows.length === 0) {

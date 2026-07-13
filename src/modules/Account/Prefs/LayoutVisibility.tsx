@@ -51,6 +51,9 @@ export const SidebarVisibility = ({
   return (
     <>
       <div className='area-item'>
+        Current Sidebar Width: {modified.sidebarWidth}px
+      </div>
+      <div className='area-item'>
         <CheckboxField
           checked={allSidebarsVisible}
           onChange={(value) => {

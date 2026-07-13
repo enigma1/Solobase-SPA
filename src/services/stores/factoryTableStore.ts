@@ -1,10 +1,15 @@
 import { makeFactoryStore } from '>/services/utils/emitter';
+import { PagingParams } from '>/types';
+import { PageListings, defaultPaging } from '>/services/utils';
+import { configStoreActions } from './configStore';
 
 type WithUiKey = {
   uiKey: string;
 };
+
 type FactoryTableState = {
   selectedRows: Set<string>;
+  paging: PagingParams;
 };
 
 export type FactoryTableActions = {
@@ -12,6 +17,7 @@ export type FactoryTableActions = {
   clearSelected: () => void;
   setAllRows: (rows: WithUiKey[]) => void;
   setSelectedRow: (row: string, active: boolean) => void;
+  setPaging: (paging: Partial<PagingParams>) => void;
 };
 
 export type FactoryTableStore = {
@@ -30,18 +36,37 @@ export type FactoryTableStore = {
   get: () => FactoryTableState;
 };
 
+type GetOptionsProps = {
+  listingType?: PageListings;
+};
+const getOptions = ({ listingType }: GetOptionsProps) => {
+  const paging = configStoreActions.getPageSizes();
+  return {
+    ...(listingType && { limit: paging[listingType] }),
+  };
+};
+
 // const baseStore = makeFactoryStore<UiTableState>(() => initialState);
-export const createFactoryTableStore = () => {
+export const createFactoryTableStore = (options: GetOptionsProps) => {
   const baseStore = makeFactoryStore<FactoryTableState>(() => ({
     selectedRows: new Set<string>(),
+    paging: {
+      ...defaultPaging,
+      ...getOptions(options),
+    },
   }))();
 
   const { get, set, setAuto } = baseStore;
 
   const api: FactoryTableActions = {
     initialize: () => {
+      configStoreActions.getPreferences();
       set(() => ({
-        selectedRows: new Set(),
+        selectedRows: new Set<string>(),
+        paging: {
+          ...defaultPaging,
+          ...getOptions(options),
+        },
       }));
     },
 
@@ -70,6 +95,14 @@ export const createFactoryTableStore = () => {
           selectedRows: next,
         };
       });
+    },
+    setPaging: (paging) => {
+      setAuto((prev) => ({
+        paging: {
+          ...prev.paging,
+          ...paging,
+        },
+      }));
     },
   };
 

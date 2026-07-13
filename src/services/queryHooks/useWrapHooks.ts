@@ -40,6 +40,7 @@ export const useSelectDatabaseWrap = () => {
     ({ api, state, query }) => ({
       isPending: query.isPending,
       mutate: api.mutate,
+      mutateAsync: api.mutateAsync,
       response: state,
     }),
     callbacks,

@@ -1,4 +1,5 @@
 import { ReactNode, RefObject } from 'react';
+import { Pagination } from '>/modules';
 export const EffectiveTableWrapper = ({
   children,
   outerRef,

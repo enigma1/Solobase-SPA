@@ -89,4 +89,15 @@
       color: var(--color-text-peak);
     }
   }
+
+  .side-toolbar {
+    @apply flex flex-[0_0_auto] items-center gap-2 px-2 py-1.5;
+    background: var(--color-srf-high);
+
+    & .label {
+      @apply flex-1 text-center text-sm truncate;
+      color: var(--color-text-peak);
+    }
+  }
+
 }

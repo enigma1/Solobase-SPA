@@ -1,17 +1,24 @@
 import { useEffect, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   useAccountStore,
   tablesDataStoreActions,
   dialogStoreActions,
+  createFactoryTableStore,
 } from '>/services/stores';
-import { queryKeys, useTablesHook } from '>/services/queryHooks';
+import { useTables } from '>/services/queryHooks';
 import { EmptyPage, ScreenLoader, dialogFactories } from '>/modules';
 import type { ViewRow, SqlTypes, SqlRow } from '>/types';
 import { TablesList } from './TablesList';
 
 export const TablesMainView = () => {
-  const queryClient = useQueryClient();
+  const tableStore = useMemo(
+    () => createFactoryTableStore({ listingType: 'tableRows' }),
+    [],
+  );
+  const { cPaging } = tableStore.useFactoryTableStore(({ state }) => ({
+    cPaging: state.paging,
+  }));
+
   const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
@@ -21,21 +28,30 @@ export const TablesMainView = () => {
     rows,
     cols,
     columnsOrder,
+    responsePaging,
     isSuccess,
     isError,
     isFetching,
-    isFetched,
-  } = useTablesHook(({ state, query }) => {
-    return {
-      rows: state.rows,
-      cols: state.cols,
-      columnsOrder: state.columnsOrder,
-      isSuccess: query.isSuccess,
-      isError: query.isError,
-      isFetching: query.isFetching,
-      isFetched: query.isFetched,
-    };
-  });
+  } = useTables(
+    {
+      paging: {
+        limit: cPaging.limit,
+        offset: cPaging.offset,
+      },
+    },
+    ({ state, query }) => {
+      return {
+        rows: state.rows,
+        cols: state.cols,
+        columnsOrder: state.columnsOrder,
+        responsePaging: state.paging,
+        isSuccess: query.isSuccess,
+        isError: query.isError,
+        isFetching: query.isFetching,
+        isFetched: query.isFetched,
+      };
+    },
+  );
 
   const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
@@ -50,6 +66,15 @@ export const TablesMainView = () => {
     }
   }, [dbSelected, activeTable]);
 
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    tableStore.api.setPaging({
+      hasNext: responsePaging?.hasNext ?? false,
+      hasPrevious: responsePaging?.hasPrevious ?? false,
+    });
+  }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
+
   const handleCreateTable = () => {
     dialogStoreActions.openDialog({
       payload: dialogFactories.createTable(dbSelected),
@@ -57,7 +82,9 @@ export const TablesMainView = () => {
   };
 
   const isBusy = isFetching;
-  if (!dbSelected || (isFetched && rows.length === 0)) {
+  if (isBusy) return <ScreenLoader />;
+
+  if (!dbSelected || rows.length === 0) {
     return (
       <EmptyPage
         onCreate={handleCreateTable}
@@ -67,14 +94,12 @@ export const TablesMainView = () => {
   }
 
   return (
-    <>
-      {isBusy && <ScreenLoader />}
-      <TablesList
-        dbSelected={dbSelected}
-        rows={viewRows}
-        cols={cols}
-        columnsOrder={columnsOrder}
-      />
-    </>
+    <TablesList
+      dbSelected={dbSelected}
+      rows={viewRows}
+      cols={cols}
+      columnsOrder={columnsOrder}
+      store={tableStore}
+    />
   );
 };

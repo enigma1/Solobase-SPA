@@ -40,13 +40,25 @@ const AppSettingsConfigSchema = z.object({
   maxTableColumns: z.int().min(1).max(256),
   maxTableKeys: z.int().min(1).max(64),
   maxColumnsPerKey: z.int().min(1).max(16),
-  pageSize: z.int().min(5).max(500),
   queryTimeout: z
     .int()
     .min(3000)
     .max(1000 * 3600),
 });
 
+export const pageSizeValues = [5, 25, 50, 100, 250] as const;
+export const pListings = [
+  'userRows',
+  'dbRows',
+  'tableRows',
+  'dataRows',
+  'queryRows',
+] as const;
+
+const PageListingsSchema = z.enum(pListings);
+const PageSizeSchema = z.union(pageSizeValues.map((size) => z.literal(size)));
+
+export type PageListings = (typeof pListings)[number];
 export const UserPrefsConfigSchema = z.object({
   backend: z.url(),
   frontPort: z.number().int().min(1).max(65535),
@@ -55,6 +67,7 @@ export const UserPrefsConfigSchema = z.object({
   headerVisibility: z.boolean(),
   sidebarWidth: z.int().min(10).max(1024),
   sidebarVisibility: SidebarVisibilitySchema,
+  pageSizes: z.record(PageListingsSchema, PageSizeSchema),
 });
 
 export const AppConfigSchema = z.object({

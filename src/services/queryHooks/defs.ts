@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-query';
 import { accountStoreActions } from '>/services/stores';
 import { createNetworkError } from '>/services/api/apiErrors';
+import { PagingParams } from '>/types';
 
 export const STALE_TIME = 5 * 60 * 1000; // Set default to 5 minutes
 
@@ -85,17 +86,6 @@ export type HookStore<TState = unknown, TApi = unknown, TQuery = unknown> = {
 };
 export type HookSelector<TStore, TResult = TStore> = (store: TStore) => TResult;
 
-// const invalidationPipeline = [
-//   'users',
-//   'databases',
-//   'tables',
-//   'table-details',
-//   'columns-info',
-//   'table-rows',
-// ] as const;
-
-// type InvalidationKey = (typeof invalidationPipeline)[number];
-
 export const queryKeys = {
   // Keys for independent invalidations
   preferences: () => ['preferences'] as const,
@@ -103,10 +93,17 @@ export const queryKeys = {
   databaseServerInfo: () => ['database-server-info'],
   query: (db: string | null, id: string | null) => ['query', db, id],
 
-  // Hierarchical Sequence
-  users: () => ['users'] as const,
-  databases: () => ['users', 'databases'] as const,
-  tables: (db: string | null) => ['users', 'databases', db, 'tables'] as const,
+  // Hierarchical Invalidations
+  users: (paging?: Partial<PagingParams>) =>
+    paging ? ['users', , paging.offset, paging.limit] : ['users'],
+  databases: (paging?: Partial<PagingParams>) =>
+    paging
+      ? ['users', 'databases', paging.offset, paging.limit]
+      : ['users', 'databases'],
+  tables: (db: string | null, paging?: Partial<PagingParams>) =>
+    paging
+      ? ['users', 'databases', db, 'tables', paging.offset, paging.limit]
+      : ['users', 'databases', db, 'tables'],
   tableDetails: (db: string | null, table: string | null) =>
     ['users', 'databases', db, 'tables', table, 'table-details'] as const,
   tableColumnsInfo: (db: string | null, table: string | null) =>
@@ -119,38 +116,33 @@ export const queryKeys = {
       'table-details',
       'columns-info',
     ] as const,
-  rows: (db: string | null, table: string | null) =>
-    [
-      'users',
-      'databases',
-      db,
-      'tables',
-      table,
-      'table-details',
-      'table-rows',
-    ] as const,
-
-  // users: () => [...getInvalidationLegacy('users')] as const,
-  // databases: () => [...getInvalidationLegacy('databases')] as const,
-  // tables: (db: string | null) =>
-  //   [...getInvalidationLegacy('tables'), db] as const,
-  // tableDetails: (db: string | null, table: string | null) =>
-  //   [...getInvalidationLegacy('table-details'), db, table] as const,
-  // tableColumnsInfo: (db: string | null, table: string | null) =>
-  //   [...getInvalidationLegacy('columns-info'), db, table] as const,
-  // rows: (db: string | null, table: string | null) =>
-  //   [...getInvalidationLegacy('table-rows'), db, table] as const,
+  rows: (
+    db: string | null,
+    table: string | null,
+    paging?: Partial<PagingParams>,
+  ) =>
+    paging
+      ? [
+          'users',
+          'databases',
+          db,
+          'tables',
+          table,
+          'table-details',
+          'table-rows',
+          paging.offset,
+          paging.limit,
+        ]
+      : [
+          'users',
+          'databases',
+          db,
+          'tables',
+          table,
+          'table-details',
+          'table-rows',
+        ],
 };
-
-// export const getInvalidationLegacy = (key: InvalidationKey) => {
-//   const index = invalidationPipeline.indexOf(key);
-//   if (index === -1) {
-//     throw new Error(`Invalidation key not found in hierarchy: ${key}`);
-//   }
-//   const slice = invalidationPipeline.slice(0, index + 1);
-//   // console.log('slice', slice);
-//   return slice;
-// };
 
 export const getMutationResult = <TData = any, TVariables = any>(
   mutation: UseMutationResult<TData, any, TVariables>,

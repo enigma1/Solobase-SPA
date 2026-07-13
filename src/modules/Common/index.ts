@@ -12,3 +12,4 @@ export * from './Text';
 export * from './Offline';
 export * from './Controls';
 export * from './Json';
+export * from './Pagination';

@@ -15,6 +15,7 @@
   --color-text: var(--tone-11);
   --color-text-dim: var(--tone-10);
   --color-text-muted: var(--tone-9);
+  --color-text-light: var(--tone-8);
   --color-text-peak: var(--tone-0);
 
   /* actions */

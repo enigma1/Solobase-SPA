@@ -1,10 +1,5 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import {
-  queryKeys,
-  useDeleteUsersMutation,
-  useUsers,
-} from '>/services/queryHooks';
+import { useDeleteUsersMutation, useUsers } from '>/services/queryHooks';
 import {
   useConfigStore,
   messageStoreActions,
@@ -15,54 +10,70 @@ import {
   getColumnsFromRow,
   getColumnsFromResult,
   getOnlyColumnsFromResult,
-  getSingleColumnFromResult,
-  createFileSaveUrl,
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
-import {
-  ViewRow,
-  SqlColumnsShape,
-  SqlRow,
-  CommonDialogHandlers,
-  WizardHandlers,
-} from '>/types';
 import {
   ScreenLoader,
   EffectiveTableWrapper,
   SqlTableContainer,
   PageTableShell,
-  DialogContent,
   dialogFactories,
 } from '>/modules';
-
+import {
+  ViewRow,
+  SqlColumnsShape,
+  SqlRow,
+  WizardHandlers,
+  PagingContext,
+} from '>/types';
 import { UsersDeletePreview } from './UsersPreviews';
 import { UserEdit } from './UserEdit';
-
-// type UsersListProps = {
-//   rows: ViewRow<SqlRow>[];
-//   cols: SqlColumnsShape;
-//   columnsOrder: string[];
-// };
-// export const UsersList = ({ cols, rows, columnsOrder }: UsersListProps) => {
 
 export const UsersList = () => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const tableStore = useMemo(() => createFactoryTableStore(), []);
+  const store = useMemo(
+    () => createFactoryTableStore({ listingType: 'userRows' }),
+    [],
+  );
 
-  const queryClient = useQueryClient();
-  // Fetch Users
+  const { paging } = store.useFactoryTableStore(({ state }) => ({
+    paging: state.paging,
+  }));
+
+  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
+    ({ state, api }) => ({
+      hiddenColumns: state.hiddenColumns,
+      savePreferences: api.savePreferences,
+      getPageSizes: api.getPageSizes,
+    }),
+  );
+
   const {
     rows: tRows,
     cols,
     columnsOrder,
-  } = useUsers(({ state }) => ({
-    rows: state.rows,
-    cols: state.cols,
-    columnsOrder: state.columnsOrder,
-  }));
+    responsePaging,
+    isSuccess,
+    isFetching,
+  } = useUsers(
+    {
+      paging: {
+        limit: paging.limit,
+        offset: paging.offset,
+      },
+    },
+    ({ state, query }) => ({
+      isSuccess: query.isSuccess,
+      isFetching: query.isFetching,
+      rows: state.rows,
+      cols: state.cols,
+      columnsOrder: state.columnsOrder,
+      responsePaging: state.paging,
+    }),
+  );
 
   const rows: ViewRow<SqlRow>[] = useMemo(() => {
     return tRows.map((row, idx) => ({
@@ -76,9 +87,14 @@ export const UsersList = () => {
     [rows],
   );
 
-  const { hiddenColumns } = useConfigStore(({ state }) => ({
-    hiddenColumns: state.hiddenColumns,
-  }));
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    store.api.setPaging({
+      hasNext: responsePaging?.hasNext ?? false,
+      hasPrevious: responsePaging?.hasPrevious ?? false,
+    });
+  }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
 
   const deleteUsersCallbacks = {
     onSuccess: (data: any) => {
@@ -113,13 +129,6 @@ export const UsersList = () => {
     deleteUsersCallbacks,
   );
 
-  // useEffect(() => {
-  //   queryClient.invalidateQueries({
-  //     queryKey: queryKeys.databaseServerInfo(),
-  //     exact: true,
-  //   });
-  // }, []);
-
   const handleCreateUser = () => {
     dialogStoreActions.openDialog({
       payload: dialogFactories.createUser(),
@@ -127,7 +136,7 @@ export const UsersList = () => {
   };
 
   const handleDeleteUsers = () => {
-    const sRows = tableStore.get().selectedRows;
+    const sRows = store.get().selectedRows;
     if (sRows.size === 0) {
       return;
     }
@@ -223,18 +232,57 @@ export const UsersList = () => {
     },
   };
 
+  const getPagingContext = (): PagingContext => {
+    return {
+      hasNext: paging.hasNext,
+      hasPrevious: paging.hasPrevious,
+      currentSize: paging.limit,
+
+      onNextPage: () => {
+        store.api.setPaging({
+          offset: paging.offset + paging.limit,
+        });
+      },
+
+      onPreviousPage: () => {
+        store.api.setPaging({
+          offset: Math.max(0, paging.offset - paging.limit),
+        });
+      },
+
+      onPageSize: (limit) => {
+        store.api.setPaging({
+          limit,
+          offset: 0,
+        });
+        const pageSizes = getPageSizes();
+        savePreferences({
+          pageSizes: {
+            ...pageSizes,
+            userRows: limit,
+          },
+        });
+      },
+    };
+  };
+
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
 
-  const isBusy = isPending;
+  const isBusy = isPending || isFetching;
   if (isBusy) return <ScreenLoader />;
+
+  const pagingContext = getPagingContext();
+  const start = paging.offset + 1;
+  const end = paging.offset + rows.length;
 
   return (
     <>
       <PageTableShell
-        store={tableStore}
-        title={`Users: ${rows.length}`}
+        store={store}
+        title={`Users: ${start}-${end}`}
         tableRef={tableRef}
         actions={shellHandlers}
+        paging={pagingContext}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}
@@ -246,7 +294,7 @@ export const UsersList = () => {
           rows={rows}
           columnsOrder={columnsOrder}
           activeCols={activeCols}
-          store={tableStore}
+          store={store}
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}

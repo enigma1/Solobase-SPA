@@ -78,8 +78,7 @@
   }
 
   .combo-menu {
-    /* @apply absolute left-0 top-full -mt-0.5 w-full rounded-md rounded-t-none max-h-60 overflow-auto border;*/
-    @apply rounded-md rounded-t-none max-h-60 overflow-auto border;
+    @apply rounded-md rounded-t-none max-h-80 overflow-auto border;
     z-index: 60;
     background-color: var(--color-srf);
     border-color: var(--color-border-focus);
@@ -128,6 +127,5 @@
         background-color: color-mix(in oklch, var(--color-action) 50%, var(--color-bg) 10%);
       }
     }
-
   }
 }

@@ -1,3 +1,3 @@
-export * from './SqlView';
+export * from './DataRowsList';
 export * from './TableDataView';
 export * from './CreateDataRows';

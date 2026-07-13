@@ -1,13 +1,8 @@
-import { useRef, useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DeleteIcon, RotateCcwIcon } from 'lucide-react';
-import {
-  messageStoreActions,
-  dialogStoreActions,
-  queriesStoreActions,
-} from '>/services/stores';
+import { queriesStoreActions } from '>/services/stores';
 import { useModal } from '>/services/hooks';
-import { useDatabases } from '>/services/queryHooks';
 import { MIN_QUERY_CHARS, groupByModes } from '>/services/utils';
 import {
   ScreenLoader,
@@ -15,6 +10,7 @@ import {
   CheckboxField,
   TextAreaField,
   InputField,
+  DatabaseCombo,
 } from '>/modules';
 import { routes } from '>/config';
 import { SqlQueryModes, CommonDialogHandlers } from '>/types';
@@ -37,16 +33,6 @@ export const QueryRequestArea = ({
   const { setButtonStatus } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const { isFetching, dbNames } = useDatabases(({ api, query }) => {
-    return {
-      dbNames: api.getDbNames(),
-      isSuccess: query.isSuccess,
-      isError: query.isError,
-      isLoading: query.isLoading,
-      isFetching: query.isFetching,
-    };
-  });
 
   const onConfirm = () => {
     const values = {
@@ -87,11 +73,6 @@ export const QueryRequestArea = ({
     formHandlers.confirm = onConfirm;
   }, [onConfirm]);
 
-  const isBusy = isFetching; //  || isPending;
-
-  if (isBusy) {
-    return <ScreenLoader />;
-  }
   return (
     <div className='area-container'>
       <div className='area-spacer'>
@@ -134,16 +115,9 @@ export const QueryRequestArea = ({
           />
         </div>
         <div className='flex flex-col space-y-1'>
-          <label htmlFor='select-database'>Database:</label>
-          <ComboBox
-            id='select-database'
-            value={selectedDatabase}
-            onChange={(v) => setSelectedDatabase(v as string)}
-            $options={dbNames.map((name: string) => ({
-              value: name,
-              label: name,
-            }))}
-            $placeholder='Select Database'
+          <DatabaseCombo
+            selectedDatabase={selectedDatabase}
+            onChange={setSelectedDatabase}
           />
         </div>
         <div className='flex flex-col space-y-1 w-full h-full'>
@@ -180,18 +154,6 @@ export const QueryRequestArea = ({
             $options={groupByModes.map((mode) => ({ ...mode }))}
           />
         </div>
-
-        {/*
-        <div className='area-item space-y-1'>
-          <label className='check-label' htmlFor='save-query'>
-            <CheckboxField
-              checked={legacyGroupBy}
-              onChange={() => setLegacyGroupBy(!legacyGroupBy)}
-              id='legacy-group-by'
-            />
-            Enable legacy ONLY_FULL_GROUP_BY
-          </label>
-        </div> */}
       </div>
     </div>
   );

@@ -4,16 +4,22 @@ import { dbApi, FetchDatabaseInfoResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
 import { queryKeys, STALE_TIME, DataHookProps, HookStore } from './defs';
 import {
+  FetchDatabasesRequest,
   FetchDatabasesResponse,
   SessionRestoreResponse,
   GetTableDetailsResponse,
   GetTableColumnsInfoResponse,
+  FetchUsersRequest,
   FetchUsersResponse,
+  BasicResponse,
+  PagingResponse,
 } from '>/services/api';
 import {
   getSingleColumnFromResult,
   defaultResponse,
   defaultListResponse,
+  defaultPageRequest,
+  defaultPageResponse,
 } from '>/services/utils';
 import { BasicRowsShape } from '>/types';
 // import { createDataQueryHook } from './dataQueryBuilder';
@@ -32,9 +38,6 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
   const initialData: SessionRestoreResponse = {
     ...defaultResponse,
     username: '',
-    schemas: {
-      ...defaultListResponse,
-    },
     dbSelected: null,
     preferences: {},
   };
@@ -54,27 +57,8 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
 
   const data = q.data ?? initialData;
 
-  const api = useMemo(() => {
-    // const nameIndex = data.schemas.columnsOrder.indexOf('SCHEMA_NAME');
-
-    // return {
-    //   getDbNames: () => {
-    //     if (nameIndex === -1) return [];
-    //     return data.schemas.rows.map((row) => row[nameIndex]);
-    //   },
-    // };
-    return {
-      getDbNames: () =>
-        getSingleColumnFromResult({
-          rows: data.schemas.rows,
-          columnsOrder: data.schemas.columnsOrder,
-          field: 'SCHEMA_NAME',
-        }),
-    };
-  }, [data.schemas.rows, data.schemas.columnsOrder]);
-
   const args = {
-    api,
+    api: {},
     state: data,
     query: q,
   };
@@ -99,20 +83,22 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
 
 type DatabaseHookProps = DataHookProps<FetchDatabasesResponse>;
 export const useDatabases = <TSelected = DatabaseHookProps>(
+  request?: FetchDatabasesRequest,
   selector?: (args: DatabaseHookProps) => TSelected,
 ) => {
   const initialData = {
     ...defaultResponse,
     ...defaultListResponse,
-  } satisfies BasicRowsShape;
+    ...defaultPageResponse,
+  };
 
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
   // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
   const q = useQuery<FetchDatabasesResponse, Error>({
-    queryKey: queryKeys.databases(),
+    queryKey: queryKeys.databases(request?.paging),
     // select: (data) => data.databases, // transform to string[] for easier usage
     queryFn: async () => {
-      const data = await dbApi.fetchDatabases();
+      const data = await dbApi.fetchDatabases(request ?? defaultPageRequest);
       return data;
     },
     staleTime: STALE_TIME,
@@ -239,7 +225,6 @@ export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
 
   const q = useQuery<GetTableColumnsInfoResponse, Error>({
     queryKey: queryKeys.tableColumnsInfo(request.database, request.table),
-    // select: (data) => data.databases, // transform to string[] for easier usage
     queryFn: async () => {
       const data = await dbApi.getTableColumnsInfo(request);
       return data;
@@ -248,8 +233,6 @@ export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
     enabled: isAuthenticated && !!request.database && !!request.table,
     retry: 1,
     refetchOnWindowFocus: false,
-    // placeholderData: keepPreviousData,
-    // initialData,
   });
 
   const data = q.data ?? initialData;
@@ -262,8 +245,9 @@ export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
 };
 
 type UsersHookProps = DataHookProps<FetchUsersResponse>;
-export const useUsers = <TSelected = DatabaseHookProps>(
-  selector?: (args: DatabaseHookProps) => TSelected,
+export const useUsers = <TSelected = UsersHookProps>(
+  request?: FetchUsersRequest,
+  selector?: (args: UsersHookProps) => TSelected,
 ) => {
   const initialData = {
     ...defaultResponse,
@@ -271,20 +255,17 @@ export const useUsers = <TSelected = DatabaseHookProps>(
   } satisfies BasicRowsShape;
 
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
-  // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
+
   const q = useQuery<FetchDatabasesResponse, Error>({
-    queryKey: queryKeys.users(),
-    // select: (data) => data.databases, // transform to string[] for easier usage
+    queryKey: queryKeys.users(request?.paging),
     queryFn: async () => {
-      const data = await dbApi.fetchUsers();
+      const data = await dbApi.fetchUsers({ ...request });
       return data;
     },
     staleTime: STALE_TIME,
     enabled: isAuthenticated,
     retry: 1,
     refetchOnWindowFocus: false,
-    // placeholderData: keepPreviousData,
-    // initialData,
   });
   const data = q.data ?? initialData;
 

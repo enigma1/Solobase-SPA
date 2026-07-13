@@ -7,7 +7,7 @@ export const ImportView = () => {
   const content =
     lastImport.length > 0
       ? lastImport
-      : 'No details available during the last data process';
+      : 'No details available during the last Running/Importing data process';
 
   return (
     <>

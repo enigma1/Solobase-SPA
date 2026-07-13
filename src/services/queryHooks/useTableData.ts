@@ -1,7 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
-import { dbApi, FetchRowsResponse, BasicDataResponse } from '>/services/api';
+import {
+  dbApi,
+  FetchRowsRequest,
+  FetchRowsResponse,
+  BasicDataRequest,
+  BasicDataResponse,
+  BasicResponse,
+} from '>/services/api';
 import { useAccountStore } from '>/services/stores';
-import { defaultResponse } from '>/services/utils';
+import {
+  defaultResponse,
+  defaultListResponse,
+  defaultPageResponse,
+} from '>/services/utils';
+import { BasicRowsShape, TableBasics } from '>/types';
 import { queryKeys, STALE_TIME } from './defs';
 
 type TablesHookProps = {
@@ -9,18 +21,15 @@ type TablesHookProps = {
   query: ReturnType<typeof useQuery>;
 };
 
-const defaultCollectionColumns = {};
-
-export const useTableDataHook = <TSelected = TablesHookProps>(
+export const useTableData = <TSelected = TablesHookProps>(
+  request?: BasicDataRequest,
   selector?: (args: TablesHookProps) => TSelected,
 ) => {
-  const initialData = {
+  const initialData: BasicResponse & BasicRowsShape = {
     ...defaultResponse,
-    rows: [],
-    cols: defaultCollectionColumns,
-    columnsOrder: [],
-    rowTokens: undefined,
-  } satisfies BasicDataResponse;
+    ...defaultListResponse,
+    ...defaultPageResponse,
+  };
 
   const { dbSelected, isAuthenticated, activeTable } = useAccountStore(
     ({ state }) => ({
@@ -32,10 +41,11 @@ export const useTableDataHook = <TSelected = TablesHookProps>(
 
   // React Query fetch
   const q = useQuery<FetchRowsResponse, Error>({
-    queryKey: queryKeys.rows(dbSelected, activeTable),
+    queryKey: queryKeys.rows(dbSelected, activeTable, request?.paging),
     queryFn: async () => {
       if (!dbSelected || !activeTable) return { ...initialData };
       const data = await dbApi.fetchRows({
+        ...request,
         database: dbSelected,
         table: activeTable,
       });

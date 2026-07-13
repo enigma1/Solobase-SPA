@@ -66,7 +66,7 @@ export const NetworkSelect = ({ onModify }: ItemPreferenceProps) => {
               await logout();
             }
           }}
-          placeholder='Enter connection'
+          placeholder='Enter connection path'
         />
         <button
           className='btn'

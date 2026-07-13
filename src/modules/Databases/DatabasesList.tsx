@@ -12,6 +12,7 @@ import {
   createFactoryTableStore,
   dialogStoreActions,
   accountStoreActions,
+  FactoryTableStore,
 } from '>/services/stores';
 import {
   getColumnsFromRow,
@@ -29,6 +30,7 @@ import {
   DialogContent,
   FilterColumns,
   dialogFactories,
+  Pagination,
 } from '>/modules';
 import { routes } from '>/config/routes';
 import type {
@@ -37,6 +39,7 @@ import type {
   SqlRow,
   SqlObject,
   CommonDialogHandlers,
+  PagingContext,
 } from '>/types';
 import type { DeleteDatabasesResponse } from '>/services/api/dbApiTypes';
 import {
@@ -48,26 +51,35 @@ type DatabasesListProps = {
   rows: ViewRow<SqlRow>[];
   cols: SqlColumnsShape;
   columnsOrder: string[];
+  store: FactoryTableStore;
 };
 
 export const DatabasesList = ({
   cols,
   rows,
   columnsOrder,
+  store,
 }: DatabasesListProps) => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const tableStore = useMemo(() => createFactoryTableStore(), []);
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
   );
 
-  const { hiddenColumns } = useConfigStore(({ state }) => ({
-    hiddenColumns: state.hiddenColumns,
+  const { paging } = store.useFactoryTableStore(({ state }) => ({
+    paging: state.paging,
   }));
+
+  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
+    ({ state, api }) => ({
+      hiddenColumns: state.hiddenColumns,
+      savePreferences: api.savePreferences,
+      getPageSizes: api.getPageSizes,
+    }),
+  );
 
   const { editedRow, markEditedRow } = useDatabasesStore(({ state, api }) => ({
     editedRow: state.editedRow as Record<number, SqlObject>,
@@ -76,7 +88,7 @@ export const DatabasesList = ({
 
   const deleteDatabasesCallbacks = {
     onSuccess: (data: DeleteDatabasesResponse) => {
-      tableStore.api.clearSelected();
+      store.api.clearSelected();
       if (data.ok) {
         messageStoreActions.addMessage({
           type: 'success',
@@ -144,14 +156,14 @@ export const DatabasesList = ({
     const match = disposition?.match(/filename="(.+)"/);
     const filename = match?.[1] ?? 'export.sql.gz';
     createFileSaveUrl(rsp.data, filename);
-    tableStore.api.clearSelected();
+    store.api.clearSelected();
     // console.log('response confirmSelectedExports', rsp);
   };
 
   const handleConfirmSelectedExports = () => {
-    const sRows = tableStore.get().selectedRows;
+    const sRows = store.get().selectedRows;
     if (sRows.size === 0) {
-      tableStore.api.setAllRows(rows);
+      store.api.setAllRows(rows);
       return;
     }
 
@@ -186,7 +198,7 @@ export const DatabasesList = ({
   };
 
   const handleDeleteDatabases = () => {
-    const sRows = tableStore.get().selectedRows;
+    const sRows = store.get().selectedRows;
     if (sRows.size === 0) {
       return;
     }
@@ -291,18 +303,60 @@ export const DatabasesList = ({
     },
   };
 
+  const getPagingContext = (): PagingContext => {
+    // const showPagination = paging.hasNext || paging.hasPrevious;
+    // if (!showPagination) return;
+
+    return {
+      hasNext: paging.hasNext,
+      hasPrevious: paging.hasPrevious,
+      currentSize: paging.limit,
+
+      onNextPage: () => {
+        store.api.setPaging({
+          offset: paging.offset + paging.limit,
+        });
+      },
+
+      onPreviousPage: () => {
+        store.api.setPaging({
+          offset: Math.max(0, paging.offset - paging.limit),
+        });
+      },
+
+      onPageSize: (limit) => {
+        store.api.setPaging({
+          limit,
+          offset: 0,
+        });
+        const pageSizes = getPageSizes();
+        savePreferences({
+          pageSizes: {
+            ...pageSizes,
+            dbRows: limit,
+          },
+        });
+      },
+    };
+  };
+
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
 
   const isBusy = isPending || isDatabaseSelectionPending;
   if (isBusy) return <ScreenLoader />;
 
+  const pagingContext = getPagingContext();
+  const start = paging.offset + 1;
+  const end = paging.offset + rows.length;
+
   return (
     <>
       <PageTableShell
-        store={tableStore}
-        title={`Databases: ${rows.length}`}
+        store={store}
+        title={`Databases: ${start}–${end}`}
         tableRef={tableRef}
         actions={shellHandlers}
+        paging={pagingContext}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}
@@ -314,7 +368,7 @@ export const DatabasesList = ({
           rows={rows}
           columnsOrder={columnsOrder}
           activeCols={activeCols}
-          store={tableStore}
+          store={store}
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}

@@ -3,4 +3,21 @@
     @apply font-semibold text-sm;
     color: var(--color-text);
   }
+
+  .preference-section-header {
+    @apply flex items-center p-2 gap-2 w-full;
+    background: var(--color-srf-high);
+    color: var(--color-text-peak);
+  }
+
+  .preference-section-header .one-line {
+    @apply flex-1;
+  }
+
+  .segment-toolbar {
+    @apply flex flex-[0_0_auto] rounded-md border items-center gap-2 px-2 py-1.5;
+    background: transparent;
+    border-color: var(--color-border);
+
+  }
 }
