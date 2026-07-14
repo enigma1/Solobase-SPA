@@ -1,8 +1,12 @@
 import { useFormContext, ControllerFieldState } from 'react-hook-form';
 import { buildRulesFromColumn } from '>/services/utils';
 import { FormCellField, JsonEditor } from '>/modules';
-import { AnyControlField } from '>/modules/Common/Forms/commonTypes';
-import { DataCell, DataEditorType, SqlColumnsShape } from '>/types';
+import {
+  DataCell,
+  DataEditorType,
+  SqlColumnsShape,
+  AnyControlField,
+} from '>/types';
 import { CreateDataRowsForm, DataRowForm } from './commonTypes';
 
 type RenderEditorProps = {

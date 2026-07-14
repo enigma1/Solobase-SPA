@@ -6,6 +6,7 @@ import {
   useSelectDatabaseWrap,
 } from '>/services/queryHooks';
 import {
+  useAccountStore,
   useConfigStore,
   useDatabasesStore,
   messageStoreActions,
@@ -52,6 +53,7 @@ type DatabasesListProps = {
   cols: SqlColumnsShape;
   columnsOrder: string[];
   store: FactoryTableStore;
+  uidSelected?: string;
 };
 
 export const DatabasesList = ({
@@ -59,11 +61,14 @@ export const DatabasesList = ({
   rows,
   columnsOrder,
   store,
+  uidSelected,
 }: DatabasesListProps) => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const dbSelected = useAccountStore(({ state }) => state.dbSelected);
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
@@ -372,6 +377,7 @@ export const DatabasesList = ({
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
+          selectedRow={uidSelected}
           editedRow={editedRow}
           onEditRow={onEditRow}
           onSelectRow={onSelectRow}

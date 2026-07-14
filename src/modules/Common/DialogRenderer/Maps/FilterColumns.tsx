@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CheckboxField } from '>/modules';
 import { useModal } from '>/services/hooks';
 

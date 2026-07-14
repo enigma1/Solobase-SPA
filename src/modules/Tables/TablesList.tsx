@@ -6,7 +6,6 @@ import {
   useTablesStore,
   useDialogStore,
   messageStoreActions,
-  createFactoryTableStore,
   dialogStoreActions,
   accountStoreActions,
   FactoryTableStore,
@@ -22,7 +21,6 @@ import {
 import {
   getSingleColumnFromResult,
   getColumnsFromRow,
-  getMergedSqlColumnData,
   dialogActions,
   makeColumnsActive,
 } from '>/services/utils';
@@ -30,7 +28,6 @@ import { routes } from '>/config';
 import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
 import type {
   SqlColumnsShape,
-  SqlTypes,
   SqlRow,
   SqlObject,
   ViewRow,
@@ -45,6 +42,7 @@ type TablesListProps = {
   cols: SqlColumnsShape;
   columnsOrder: string[];
   store: FactoryTableStore;
+  uidSelected?: string;
 };
 
 export const TablesList = ({
@@ -53,6 +51,7 @@ export const TablesList = ({
   cols,
   columnsOrder,
   store,
+  uidSelected,
 }: TablesListProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -95,13 +94,13 @@ export const TablesList = ({
       if (data.ok) {
         messageStoreActions.addMessage({
           type: 'success',
-          content: { text: 'Selected Rows removed', duration: 3000 },
+          content: { text: 'Selected Tables removed', duration: 3000 },
         });
       } else {
         messageStoreActions.addMessage({
           type: 'warn',
           content: {
-            text: data.message ?? 'Failed to remove some data rows',
+            text: data.message ?? 'Partial Failure removing tables',
             duration: 3000,
           },
         });
@@ -109,7 +108,7 @@ export const TablesList = ({
     },
     onError: (error: any) => {
       messageStoreActions.addMessage({
-        content: { text: 'Failed to remove data rows', duration: 3000 },
+        content: { text: 'Failed to remove requested tables', duration: 3000 },
       });
     },
   };
@@ -318,6 +317,7 @@ export const TablesList = ({
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
+          selectedRow={uidSelected}
           editedRow={editedRow}
           onEditRow={onEditRow}
           onSelectRow={onSelectRow}

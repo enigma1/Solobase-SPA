@@ -14,8 +14,7 @@ import {
   autoUpdate,
 } from '@floating-ui/react-dom';
 import { ChevronLeftIcon } from 'lucide-react';
-import { StatusType, ListScrollInfo } from '>/types';
-import { Option, OptionGroup } from '>/modules/Common/Forms/commonTypes';
+import { Option, OptionGroup, StatusType, ListScrollInfo } from '>/types';
 
 type ComboBoxProps = {
   id?: string;

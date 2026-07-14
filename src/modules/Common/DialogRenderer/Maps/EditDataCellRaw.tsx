@@ -1,21 +1,39 @@
-import { useState } from 'react';
 import { useModal } from '>/services/hooks';
-import { TextAreaField, JsonEditor } from '>/modules';
-import { SqlTypes, SqlObject } from '>/types';
+import { NumberField, TextAreaField, JsonEditor } from '>/modules';
+import { SqlTypes } from '>/types';
+
+const numberTypes = [
+  'TINYINT',
+  'SMALLINT',
+  'MEDIUMINT',
+  'INT',
+  'INTEGER',
+  'BIGINT',
+  'DECIMAL',
+  'NUMERIC',
+  'FLOAT',
+  'DOUBLE',
+];
 
 type HasitProps = {
   input: string;
-  part: string;
+  parts: string[];
   at?: number;
 };
-export const hasit = ({ input, part, at = 0 }: HasitProps) => {
-  return input.toLowerCase().indexOf(part.toLowerCase(), at) !== -1;
+
+export const hasit = ({ input, parts, at = 0 }: HasitProps) => {
+  const value = input.toLowerCase();
+
+  return parts.some((part) => value.indexOf(part.toLowerCase(), at) !== -1);
 };
+
+const isNumber = (type?: string) =>
+  type ? hasit({ input: type, parts: numberTypes }) : false;
 
 const getModeType = (type?: string) => {
   if (!type) return 'text';
   if (type === 'json') return 'tree';
-  if (hasit({ input: type, part: 'varbinary' })) {
+  if (hasit({ input: type, parts: ['binary', 'varbinary'] })) {
     return 'text';
   }
 };
@@ -32,7 +50,6 @@ export const EditDataCellRaw = ({
   type,
 }: EditDataCellRawProps) => {
   const { setButtonStatus } = useModal();
-  // const [value, setValue] = useState(cellValue);
   const mode = getModeType(type);
 
   if (mode) {
@@ -45,6 +62,16 @@ export const EditDataCellRaw = ({
         }}
         options={{
           mode,
+        }}
+      />
+    );
+  } else if (isNumber(type)) {
+    return (
+      <NumberField
+        defaultValue={cellValue == null ? '' : Number(cellValue)}
+        onValueChange={(v) => {
+          onChange(Number(v));
+          setButtonStatus('confirm');
         }}
       />
     );

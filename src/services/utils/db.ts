@@ -48,8 +48,8 @@ export const tableColumnTypes = [
     id: 'binary',
     label: 'Binary',
     options: [
-      { value: 'BINARY', params: ['Length'] },
-      { value: 'VARBINARY', params: ['Length'] },
+      { value: 'BINARY', params: ['Length *'] },
+      { value: 'VARBINARY', params: ['Length *'] },
 
       { value: 'TINYBLOB' },
       { value: 'BLOB' },
@@ -114,6 +114,11 @@ const getVarcharLength = (type: string) => {
   return match ? Number(match[1]) : null;
 };
 
+const getVarbinLength = (type: string) => {
+  const match = type.match(/varbinary\((\d+)\)/i);
+  return match ? Number(match[1]) : null;
+};
+
 const isTextarea = (type: string) => {
   if (type.includes('text')) return true;
 
@@ -138,6 +143,11 @@ export const buildRulesFromColumn = (col: SqlColumns) => {
   const type = col.type.toLowerCase();
 
   if (type.includes('varchar')) {
+    const match = type.match(/\((\d+)\)/);
+    if (match) rules.maxLength = Number(match[1]);
+  }
+
+  if (type.includes('varbinary')) {
     const match = type.match(/\((\d+)\)/);
     if (match) rules.maxLength = Number(match[1]);
   }

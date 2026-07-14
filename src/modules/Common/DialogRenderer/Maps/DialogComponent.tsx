@@ -1,10 +1,4 @@
-import {
-  ReactNode,
-  SyntheticEvent,
-  useState,
-  useMemo,
-  useCallback,
-} from 'react';
+import { ReactNode, SyntheticEvent, useState } from 'react';
 import { ModalDialog } from '>/modules';
 import { DialogPayload, ButtonStatus } from '>/types';
 import { ModalContext } from '>/services/hooks';

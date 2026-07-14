@@ -6,8 +6,9 @@ import {
   createFactoryTableStore,
 } from '>/services/stores';
 import { useTables } from '>/services/queryHooks';
+import { getColumnsFromRow } from '>/services/utils';
 import { EmptyPage, ScreenLoader, dialogFactories } from '>/modules';
-import type { ViewRow, SqlTypes, SqlRow } from '>/types';
+import type { ViewRow, SqlRow } from '>/types';
 import { TablesList } from './TablesList';
 
 export const TablesMainView = () => {
@@ -60,6 +61,24 @@ export const TablesMainView = () => {
     }));
   }, [rows]);
 
+  const uidSelected = useMemo(() => {
+    if (!dbSelected) return undefined;
+
+    for (const row of viewRows) {
+      const { TABLE_NAME } = getColumnsFromRow({
+        row: row.row,
+        columnsOrder,
+        fields: ['TABLE_NAME'],
+      });
+
+      if (TABLE_NAME === activeTable) {
+        return row.uiKey;
+      }
+    }
+
+    return undefined;
+  }, [dbSelected, viewRows, columnsOrder]);
+
   useEffect(() => {
     if (!dbSelected || !activeTable) {
       tablesDataStoreActions.initialize();
@@ -100,6 +119,7 @@ export const TablesMainView = () => {
       cols={cols}
       columnsOrder={columnsOrder}
       store={tableStore}
+      uidSelected={uidSelected}
     />
   );
 };

@@ -40,6 +40,12 @@
         background-color: color-mix(in oklch, var(--color-srf-elevated), var(--state-selected) 25%);
         border-color: var(--color-ring);
       }
+
+      &[data-active="true"] {
+        background-color: var(--state-selected);
+        color: var(--color-text-peak);
+      }
+
     }
 
     & th {

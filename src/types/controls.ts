@@ -14,7 +14,7 @@ export type FormCommonFieldProps<T extends FieldValues, N extends Path<T>> = {
   name: N;
   control: Control<T>;
   label: string;
-  type?: 'text' | 'password' | 'email';
+  type?: 'text' | 'password' | 'email' | 'number';
   $status?: StatusType;
   rules?: RegisterOptions<T, N>;
   endAdornment?: React.ReactNode;

@@ -23,6 +23,7 @@ type SqlTableContainerProps = {
   tableRef: React.RefObject<HTMLTableElement | null>;
   resizeLineRef: RefObject<HTMLDivElement | null>;
   editedRow?: Record<string, SqlObject>;
+  selectedRow?: string;
   onEditCell?: (props: EditHandlerProps) => void;
   onEditRow?: (uid: string) => void;
   onSelectRow?: (uid: string) => void;
@@ -38,6 +39,7 @@ export const SqlTableContainer = ({
   resizeLineRef,
   tableRef,
   editedRow,
+  selectedRow,
   onEditCell,
   onEditRow,
   onSelectRow,
@@ -90,6 +92,7 @@ export const SqlTableContainer = ({
       <tbody>
         {rows.map((oRow, idx) => {
           const uid = oRow.uiKey;
+          const isSelected = selectedRows && uid === selectedRow;
           const row = editedRow
             ? getMergedSqlColumnData(oRow.row, editedRow[uid])
             : oRow.row;
@@ -105,6 +108,7 @@ export const SqlTableContainer = ({
               onClick={() => {
                 onSelectRow?.(uid);
               }}
+              data-active={isSelected}
             >
               <td className='align-middle' onClick={(e) => e.stopPropagation()}>
                 <div className='flex items-center gap-2'>

@@ -1,14 +1,17 @@
 import { ReactNode } from 'react';
 import { FormFieldWrapper } from './FormCommon';
 import {
+  Path,
   FieldValues,
   Controller,
   ControllerFieldState,
-  ControllerRenderProps,
 } from 'react-hook-form';
-import { FormCommonFieldProps, AnyControlField } from './commonTypes';
+import { FormCommonFieldProps, AnyControlField } from '>/types';
 
-type FormCellFieldProps<T extends FieldValues> = FormCommonFieldProps<T> & {
+type FormCellFieldProps<
+  T extends FieldValues,
+  N extends Path<T>,
+> = FormCommonFieldProps<T, N> & {
   onSelect?: () => void;
   renderEditor: (props: {
     field: AnyControlField;
@@ -16,14 +19,14 @@ type FormCellFieldProps<T extends FieldValues> = FormCommonFieldProps<T> & {
   }) => ReactNode;
 };
 
-export const FormCellField = <T extends FieldValues>({
+export const FormCellField = <T extends FieldValues, N extends Path<T>>({
   name,
   control,
   label,
   rules,
   renderEditor,
   onSelect,
-}: FormCellFieldProps<T>) => {
+}: FormCellFieldProps<T, N>) => {
   return (
     <Controller
       name={name}

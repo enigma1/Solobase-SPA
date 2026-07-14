@@ -9,11 +9,8 @@ import {
   Control,
   RegisterOptions,
 } from 'react-hook-form';
-import { FormFieldWrapper } from './FormCommon';
-import { ComboBox } from '>/modules';
-import { FormCommonFieldProps, Option, OptionGroup, StatusType } from '>/types';
+import { StatusType } from '>/types';
 import { formatSize } from '>/services/utils';
-import { InputField } from './FormInputField';
 
 type DropFileAreaText = {
   title?: string;

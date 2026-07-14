@@ -247,8 +247,8 @@ export const TableColumnEntry = ({
         );
       })}
 
-      <div className='flex flex-wrap gap-x-4 gap-y-2 my-2 mt-4 justify-between items-center'>
-        <div className='flex flex-wrap gap-x-4 gap-y-2'>
+      <div className='inline-wrap my-2 mt-4 justify-between items-center'>
+        <div className='inline-wrap'>
           {groupMeta?.hasUnsigned && (
             <FormCheckboxField
               name={`cols.${index}.unsigned`}
