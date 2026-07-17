@@ -2,22 +2,26 @@ import { useState } from 'react';
 import { FieldValues, Controller, Path } from 'react-hook-form';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { FormFieldWrapper } from './FormCommon';
-import type { FormCommonFieldProps } from '>/types';
+import type { FormCommonFieldProps, CommonFieldProps } from '>/types';
 
-export type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  label?: string;
-  notice?: string;
-  status?: 'error' | 'success';
-  endAdornment?: React.ReactNode;
+export type InputFieldProps = CommonFieldProps & {
   inputClassName?: string;
-  onValueChange?: (value: string) => void;
 };
 
-export const InputField = ({
+// export type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
+//   label?: string;
+//   notice?: string;
+//   status?: 'error' | 'success';
+//   endAdornment?: React.ReactNode;
+//   inputClassName?: string;
+//   onValueChange?: (value: string) => void;
+// };
+
+export const InputField = <T extends FieldValues, N extends Path<T>>({
   id,
   label,
-  notice,
-  status,
+  $notice,
+  $status,
   endAdornment,
   inputClassName,
   value,
@@ -29,8 +33,8 @@ export const InputField = ({
   <FormFieldWrapper
     label={label}
     htmlFor={id}
-    $notice={notice}
-    $status={status}
+    $notice={$notice}
+    $status={$status}
   >
     <div className='field-control'>
       <input
@@ -56,11 +60,12 @@ export const FormInputField = <T extends FieldValues, N extends Path<T>>({
   control,
   label,
   rules,
-  $status,
   endAdornment,
   onValueChange,
   ...rest
-}: FormCommonFieldProps<T, N> & { type?: string }) => {
+}: FormCommonFieldProps<T, N> & {
+  type?: string;
+}) => {
   return (
     <Controller
       name={name}
@@ -78,8 +83,8 @@ export const FormInputField = <T extends FieldValues, N extends Path<T>>({
             id={id}
             label={label}
             onValueChange={handleChange}
-            notice={fieldState.error?.message}
-            status={fieldState.error ? 'error' : undefined}
+            $notice={fieldState.error?.message}
+            $status={fieldState.error ? 'error' : undefined}
             endAdornment={endAdornment}
           />
         );

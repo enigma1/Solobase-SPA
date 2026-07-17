@@ -82,22 +82,36 @@ export const handleClearSession = () => {
       caption: 'Sessions',
       component: (
         <DialogContent note='ClearSession'>
-          {'Are you sure you want to erase all session data?'}
+          <p>Are you sure you want to erase all session data?</p>
+          <p>
+            If you cannot login because of corrupted settings this operation
+            will reset the environment.
+          </p>
         </DialogContent>
       ),
       variant: 'warn',
       actions: dialogActions.confirmCancel({
         onConfirm: async () => {
           dialogStoreActions.closeDialog();
+          const rsp = await dbApi.cleanup();
           sessionStorage.removeItem('can-restore');
           sessionStorage.removeItem('sessionPrefs');
-          messageStoreActions.addMessage({
-            type: 'info',
-            content: {
-              text: `Session data erased`,
-              duration: 3000,
-            },
-          });
+          if (rsp.ok) {
+            messageStoreActions.addMessage({
+              type: 'info',
+              content: {
+                text: rsp.message,
+                duration: 4000,
+              },
+            });
+          } else {
+            messageStoreActions.addMessage({
+              content: {
+                text: 'Failed to clear session',
+                duration: 6000,
+              },
+            });
+          }
         },
       }),
     },

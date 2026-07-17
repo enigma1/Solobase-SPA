@@ -1,10 +1,11 @@
 import { ComboField } from '>/modules';
 import { pageSizeValues } from '>/services/utils/appSettings';
+import { WrapLayout } from '>/types';
 
 type PageSizeSelectProps = {
   id?: string;
   label?: string;
-  wrapLayout?: 'stack' | 'inline';
+  wrapLayout?: WrapLayout;
   wrapClass?: string;
   onChange: (size: number) => void;
   selectedSize: number;

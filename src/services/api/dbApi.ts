@@ -8,6 +8,7 @@ import { MutationRequestMeta } from '>/services/queryHooks';
 import {
   BasicResponse,
   AbortResponse,
+  CleanupResponse,
   SessionRestoreResponse,
   LoginRequest,
   LoginResponse,
@@ -91,6 +92,9 @@ const apiCall = <T>(fn: () => Promise<any>, unwrap = true) =>
 const ping = () => apiCall<{ ok: true }>(() => apiClient.get('/api/active'));
 const checkSession = () =>
   apiCall<SessionRestoreResponse>(() => apiClient.get('/api/check-session'));
+
+const cleanup = () =>
+  apiCall<CleanupResponse>(() => apiClient.get('/auth/cleanup'));
 
 const sessionRestore = () =>
   apiCall<SessionRestoreResponse>(() => apiClient.get('/auth/presence'));
@@ -211,6 +215,7 @@ export const dbApi = {
   ping,
   checkSession,
   abort,
+  cleanup,
   getTableDetails,
   getTableColumnsInfo,
   fetchDatabaseInfo,

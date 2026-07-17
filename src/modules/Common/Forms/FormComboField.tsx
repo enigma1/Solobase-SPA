@@ -1,12 +1,21 @@
-import { FieldValues, Controller, Path } from 'react-hook-form';
+import {
+  FieldValues,
+  Control,
+  RegisterOptions,
+  Controller,
+  Path,
+} from 'react-hook-form';
+
 import { FormFieldWrapper } from './FormCommon';
 import { ComboBox } from '>/modules';
 import {
   FormCommonFieldProps,
   Option,
   OptionGroup,
-  StatusType,
   ListScrollInfo,
+  FieldAdapter,
+  CommonFieldProps,
+  WrapLayout,
 } from '>/types';
 
 type ComboCommonFields = {
@@ -16,25 +25,24 @@ type ComboCommonFields = {
   $multiple?: boolean;
   $placeholder?: string;
   onListScroll?: (info: ListScrollInfo) => void;
-};
-
-type ComboFieldProps = ComboCommonFields & {
-  id?: string;
-  label?: string;
-  notice?: string;
-  status?: StatusType;
-  value: string | string[];
-  onChange: (value: string | string[]) => void;
-  htmlFor?: string;
-  wrapLayout?: 'stack' | 'inline';
+  wrapLayout?: WrapLayout;
   wrapClass?: string;
 };
+
+type ComboFieldProps = Omit<
+  CommonFieldProps,
+  'onChange' | 'onValueChange' | 'value' | 'type'
+> &
+  ComboCommonFields & {
+    value: string | string[];
+    onChange: (value: string | string[]) => void;
+  };
 export const ComboField = ({
   label,
-  notice,
-  status,
   onChange,
   htmlFor,
+  $notice,
+  $status,
   wrapClass,
   wrapLayout,
   ...props
@@ -42,8 +50,8 @@ export const ComboField = ({
   return (
     <FormFieldWrapper
       label={label}
-      $notice={notice}
-      $status={status}
+      $notice={$notice}
+      $status={$status}
       htmlFor={htmlFor ?? props.id}
       wrapClass={wrapClass}
       wrapLayout={wrapLayout}
@@ -53,12 +61,12 @@ export const ComboField = ({
   );
 };
 
-type FormComboFieldProps<T extends FieldValues, N extends Path<T>> = Omit<
-  FormCommonFieldProps<T, N>,
-  'onValueChange'
-> &
+type FormComboFieldProps<
+  T extends FieldValues,
+  N extends Path<T>,
+> = FormCommonFieldProps<T, N> &
   ComboCommonFields & {
-    onValueChange?: (value: string | string[], field: any) => void;
+    onValueChange?: (value: string | string[], field: FieldAdapter) => void;
   };
 export const FormComboField = <T extends FieldValues, N extends Path<T>>({
   name,

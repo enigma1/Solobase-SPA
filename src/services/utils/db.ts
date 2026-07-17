@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import {
   SqlTypes,
   SqlObject,
@@ -212,12 +213,12 @@ export const transformColumnsToDefaults = (cols: SqlColumnsShape) => {
 };
 
 export const emptyDataRow = (cols: SqlColumnsShape) => ({
-  uid: crypto.randomUUID(),
+  uid: uuidv4(),
   values: transformColumnsToDefaults(cols),
 });
 
 export const emptyTableColumn = (): TableShapeColumn => ({
-  uid: crypto.randomUUID(),
+  uid: uuidv4(),
   field: '',
   type: '',
   params: {},
@@ -229,7 +230,7 @@ export const emptyTableColumn = (): TableShapeColumn => ({
 });
 
 export const emptyTableColumnKey = (): TableShapeKey => ({
-  uid: crypto.randomUUID(),
+  uid: uuidv4(),
   type: 'INDEX',
   name: '',
   columns: [],

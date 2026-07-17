@@ -37,19 +37,24 @@
   --color-accent: var(--tone-6);
 
   /* types */
-  --color-error: oklch(0.65 0.22 25);
-  --color-warn: oklch(0.78 0.18 85);
-  --color-success: oklch(0.72 0.18 145);
-  --color-info: oklch(0.68 0.16 250);
+  --error: oklch(0.65 0.22 25);
+  --warn: oklch(0.78 0.18 85);
+  --success: oklch(0.72 0.18 145);
+  --info: oklch(0.68 0.16 250);
+
+  --color-error: color-mix(in oklch, var(--error) 80%, var(--color-text) 20%);
+  --color-warn: color-mix(in oklch, var(--warn) 80%, var(--color-text) 20%);
+  --color-success: color-mix(in oklch, var(--success) 80%, var(--color-text) 20%);
+  --color-info: color-mix(in oklch, var(--info) 80%, var(--color-text) 20%);
 
   --color-error-bg:
-    color-mix(in oklch, var(--color-error), transparent 88%);
+    color-mix(in oklch, var(--error), transparent 88%);
   --color-warn-bg:
-    color-mix(in oklch, var(--color-warn), transparent 88%);
+    color-mix(in oklch, var(--warn), transparent 88%);
   --color-success-bg:
-    color-mix(in oklch, var(--color-success), transparent 88%);
+    color-mix(in oklch, var(--success), transparent 88%);
   --color-info-bg:
-    color-mix(in oklch, var(--color-info), transparent 88%);
+    color-mix(in oklch, var(--info), transparent 88%);
 
 
   /* interactive states */

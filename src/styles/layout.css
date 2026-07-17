@@ -4,7 +4,7 @@
   }
 
   .app-header {
-    @apply h-14 flex items-center justify-between border-b px-4;
+    @apply h-14 flex items-center justify-between border-b pr-4;
     border-color: var(--color-border-separate)
   }
 

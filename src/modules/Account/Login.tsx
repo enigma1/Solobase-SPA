@@ -72,22 +72,22 @@ export const Login = ({ formHandlers }: LoginProps) => {
     },
   };
 
-  const { mutate, isPending, response } = useLoginMutation(
+  const { mutateAsync, isPending, response } = useLoginMutation(
     ({ api, query, state }) => ({
-      mutate: api.mutate,
+      mutateAsync: api.mutateAsync,
       isPending: query.isPending,
       response: state,
     }),
     callbacks,
   );
 
-  const onLoginSubmit = (data: LoginFormRequest) => {
+  const onLoginSubmit = async (data: LoginFormRequest) => {
     configStoreActions.setBackend(data.backend);
     const request = {
       username: data.username,
       password: data.password,
     };
-    mutate(request);
+    await mutateAsync(request);
   };
 
   useEffect(() => {
@@ -150,21 +150,12 @@ export const Login = ({ formHandlers }: LoginProps) => {
               control={control}
             />
           </div>
-
-          <div className='btn-group'>
-            {/* <button type='submit' className='btn'>
-              User Login
-            </button> */}
-
-            {/* <button
-                type='button'
-                onClick={() => navigate(routes.front.createUser)}
-                className='btn-secondary'
-              >
-                Register
-              </button> */}
-          </div>
         </form>
+        <p className='space-y-1 text-sm font-semibold'>
+          Typically the domain of the{' '}
+          <span className='stand'>Back End URL</span> should match the domain
+          you see on the browser
+        </p>
       </div>
     </div>
   );

@@ -38,8 +38,8 @@ export const FormNumberField = <T extends FieldValues, N extends Path<T>>(
         {...field}
         value={field.value ?? ''}
         onValueChange={(value) => field.onChange(value)}
-        notice={fieldState.error?.message}
-        status={fieldState.error ? 'error' : undefined}
+        $notice={fieldState.error?.message}
+        $status={fieldState.error ? 'error' : undefined}
       />
     )}
   />

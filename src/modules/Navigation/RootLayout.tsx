@@ -29,20 +29,20 @@ import {
 } from '>/modules/Account';
 import { useDebouncer } from '>/services/hooks/common';
 import { AuthNavigationLinks } from './NavigationLinks';
+import Logo from '>/assets/images/solo-base-xp.svg?react';
 
 const GuestNavigationLinks = () => null;
 const GuestMenu = () => {
   return (
     <Guest>
       <div className='menu'>
-        <DropdownMenu label='Guest'>
-          <a href='#' onClick={handleLogin}>
-            Login
-          </a>
-          <a href='#' onClick={handleClearSession}>
-            Clear Session
-          </a>
-        </DropdownMenu>
+        <a className='menu-trigger' href='#' onClick={handleLogin}>
+          Login
+        </a>
+        <div className='menu-separator'>|</div>
+        <a className='menu-trigger' href='#' onClick={handleClearSession}>
+          Clear Session
+        </a>
       </div>
     </Guest>
   );
@@ -231,7 +231,7 @@ export const RootLayout = () => {
               <header className='app-header'>
                 <div className='app-logo'>
                   <Link to={routes.front.home} className='font-semibold'>
-                    SoloBase
+                    <Logo className='text-logo' />
                   </Link>
                 </div>
                 <nav className='w-full flex items-center gap-4'>

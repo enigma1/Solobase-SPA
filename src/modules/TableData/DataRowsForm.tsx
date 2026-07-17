@@ -1,20 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Trash2Icon, ListPlusIcon, SquareActivityIcon } from 'lucide-react';
 import {
-  UseFormReturn,
-  FormProvider,
-  useForm,
-  useFieldArray,
-  Controller,
-  FieldErrors,
-  useWatch,
-} from 'react-hook-form';
+  Trash2Icon,
+  ListPlusIcon,
+  SquareActivityIcon,
+  SquarePenIcon,
+} from 'lucide-react';
+import { UseFormReturn, FormProvider, useFieldArray } from 'react-hook-form';
+import { historyStoreActions } from '>/services/stores';
 import {
   MAX_INSERT_DATA_ROWS,
   emptyDataRow,
   transformColumnsToDefaults,
 } from '>/services/utils';
-
+import { ComboField } from '>/modules';
 import { SqlColumnsShape } from '>/types';
 import { CreateDataRowsForm } from './commonTypes';
 import { DataRowEntry } from './DataRowEntry';
@@ -32,7 +30,23 @@ export const DataRowsForm = ({
   columnsOrder,
   onValidation,
 }: DataRowsFormProps) => {
+  const [copyOption, setCopyOption] = useState<number>(-1);
   const rowDefaults = useMemo(() => transformColumnsToDefaults(cols), [cols]);
+  const copiedRows = useMemo(
+    () => historyStoreActions.getCopiedRowsList(columnsOrder),
+    [columnsOrder],
+  );
+  const $copyOptions = useMemo(() => {
+    const list = copiedRows.map((row, idx) => {
+      const text = JSON.stringify(row).replace(/^\[/, '').replace(/\]$/, '');
+
+      return {
+        label: text.length > 30 ? `${text.slice(0, 30)}…` : text,
+        value: idx.toString(),
+      };
+    });
+    return list;
+  }, [columnsOrder]);
 
   const {
     control,
@@ -44,6 +58,10 @@ export const DataRowsForm = ({
     control,
     name: 'rowsData',
   });
+
+  useEffect(() => {
+    onValidation(form.formState.isValid);
+  }, [form.formState.isValid]);
 
   const onRemove = (index: number) => {
     remove(index);
@@ -60,6 +78,22 @@ export const DataRowsForm = ({
     }
   };
 
+  const onApplyCopy = (uid: string) => {
+    const activeIndex = fields.findIndex((r) => r.uid === uid);
+    if (copyOption >= 0 && activeIndex >= 0) {
+      const row = copiedRows[copyOption];
+      const values = rowDefaults.map((entry, idx) => ({
+        ...entry,
+        value: row[idx],
+      }));
+
+      update(activeIndex, {
+        ...fields[activeIndex],
+        ...(row && { values }),
+      });
+    }
+  };
+
   const canAddRow = fields.length < MAX_INSERT_DATA_ROWS;
 
   const onAddRow = () => {
@@ -67,9 +101,9 @@ export const DataRowsForm = ({
     append(item);
   };
 
-  useEffect(() => {
-    onValidation(form.formState.isValid);
-  }, [form.formState.isValid]);
+  const handleCopyChange = (idx: string | string[]) => {
+    setCopyOption(Number(idx));
+  };
 
   return (
     <div className='area-container'>
@@ -89,21 +123,35 @@ export const DataRowsForm = ({
       </div>
       <div className='area-content' onClick={() => clearErrors()}>
         <FormProvider {...form}>
-          {fields.map((field, index) => {
-            const bg = index % 2 ? 'odd' : 'even';
+          {fields.map((field, idx) => {
+            const bg = idx % 2 ? 'odd' : 'even';
             return (
               <div
                 key={field.id}
-                className={`area-item separate ${bg}`}
+                className={`area-item space-y-2 separate ${bg}`}
                 // className={`area-item separate ${bg} ${
                 //   activeRowUid === field.uid ? 'active' : ''
                 // }`}
               >
                 <div className='flex items-center justify-between mb-2'>
                   <span className='text-xs font-semibold text-muted'>
-                    Row {index + 1}
+                    Row {idx + 1}
                   </span>
                   <span className='btn-group'>
+                    <ComboField
+                      $options={$copyOptions}
+                      value={copyOption?.toString() ?? ''}
+                      onChange={handleCopyChange}
+                    />
+                    <button
+                      type='button'
+                      className='btn-secondary'
+                      onClick={() => onApplyCopy(field.uid)}
+                      title='Set selected row option on this row'
+                    >
+                      <SquarePenIcon size={18} />
+                    </button>
+
                     <button
                       type='button'
                       className='btn-secondary'
@@ -117,7 +165,7 @@ export const DataRowsForm = ({
                       className='btn-secondary'
                       onClick={(e) => {
                         e.stopPropagation();
-                        onRemove(index);
+                        onRemove(idx);
                       }}
                       title='Remove row'
                     >
@@ -126,7 +174,7 @@ export const DataRowsForm = ({
                   </span>
                 </div>
                 <DataRowEntry
-                  rowIndex={index}
+                  rowIndex={idx}
                   row={field}
                   cols={cols}
                   columnsOrder={columnsOrder}

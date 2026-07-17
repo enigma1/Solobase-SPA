@@ -100,7 +100,7 @@ export const TableColumnsForm = ({
   return (
     <div className='area-container'>
       <div className='area-spacer'>
-        <h1 className='area-title'>Create Columns</h1>
+        <h1 className='area-title'>Create/Edit Columns</h1>
         <div className='area-actions'>
           <button
             type='button'

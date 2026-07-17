@@ -11,13 +11,7 @@ import {
   PanelBottomCloseIcon,
   PanelBottomOpenIcon,
 } from 'lucide-react';
-import {
-  FormTextField,
-  FormCheckboxField,
-  ComboBox,
-  FormComboField,
-} from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+import { FormTextField, FormCheckboxField, FormComboField } from '>/modules';
 import {
   tableColumnTypes,
   flatColumnTypeSet,
@@ -147,7 +141,7 @@ export const TableColumnEntry = ({
   const bg = index % 2 ? 'odd' : 'even';
   return (
     <div
-      className={`area-item separate ${bg} ${active ? 'active' : ''}`}
+      className={`area-item space-y-2 separate ${bg} ${active ? 'active' : ''}`}
       onClick={onSelect}
     >
       <div className='flex items-center justify-between mb-2'>

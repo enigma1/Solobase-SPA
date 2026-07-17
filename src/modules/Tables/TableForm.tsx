@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -62,11 +63,11 @@ export const TableForm = ({
       collation: initialValues.collation ?? defaults.collation,
       cols: initialValues.cols?.map((col) => ({
         ...col,
-        uid: crypto.randomUUID(),
+        uid: uuidv4(),
       })) ?? [emptyTableColumn()],
       keys: initialValues.keys?.map((key) => ({
         ...key,
-        uid: crypto.randomUUID(),
+        uid: uuidv4(),
       })) ?? [emptyTableColumnKey()],
     }),
     [initialValues, defaults],

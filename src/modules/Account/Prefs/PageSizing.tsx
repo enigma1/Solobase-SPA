@@ -23,6 +23,7 @@ export const PageSizing = ({ modified, onModify }: ItemPreferenceProps) => {
                 handlePageChange(Number(value), listing);
               }}
               label={`${listing}:`}
+              id={listing}
             />
           </div>
         );

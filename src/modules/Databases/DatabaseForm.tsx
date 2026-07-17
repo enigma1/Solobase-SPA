@@ -1,11 +1,9 @@
 import { useEffect } from 'react';
 import { SquareActivityIcon } from 'lucide-react';
-import { useForm, Controller, FieldErrors, useWatch } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useDatabaseServerInfo } from '>/services/queryHooks';
 import { useModal } from '>/services/hooks';
-import { messageStoreActions, useAccountStore } from '>/services/stores';
-import { FormTextField, ScreenLoader, ComboBox } from '>/modules';
-import { FormFieldWrapper } from '>/modules/Common/Forms/FormCommon';
+import { FormTextField, ScreenLoader, FormComboField } from '>/modules';
 import { DatabaseShape, ComponentFormHandlers } from '>/types';
 
 type DatabaseFormProps = ComponentFormHandlers & {
@@ -48,12 +46,10 @@ export const DatabaseForm = ({
     mode: 'onChange',
   });
 
-  const charset =
-    useWatch({
-      control,
-      name: 'charset',
-    }) ?? defaults.charset;
-
+  const [charset = defaults.charset, collation] = useWatch({
+    control,
+    name: ['charset', 'collation'],
+  });
   const validCollations = collationsByCharset[charset]?.collations ?? [];
 
   useEffect(() => {
@@ -73,10 +69,10 @@ export const DatabaseForm = ({
   };
   const dbCharsets = Object.keys(collationsByCharset);
   const values = getValues();
-
+  const isComplete = (!!charset && !!collation) || (!charset && !collation);
   useEffect(() => {
-    setButtonStatus('confirm', isValid ? undefined : 'disabled');
-  }, [isValid]);
+    setButtonStatus('confirm', isValid && isComplete ? undefined : 'disabled');
+  }, [isValid, charset, collation]);
 
   useEffect(() => {
     formHandlers.confirm = handleSubmit(onSubmit);
@@ -129,36 +125,24 @@ export const DatabaseForm = ({
             </div>
           )}
           <div className='space-y-1'>
-            <Controller
+            <FormComboField
+              id='create-database-charset'
+              label='Charset:'
               name='charset'
-              // defaultValue={defaults.charset}
               control={control}
-              render={({ field, fieldState }) => (
-                <FormFieldWrapper
-                  label='Charset:'
-                  htmlFor='create-database-charset'
-                  $status={fieldState.error ? 'error' : undefined}
-                  $notice={fieldState.error?.message}
-                >
-                  <ComboBox
-                    id='create-database-charset'
-                    $editable={true}
-                    value={field.value}
-                    onChange={field.onChange}
-                    $options={dbCharsets.map((cs) => ({
-                      value: cs,
-                      label: cs,
-                    }))}
-                    $placeholder='Select Charset'
-                    $status={!!fieldState.error ? 'error' : undefined}
-                  />
-                </FormFieldWrapper>
-              )}
+              $options={dbCharsets.map((cs) => ({
+                value: cs,
+                label: cs,
+              }))}
+              $placeholder='Select Charset'
+              $status={errors.charset ? 'error' : undefined}
+              $notice={errors.charset?.message}
             />
           </div>
           <div className='space-y-1'>
-            <Controller
-              // defaultValue={defaults.collation}
+            <FormComboField
+              id='create-database-collation'
+              label='Collation:'
               name='collation'
               control={control}
               rules={{
@@ -172,30 +156,21 @@ export const DatabaseForm = ({
                   return valid.includes(value) || 'Invalid collation';
                 },
               }}
-              render={({ field, fieldState }) => (
-                <FormFieldWrapper
-                  label='Collation:'
-                  htmlFor='create-database-collation'
-                  $status={fieldState.error ? 'error' : undefined}
-                  $notice={fieldState.error?.message}
-                >
-                  <ComboBox
-                    id='create-database-collation'
-                    value={field.value}
-                    onChange={field.onChange}
-                    $options={
-                      collationsByCharset[
-                        values.charset ?? defaults.charset
-                      ]?.collations.map((collation) => ({
-                        value: collation,
-                        label: collation,
-                      })) ?? []
-                    }
-                    $placeholder='Select Collation'
-                    $status={!!fieldState.error ? 'error' : undefined}
-                  />
-                </FormFieldWrapper>
-              )}
+              $options={
+                collationsByCharset[
+                  values.charset ?? defaults.charset
+                ]?.collations.map((collation) => ({
+                  value: collation,
+                  label: collation,
+                })) ?? []
+              }
+              $placeholder='Select Collation'
+              $status={!isComplete ? 'warn' : undefined}
+              $notice={
+                !isComplete
+                  ? 'Note: Selecting a charset requires a valid collation'
+                  : undefined
+              }
             />
           </div>
         </form>

@@ -23,13 +23,21 @@ export const queryClient = new QueryClient({
   mutationCache: new MutationCache({
     onError: (error) => {
       console.log('MutationCache', error);
+      const e = error as ApiError;
       dialogStoreActions.openDialog({
         payload: {
           caption: 'Action Failed',
           component: (
             <DialogContent note='Action Request Error'>
-              <h3>{(error as ApiError).error}</h3>
-              <p className='text-sm'>{(error as ApiError).message}</p>
+              <h3>{e.error}</h3>
+              <p className='text-sm'>{e.message}</p>
+              {e.details && (
+                <ul>
+                  {e.details.map((d) => (
+                    <li>{d}</li>
+                  ))}
+                </ul>
+              )}
             </DialogContent>
           ),
           actions: dialogActions.ack(),

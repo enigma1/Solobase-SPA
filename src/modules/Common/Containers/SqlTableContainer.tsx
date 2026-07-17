@@ -1,8 +1,8 @@
 import { useMemo, type RefObject } from 'react';
-import { SquarePenIcon, PencilLineIcon } from 'lucide-react';
+import { SquarePenIcon, PencilLineIcon, CopyIcon } from 'lucide-react';
 import { useColumnResize } from '>/services/hooks';
 import type { FactoryTableStore } from '>/services/stores';
-import { ViewRow, SqlTypes, SqlObject, SqlColumnsShape, SqlRow } from '>/types';
+import { ViewRow, SqlObject, SqlColumnsShape, SqlRow } from '>/types';
 import { getMergedSqlColumnData } from '>/services/utils';
 import { CheckboxField } from '>/modules';
 
@@ -27,6 +27,7 @@ type SqlTableContainerProps = {
   onEditCell?: (props: EditHandlerProps) => void;
   onEditRow?: (uid: string) => void;
   onSelectRow?: (uid: string) => void;
+  onCopyRow?: (uid: string) => void;
 };
 
 export const SqlTableContainer = ({
@@ -43,6 +44,7 @@ export const SqlTableContainer = ({
   onEditCell,
   onEditRow,
   onSelectRow,
+  onCopyRow,
 }: SqlTableContainerProps) => {
   const { useFactoryTableStore } = store;
   const columnIndices = useMemo(
@@ -63,6 +65,7 @@ export const SqlTableContainer = ({
     resizeLineRef,
   );
   const isEditable = onEditCell;
+
   return (
     <table className='table' ref={tableRef}>
       <thead>
@@ -119,6 +122,17 @@ export const SqlTableContainer = ({
                       setSelectedRow(uid, checked);
                     }}
                   />
+                  {onCopyRow && (
+                    <button
+                      title='Copy this row'
+                      className='btn-secondary p-0 bg-transparent border-0'
+                      onClick={(e) => {
+                        onCopyRow(uid);
+                      }}
+                    >
+                      <CopyIcon size={18} className='inline-block' />
+                    </button>
+                  )}
                   {onEditRow && (
                     <button
                       className='btn-secondary p-0 bg-transparent border-0'

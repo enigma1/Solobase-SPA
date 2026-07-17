@@ -5,6 +5,7 @@ import { resolve, isAbsolute } from 'node:path';
 import ssl from '@vitejs/plugin-basic-ssl';
 import { visualizer } from 'rollup-plugin-visualizer';
 import tailwindcss from '@tailwindcss/vite';
+import svgr from 'vite-plugin-svgr';
 
 const isExternal = (id) => {
   return !id.startsWith('.') && !isAbsolute(id) && !id.startsWith('~');
@@ -32,6 +33,7 @@ export default defineConfig({
   plugins: [
     ssl(),
     react(),
+    svgr(),
     visualizer({
       filename: 'stats.html', // Where the report will be saved
       open: true, // Opens the report automatically after build

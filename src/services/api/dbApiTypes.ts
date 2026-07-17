@@ -33,6 +33,11 @@ export type BasicResponse = {
   queries: string[];
 };
 
+export type AuthResponse<TData = BasicResponse> = {
+  data: TData;
+};
+export type CleanupResponse = AuthResponse;
+
 export type AbortResponse = BasicResponse;
 
 export type SessionRestoreResponse = BasicResponse & {

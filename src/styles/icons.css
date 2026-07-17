@@ -2,4 +2,8 @@
   .icon-muted {
     color: var(--color-text-dim);
   }
+
+  .text-logo {
+    color: var(--color-text-dim);
+  }
 }

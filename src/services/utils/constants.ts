@@ -11,3 +11,4 @@ export const MAX_TABLE_COLUMNS = 256;
 export const MAX_TABLE_KEYS = 64;
 export const MAX_COLUMNS_PER_KEY = 16;
 export const MAX_INSERT_DATA_ROWS = 16;
+export const MAX_COPIED_ROWS = 10;

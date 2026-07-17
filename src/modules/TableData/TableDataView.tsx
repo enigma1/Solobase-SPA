@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTableData } from '>/services/queryHooks';
 import {
   useAccountStore,
@@ -6,6 +7,7 @@ import {
   dialogStoreActions,
   createFactoryTableStore,
 } from '>/services/stores';
+import { routes } from '>/config';
 import {
   DataRowsList,
   ScreenLoader,
@@ -15,6 +17,7 @@ import {
 import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
+  const navigate = useNavigate();
   const tableStore = useMemo(
     () => createFactoryTableStore({ listingType: 'dataRows' }),
     [],
@@ -95,10 +98,17 @@ export const TableDataView = () => {
     });
   };
 
+  const onBack = () => {
+    navigate(routes.front.listTables, {
+      replace: true,
+    });
+  };
+
   if (rows.length === 0) {
     return (
       <EmptyListing
         onCreate={onCreate}
+        onBack={onBack}
         note={`No available rows in ${activeTable}`}
       />
     );

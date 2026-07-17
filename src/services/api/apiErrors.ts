@@ -27,9 +27,9 @@ export const createAuthError = (reason: string) => ({
 
 export const createUnknownError = (response: Record<string, unknown>) => ({
   code: response?.code ?? 'ERR_UNKNOWN',
-
   error: response?.error ?? 'Unknown Error',
   message: response?.message ?? 'Unknown response received from server',
+  details: response?.details ?? [],
 });
 
 const authError = async () => {

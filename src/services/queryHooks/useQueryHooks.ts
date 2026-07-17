@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { dbApi, FetchDatabaseInfoResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
 import { queryKeys, STALE_TIME, DataHookProps, HookStore } from './defs';
@@ -11,8 +11,6 @@ import {
   GetTableColumnsInfoResponse,
   FetchUsersRequest,
   FetchUsersResponse,
-  BasicResponse,
-  PagingResponse,
 } from '>/services/api';
 import {
   getSingleColumnFromResult,

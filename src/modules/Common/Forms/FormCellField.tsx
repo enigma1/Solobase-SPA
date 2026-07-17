@@ -6,14 +6,17 @@ import {
   Controller,
   ControllerFieldState,
 } from 'react-hook-form';
-import { FormCommonFieldProps, AnyControlField } from '>/types';
+import { FormCommonFieldProps, AnyControlField, DataEditorType } from '>/types';
 
 type FormCellFieldProps<
   T extends FieldValues,
   N extends Path<T>,
 > = FormCommonFieldProps<T, N> & {
   onSelect?: () => void;
+  editorType: DataEditorType;
   renderEditor: (props: {
+    id?: string;
+    editorType: DataEditorType;
     field: AnyControlField;
     fieldState: ControllerFieldState;
   }) => ReactNode;
@@ -26,6 +29,8 @@ export const FormCellField = <T extends FieldValues, N extends Path<T>>({
   rules,
   renderEditor,
   onSelect,
+  editorType,
+  ...props
 }: FormCellFieldProps<T, N>) => {
   return (
     <Controller
@@ -35,11 +40,17 @@ export const FormCellField = <T extends FieldValues, N extends Path<T>>({
       render={({ field, fieldState }) => (
         <FormFieldWrapper
           label={label}
+          htmlFor={props.htmlFor ?? props.id}
           $notice={fieldState.error?.message}
           $status={fieldState.error ? 'error' : undefined}
         >
           <div onFocus={onSelect} className='field-control'>
-            {renderEditor({ field, fieldState })}
+            {renderEditor({
+              id: props.id,
+              editorType,
+              field,
+              fieldState,
+            })}
           </div>
         </FormFieldWrapper>
       )}

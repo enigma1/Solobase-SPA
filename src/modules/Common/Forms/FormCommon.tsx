@@ -1,6 +1,6 @@
-import { StatusType } from '>/types';
+import { StatusType, WrapLayout } from '>/types';
 
-type FootNoticeProps = {
+export type FootNoticeProps = {
   $status?: StatusType;
   $notice?: string | boolean;
 };
@@ -14,7 +14,7 @@ type FieldWrapperProps = FootNoticeProps & {
   label?: string;
   htmlFor?: string;
   children: React.ReactNode;
-  wrapLayout?: 'stack' | 'inline';
+  wrapLayout?: WrapLayout;
   wrapClass?: string;
   $status?: string;
   $notice?: string;

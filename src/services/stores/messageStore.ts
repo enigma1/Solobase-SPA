@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { makeStore } from '>/services/utils/emitter';
 import { Message, MessageMode } from '>/types';
 
@@ -28,7 +29,7 @@ export const messageStoreActions: MessageStoreActions<unknown> = {
       ...msg,
       mode: msg.mode ?? 'header',
       type: msg.type ?? 'error',
-      id: msg.id ?? crypto.randomUUID(),
+      id: msg.id ?? uuidv4(),
     };
     setAuto((state) => ({
       messages: {

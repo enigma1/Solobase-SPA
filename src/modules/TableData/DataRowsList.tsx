@@ -6,6 +6,7 @@ import {
   useMessageStore,
   dialogStoreActions,
   FactoryTableStore,
+  historyStoreActions,
 } from '>/services/stores';
 import {
   MutationCallbacks,
@@ -122,14 +123,14 @@ export const DataRowsList = ({
       // reset local edited state if provided
       markEditedRow({});
       addMessage({
-        type: 'success',
-        content: { text: `Rows saved successfully`, duration: 3000 },
+        type: 'warn',
+        content: { text: `Rows removed`, duration: 3000 },
       });
     },
 
     onError: (error) => {
       addMessage({
-        content: { text: `Failed to save SQL changes`, duration: 5000 },
+        content: { text: `Failed to remove rows`, duration: 5000 },
       });
     },
   } as MutationCallbacks<DeleteDataRowsResponse, DeleteDataRowsRequest>;
@@ -269,6 +270,20 @@ export const DataRowsList = ({
     });
   };
 
+  const handleCopyRow = (uid: string) => {
+    const row = rowMap.get(uid);
+    if (row) {
+      historyStoreActions.addCopiedRow({ row, columnsOrder });
+      addMessage({
+        type: 'info',
+        content: {
+          text: 'Row Copied',
+          duration: 2000,
+        },
+      });
+    }
+  };
+
   const handleSelectedExports = () => {
     const selRows = store.get().selectedRows;
   };
@@ -368,6 +383,7 @@ export const DataRowsList = ({
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
           onEditCell={handleEditClick}
+          onCopyRow={handleCopyRow}
           editedRow={editedRow}
         />
       </EffectiveTableWrapper>

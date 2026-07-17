@@ -1,17 +1,30 @@
 import { makeStore } from '>/services/utils/emitter';
-import { normalizeSql, truncateString, MAX_SQL_STRING } from '>/services/utils';
+import {
+  normalizeSql,
+  truncateString,
+  MAX_SQL_STRING,
+  MAX_COPIED_ROWS,
+} from '>/services/utils';
+import { SqlRow } from '>/types';
+
+export type CopiedRow = { row: SqlRow; columnsOrder: string[] };
 
 export type HistoryState = {
   lastImport: string;
+  copiedRows: Record<string, SqlRow[]>;
 };
 
 const initialState: HistoryState = {
   lastImport: '',
+  copiedRows: {},
 };
 
 export type HistoryActions = {
   initialize: () => void;
   setLastImport: (sql: string) => void;
+  addCopiedRow: (row: CopiedRow) => void;
+  clearCopiedRows: () => void;
+  getCopiedRowsList: (columnsOrder: string[]) => SqlRow[];
 };
 
 const baseStore = makeStore<HistoryState>(() => initialState);
@@ -25,6 +38,30 @@ export const historyStoreActions: HistoryActions = {
     const normalizedSql = normalizeSql(rawSql);
     const sql = truncateString(normalizedSql, MAX_SQL_STRING);
     setAuto({ lastImport: sql });
+  },
+  addCopiedRow: (cr: CopiedRow) => {
+    const rowKey = JSON.stringify(cr.row);
+    const key = JSON.stringify(cr.columnsOrder);
+
+    setAuto((next) => ({
+      ...next,
+      copiedRows: {
+        ...next.copiedRows,
+        [key]: [
+          cr.row,
+          ...(next.copiedRows[key] ?? []).filter(
+            (r) => JSON.stringify(r) !== rowKey,
+          ),
+        ].slice(0, MAX_COPIED_ROWS),
+      },
+    }));
+  },
+  getCopiedRowsList: (columnsOrder: string[]) => {
+    const key = JSON.stringify(columnsOrder);
+    return get().copiedRows[key] ?? [];
+  },
+  clearCopiedRows: () => {
+    setAuto({ copiedRows: {} });
   },
 };
 
