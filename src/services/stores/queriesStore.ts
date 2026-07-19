@@ -1,34 +1,25 @@
 import { makeStore } from '>/services/utils/emitter';
 import { collapseSequentialQueryDuplicates } from './helpers';
-import { SqlQueryModes, QueryLogEntry } from '>/types';
-type Query = {
-  title: string;
-  query: string;
-  database?: string;
-  groupByMode?: SqlQueryModes;
-  multi?: boolean;
-};
+import { QueryLogEntry, QueryItem } from '>/types';
 
 type QueriesState = {
   selectedQueryTitle?: string;
-  queries: Record<string, Query>;
+  queries: Record<string, QueryItem>;
   queriesExecuted: QueryLogEntry[];
 };
-// columnsOrder: string[];
-// rows: unknown[];
-// type?: 'command' | 'resultset';
 
 export type QueriesActions = {
   initialize: () => void;
-  addQuery: (query: Query, select?: boolean) => void;
+  setQueries: (queries: Record<string, QueryItem>) => void;
+  addQuery: (query: QueryItem, select?: boolean) => void;
   removeQuery: (title?: string) => void;
   getQueriesCount: () => number;
   isQuerySelected: (title: string) => boolean;
   clearSelectedQuery: () => void;
   selectQuery: (title: string) => void;
-  getQuery: (title: string) => Query;
-  getQueries: () => Record<string, Query>;
-  getSelectedQuery: () => Query | undefined;
+  getQuery: (title: string) => QueryItem;
+  getQueries: () => Record<string, QueryItem>;
+  getSelectedQuery: () => QueryItem | undefined;
   addExecutedQueries: (queries: QueryLogEntry[]) => void;
   resetExecutedQueries: () => void;
 };
@@ -36,68 +27,7 @@ export type QueriesActions = {
 const initialState: QueriesState = {
   queriesExecuted: [],
   selectedQueryTitle: undefined,
-  queries: {
-    'Query-1': {
-      title: 'Query-1',
-      query: 'select * from customers',
-      database: 'testing',
-    },
-    'Query-2': {
-      title: 'Query-2',
-      query: 'select * from orders',
-      database: 'testing',
-    },
-    'Query-3': {
-      title: 'Query-3',
-      query: 'select * from products_description',
-      database: 'oscommerce',
-    },
-    'Query-4': {
-      title: 'Query-4',
-      query:
-        'select distinct pd.* from products_description pd left join products_to_categories p2c using (products_id)',
-      database: 'oscommerce',
-    },
-    'Query-5': {
-      title: 'Query-5',
-      query: `select pd.*, p2c.* from products_description pd left join products_to_categories p2c using (products_id) group by p2c.products_id`,
-      database: 'oscommerce',
-      groupByMode: 'legacy',
-    },
-    'Query-6': {
-      title: 'Query-6',
-      query: `SELECT *
-FROM (
-  SELECT
-    pd.products_id,
-    pd.products_name,
-    pd.language_id,
-
-    p2c.products_id AS p2c_products_id,
-    p2c.categories_id,
-
-    ROW_NUMBER() OVER (
-      PARTITION BY p2c.products_id
-      ORDER BY p2c.products_id
-    ) AS rn
-  FROM products_description pd
-  LEFT JOIN products_to_categories p2c
-    ON pd.products_id = p2c.products_id
-) x
-WHERE rn = 1`,
-      database: 'oscommerce',
-    },
-    'Query-7': {
-      title: 'Query-7',
-      query: 'ANALYZE TABLE products_description',
-      groupByMode: 'legacy',
-    },
-    Privileges: {
-      title: 'Privileges',
-      query: 'SHOW GRANTS FOR CURRENT_USER()',
-      // groupByMode: 'legacy',
-    },
-  },
+  queries: {},
 };
 
 const baseStore = makeStore<QueriesState>(() => initialState);
@@ -111,6 +41,9 @@ export const queriesStoreActions: QueriesActions = {
   getQueries: () => {
     const { '': removed, ...rest } = get().queries;
     return rest;
+  },
+  setQueries: (queries) => {
+    setAuto({ queries });
   },
   addQuery: (query, select = true) => {
     set((s) => {

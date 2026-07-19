@@ -1,5 +1,4 @@
 import { JSONTypes, JSONObject } from 'type-plus';
-
 export type SqlTypes = Date | bigint | JSONTypes;
 
 export type SqlObject = { [key in string]?: SqlTypes };
@@ -20,9 +19,11 @@ export type DataEditorType =
   | 'json'
   | 'boolean'
   | 'selection';
-export type DataCell = {
+
+export type DataCell<TOptions = unknown> = {
   value: SqlTypes;
   editorType: DataEditorType;
+  options?: TOptions;
 };
 
 export type SqlColumns = {
@@ -122,6 +123,15 @@ export type UserShape = {
   host: string;
   password: string;
   profile?: UserProfile;
+};
+export type CopiedRow = { row: SqlRow; columnsOrder: string[] };
+
+export type QueryItem = {
+  title: string;
+  query: string;
+  database?: string;
+  mode?: SqlQueryModes;
+  multi?: boolean;
 };
 
 export type QueryLogEntry = {

@@ -2,7 +2,7 @@ import { useConfigStore } from '>/services/stores';
 import { CheckboxField } from '>/modules';
 import {
   ItemPreferenceProps,
-  SidebarVisibilityType,
+  SidebarVisibilityTypes,
   SidebarOptions,
 } from '>/types';
 
@@ -60,7 +60,7 @@ export const SidebarVisibility = ({
             const next = bars.reduce((acc, key) => {
               acc[key] = value;
               return acc;
-            }, {} as SidebarVisibilityType);
+            }, {} as SidebarVisibilityTypes);
 
             onModify({
               sidebarVisibility: next,

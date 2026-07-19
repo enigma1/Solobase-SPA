@@ -14,6 +14,18 @@ export const truncateString = (value: string, max = MAX_TEXT_STRING) =>
 export const isNonEmptyString = (s: unknown): s is string =>
   typeof s === 'string' && s.trim().length > 0;
 
+type HasitProps = {
+  input: string;
+  parts: string[];
+  at?: number;
+};
+
+export const hasit = ({ input, parts, at = 0 }: HasitProps) => {
+  const value = input.toLowerCase();
+
+  return parts.some((part) => value.indexOf(part.toLowerCase(), at) !== -1);
+};
+
 export const extractNameFromRequired = (param: string) =>
   param
     .replace(/\s*\*$/, '')

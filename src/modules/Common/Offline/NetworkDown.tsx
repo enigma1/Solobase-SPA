@@ -6,7 +6,7 @@ import {
   useAccountStore,
   configStoreActions,
 } from '>/services/stores';
-import { InputField } from '>/modules';
+import { NumberField } from '>/modules';
 import { routes } from '>/config/routes';
 
 const formatDuration = (d: Temporal.Duration) => {
@@ -18,8 +18,8 @@ const formatDuration = (d: Temporal.Duration) => {
 };
 
 export const NetworkDown = () => {
-  const [endpoint, setEndpoint] = useState<string>(
-    configStoreActions.getBackend(),
+  const [endpoint, setEndpoint] = useState<number | undefined>(
+    configStoreActions.getBackport(),
   );
 
   const [startedAt] = useState(() => Temporal.Now.instant());
@@ -63,7 +63,7 @@ export const NetworkDown = () => {
   }, [online, redirectPath]);
 
   const setConnection = () => {
-    configStoreActions.setBackend(endpoint);
+    configStoreActions.setBackport(endpoint);
 
     messageStoreActions.addMessage({
       type: 'warn',
@@ -88,19 +88,18 @@ export const NetworkDown = () => {
               reconnect once connectivity is restored.
             </p>
             <p className='central'>
-              Enter a connection endpoint below for the Solobase Agent Proxy or
-              to a direct Host/IP.
+              Enter a connection port endpoint below for your Solobase Agent
+              local proxy or directly to the Solobase Host Server if the SPA is
+              deployed on the same endpoint as the Server.
               <br />
-              For example: https://example.com:5650
+              For example: 5650
             </p>
             <div className='flex flex-col my-3 space-y-1'>
-              <InputField
+              <NumberField
                 id='query-title'
-                label='Set Connection Endpoint:'
+                label='Set Connection Endpoint Port:'
                 value={endpoint}
-                title='When is named it will save the query'
-                onChange={(e) => {
-                  const value = e.currentTarget.value;
+                onValueChange={(value) => {
                   setEndpoint(value);
                 }}
                 onKeyDown={(e) => {
@@ -109,7 +108,7 @@ export const NetworkDown = () => {
                     setConnection();
                   }
                 }}
-                placeholder='eg: https://example.com:5650'
+                placeholder='eg: 5650'
               />
               <button
                 className='btn'

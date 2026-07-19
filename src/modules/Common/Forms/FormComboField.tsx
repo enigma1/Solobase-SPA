@@ -1,10 +1,5 @@
-import {
-  FieldValues,
-  Control,
-  RegisterOptions,
-  Controller,
-  Path,
-} from 'react-hook-form';
+import { useState } from 'react';
+import { FieldValues, Controller, Path } from 'react-hook-form';
 
 import { FormFieldWrapper } from './FormCommon';
 import { ComboBox } from '>/modules';
@@ -18,6 +13,7 @@ import {
   WrapLayout,
 } from '>/types';
 
+type ComboValue = string | string[];
 type ComboCommonFields = {
   $options?: Option[];
   $groups?: OptionGroup[];
@@ -34,8 +30,9 @@ type ComboFieldProps = Omit<
   'onChange' | 'onValueChange' | 'value' | 'type'
 > &
   ComboCommonFields & {
-    value: string | string[];
-    onChange: (value: string | string[]) => void;
+    value?: ComboValue;
+    defaultValue?: ComboValue;
+    onChange: (value: ComboValue) => void;
   };
 export const ComboField = ({
   label,
@@ -47,6 +44,21 @@ export const ComboField = ({
   wrapLayout,
   ...props
 }: ComboFieldProps) => {
+  const [internalValue, setInternalValue] = useState(props.defaultValue);
+  const isControlled = 'value' in props;
+  const currentValue = isControlled ? props.value : internalValue;
+
+  const controlledProps = {
+    ...props,
+    value: currentValue,
+  };
+
+  const handleChange = (value: ComboValue) => {
+    if (!isControlled) {
+      setInternalValue(value);
+    }
+    onChange?.(value);
+  };
   return (
     <FormFieldWrapper
       label={label}
@@ -56,7 +68,7 @@ export const ComboField = ({
       wrapClass={wrapClass}
       wrapLayout={wrapLayout}
     >
-      <ComboBox {...props} onChange={onChange} />
+      <ComboBox {...controlledProps} onChange={handleChange} />
     </FormFieldWrapper>
   );
 };
@@ -81,7 +93,7 @@ export const FormComboField = <T extends FieldValues, N extends Path<T>>({
       control={control}
       rules={rules}
       render={({ field, fieldState }) => {
-        const handleChange = (value: string | string[]) => {
+        const handleChange = (value: ComboValue) => {
           onValueChange?.(value, field);
           field.onChange(value);
         };

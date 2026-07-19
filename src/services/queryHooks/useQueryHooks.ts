@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { dbApi, FetchDatabaseInfoResponse } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
 import { queryKeys, STALE_TIME, DataHookProps, HookStore } from './defs';
 import {
+  dbApi,
   FetchDatabasesRequest,
   FetchDatabasesResponse,
   SessionRestoreResponse,
@@ -11,6 +11,8 @@ import {
   GetTableColumnsInfoResponse,
   FetchUsersRequest,
   FetchUsersResponse,
+  FetchDatabaseInfoResponse,
+  LoadPreferencesResponse,
 } from '>/services/api';
 import {
   getSingleColumnFromResult,
@@ -19,8 +21,51 @@ import {
   defaultPageRequest,
   defaultPageResponse,
 } from '>/services/utils';
-import { BasicRowsShape } from '>/types';
+import { BasicRowsShape, StorageConfig } from '>/types';
 // import { createDataQueryHook } from './dataQueryBuilder';
+
+const loadPreferencesInitialData: LoadPreferencesResponse = {
+  ...defaultResponse,
+  userPrefs: {
+    ...((window as any).APP_CONFIG.userPrefs as StorageConfig),
+    queries: {},
+    copiedRows: {},
+  },
+};
+
+type PreferencesHookProps = DataHookProps<LoadPreferencesResponse>;
+export const useLoadPreferences = <TSelected = PreferencesHookProps>(
+  selector?: (args: PreferencesHookProps) => TSelected,
+) => {
+  const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
+
+  const q = useQuery<LoadPreferencesResponse, Error>({
+    queryKey: queryKeys.preferences(),
+    queryFn: async (): Promise<LoadPreferencesResponse> => {
+      const result = await dbApi.loadPreferences({});
+      return result?.ok ? result : loadPreferencesInitialData;
+    },
+    staleTime: STALE_TIME,
+    retry: 1,
+    enabled: isAuthenticated,
+    refetchOnWindowFocus: false,
+  });
+
+  const data = q.data ?? loadPreferencesInitialData;
+
+  const args = {
+    api: {},
+    state: data,
+    query: q,
+  };
+  return selector ? selector(args) : (args as TSelected);
+};
+
+const sessionRestoreInitialData: SessionRestoreResponse = {
+  ...defaultResponse,
+  username: '',
+  dbSelected: null,
+};
 
 type RestoreHookProps = DataHookProps<SessionRestoreResponse>;
 export const useSessionRestore = <TSelected = RestoreHookProps>(
@@ -33,19 +78,13 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
     }),
   );
 
-  const initialData: SessionRestoreResponse = {
-    ...defaultResponse,
-    username: '',
-    dbSelected: null,
-    preferences: {},
-  };
   const canRestore = sessionStorage.getItem('can-restore');
   const q = useQuery<SessionRestoreResponse, Error>({
     queryKey: queryKeys.session(),
     queryFn: async (): Promise<SessionRestoreResponse> => {
       const session = await dbApi.sessionRestore();
       const result = restoreSession(session);
-      return result ? session : initialData;
+      return result ? session : sessionRestoreInitialData;
     },
     staleTime: STALE_TIME,
     retry: false,
@@ -53,7 +92,7 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
     refetchOnWindowFocus: false,
   });
 
-  const data = q.data ?? initialData;
+  const data = q.data ?? sessionRestoreInitialData;
 
   const args = {
     api: {},
@@ -79,17 +118,17 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
 //   }),
 // });
 
+const fetchDatabasesInitialData: FetchDatabasesResponse = {
+  ...defaultResponse,
+  ...defaultListResponse,
+  ...defaultPageResponse,
+};
+
 type DatabaseHookProps = DataHookProps<FetchDatabasesResponse>;
 export const useDatabases = <TSelected = DatabaseHookProps>(
   request?: FetchDatabasesRequest,
   selector?: (args: DatabaseHookProps) => TSelected,
 ) => {
-  const initialData = {
-    ...defaultResponse,
-    ...defaultListResponse,
-    ...defaultPageResponse,
-  };
-
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
   // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
   const q = useQuery<FetchDatabasesResponse, Error>({
@@ -106,7 +145,7 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
     // placeholderData: keepPreviousData,
     // initialData,
   });
-  const data = q.data ?? initialData;
+  const data = q.data ?? fetchDatabasesInitialData;
 
   const api = useMemo(() => {
     return {
@@ -214,12 +253,12 @@ export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
 ) => {
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
 
-  const initialData = {
+  const initialData: GetTableColumnsInfoResponse = {
     ...defaultResponse,
     ...defaultListResponse,
     database: request.database,
     table: request.table,
-  } satisfies GetTableColumnsInfoResponse;
+  };
 
   const q = useQuery<GetTableColumnsInfoResponse, Error>({
     queryKey: queryKeys.tableColumnsInfo(request.database, request.table),

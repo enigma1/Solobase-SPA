@@ -33,6 +33,8 @@ import type {
   DeleteDataRowsResponse,
   UpdateDataRowsRequest,
   UpdateDataRowsResponse,
+  SavePreferencesRequest,
+  SavePreferencesResponse,
 } from '>/services/api';
 import { MutationRequestMeta, queryKeys, invalidateOptions } from './defs';
 import {
@@ -109,7 +111,7 @@ export const useSelectDatabaseMutation = createMutationHook<
     cache: async (qc, data, vars) => {
       accountStoreActions.setActiveDatabase(data.database ?? null);
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database ?? null),
+        queryKey: queryKeys.tables(data.database ?? null, { offset: 0 }),
       });
     },
   },
@@ -245,6 +247,13 @@ export const useLoginMutation = createMutationHook<
     preferences: {},
     capabilities: defaultCapabilities,
   },
+  options: {
+    cache: async (qc, data) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.preferences(),
+      });
+    },
+  },
 });
 
 export const useCreateDataRowsMutation = createMutationHook<
@@ -299,30 +308,18 @@ export const useUpdateRowsMutation = createMutationHook<
   },
 });
 
-// type SettingsMutationProps = MutationHookProps<void, PrimeObject>;
-// export const useSettingsMutation = <TSelected = SettingsMutationProps>(
-//   selector?: (args: SettingsMutationProps) => TSelected,
-//   callbacks?: MutationCallbacks<void, PrimeObject>,
-// ) => {
-//   const preferences = useAccountStore(({ state }) => state.preferences);
-//   const queryClient = useQueryClient();
-//   const mutation = createMutationHook(dbApi.saveSettings, undefined)(selector, {
-//     ...callbacks,
-
-//     onError:
-//       callbacks?.onError ??
-//       (() => {
-//         queryClient.setQueryData(queryKeys.preferences(), preferences);
-//       }),
-
-//     onSettled:
-//       callbacks?.onSettled ??
-//       (() => {
-//         queryClient.invalidateQueries({
-//           queryKey: queryKeys.preferences(),
-//         });
-//       }),
-//   });
-
-//   return mutation;
-// };
+export const useSavePreferencesMutation = createMutationHook<
+  MutationFunction<SavePreferencesResponse, SavePreferencesRequest>
+>({
+  fn: dbApi.savePreferences,
+  state: {
+    ...defaultResponse,
+  },
+  options: {
+    cache: async (qc) => {
+      await qc.invalidateQueries({
+        queryKey: queryKeys.preferences(),
+      });
+    },
+  },
+});

@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { dbApi } from '>/services/api';
 import {
@@ -10,9 +10,7 @@ import {
   useConfigStore,
   useDatabasesStore,
   messageStoreActions,
-  createFactoryTableStore,
   dialogStoreActions,
-  accountStoreActions,
   FactoryTableStore,
 } from '>/services/stores';
 import {
@@ -29,9 +27,7 @@ import {
   PageTableShell,
   DatabaseEdit,
   DialogContent,
-  FilterColumns,
   dialogFactories,
-  Pagination,
 } from '>/modules';
 import { routes } from '>/config/routes';
 import type {
@@ -117,7 +113,7 @@ export const DatabasesList = ({
   };
 
   const {
-    mutate: mutateDabaseSelection,
+    mutate: mutateDatabaseSelection,
     isPending: isDatabaseSelectionPending,
   } = useSelectDatabaseWrap();
 
@@ -162,7 +158,6 @@ export const DatabasesList = ({
     const filename = match?.[1] ?? 'export.sql.gz';
     createFileSaveUrl(rsp.data, filename);
     store.api.clearSelected();
-    // console.log('response confirmSelectedExports', rsp);
   };
 
   const handleConfirmSelectedExports = () => {
@@ -249,7 +244,7 @@ export const DatabasesList = ({
       fields: ['SCHEMA_NAME'],
     });
     if (typeof fields['SCHEMA_NAME'] !== 'string') return;
-    mutateDabaseSelection({ database: fields['SCHEMA_NAME'] });
+    mutateDatabaseSelection({ database: fields['SCHEMA_NAME'] });
     navigate(routes.front.listTables);
   };
 

@@ -3,9 +3,10 @@ import {
   userPrefs,
   loadStoredPreferences,
   storePreferences,
+  backPath,
 } from '>/services/utils';
 import { apiClient } from '>/services/api/client';
-import { StorageConfig, SidebarVisibilityType } from '>/types';
+import { StorageConfig, SidebarVisibilityTypes } from '>/types';
 import { PageListings } from '>/services/utils/appSettings';
 
 export type ConfigActions = {
@@ -13,13 +14,13 @@ export type ConfigActions = {
   getHiddenColumns: () => Record<string, boolean>;
   setHiddenColumns: (cols: Record<string, boolean>) => void;
   setHeaderVisibility: (visible: boolean) => void;
-  setSidebarVisibility: (visibility: SidebarVisibilityType) => void;
+  setSidebarVisibility: (visibility: SidebarVisibilityTypes) => void;
   getPreferences: () => StorageConfig;
   savePreferences: (prefs?: Partial<StorageConfig>) => void;
-  restorePreferences: (defaultsOnly: boolean) => void;
-  setBackend: (backend?: string, updateClient?: boolean) => void;
-  getBackend: () => string;
-  setFrontPort: (port: number) => void;
+  // restorePreferences: (defaultsOnly: boolean) => void;
+  setBackport: (backport?: number, updateClient?: boolean) => void;
+  getBackport: () => number;
+  setFrontPort: (port?: number) => void;
   getFrontPort: () => number;
   getPageSizes: () => Record<PageListings, number>;
 };
@@ -29,10 +30,10 @@ export type ConfigStore = StorageConfig & ConfigActions;
 const initialState: StorageConfig = userPrefs;
 
 const baseStore = makeStore<StorageConfig>(() => {
-  apiClient.defaults.baseURL = userPrefs.backend ?? '';
+  apiClient.defaults.baseURL = `${backPath}:${userPrefs.backPort}`;
   return {
     ...initialState,
-    ...loadStoredPreferences(),
+    // ...loadStoredPreferences(),
   };
 });
 const { get, set, setAuto } = baseStore;
@@ -49,16 +50,16 @@ export const configStoreActions: ConfigActions = {
   getHiddenColumns: () => get().hiddenColumns,
   getPageSizes: () => get().pageSizes,
 
-  getBackend: () => get().backend,
-  setBackend: (url, updateClient = true) => {
-    setAuto({ backend: url });
+  getBackport: () => get().backPort,
+  setBackport: (port, updateClient = true) => {
+    setAuto({ backPort: port });
     if (updateClient) {
-      apiClient.defaults.baseURL = url;
+      apiClient.defaults.baseURL = `${backPath}:${port}`;
     }
   },
   getFrontPort: () => get().frontPort,
   setFrontPort: (port) => {
-    setAuto({ frontPort: port });
+    setAuto({ frontPort: port ?? userPrefs.frontPort });
   },
   setHeaderVisibility: (visible) => {
     setAuto({ headerVisibility: visible });
@@ -69,17 +70,17 @@ export const configStoreActions: ConfigActions = {
   getPreferences: () => get(),
   savePreferences: (settings?: Partial<StorageConfig>) => {
     const modSettings = settings ?? get();
-    storePreferences(modSettings);
+    // storePreferences(modSettings);
     setAuto({ ...modSettings });
   },
 
-  restorePreferences: (defaultsOnly = false) => {
-    const combinedState = {
-      ...initialState,
-      ...(!defaultsOnly && loadStoredPreferences()),
-    };
-    set(() => combinedState);
-  },
+  // restorePreferences: (defaultsOnly = false) => {
+  //   const combinedState = {
+  //     ...initialState,
+  //     ...(!defaultsOnly && loadStoredPreferences()),
+  //   };
+  //   set(() => combinedState);
+  // },
 };
 
 type SelectorProps = {

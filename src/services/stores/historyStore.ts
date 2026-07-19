@@ -5,11 +5,9 @@ import {
   MAX_SQL_STRING,
   MAX_COPIED_ROWS,
 } from '>/services/utils';
-import { SqlRow } from '>/types';
+import { SqlRow, CopiedRow } from '>/types';
 
-export type CopiedRow = { row: SqlRow; columnsOrder: string[] };
-
-export type HistoryState = {
+type HistoryState = {
   lastImport: string;
   copiedRows: Record<string, SqlRow[]>;
 };
@@ -25,6 +23,8 @@ export type HistoryActions = {
   addCopiedRow: (row: CopiedRow) => void;
   clearCopiedRows: () => void;
   getCopiedRowsList: (columnsOrder: string[]) => SqlRow[];
+  getCopiedRows: () => Record<string, SqlRow[]>;
+  setCopiedRows: (rows: Record<string, SqlRow[]>) => void;
 };
 
 const baseStore = makeStore<HistoryState>(() => initialState);
@@ -60,6 +60,13 @@ export const historyStoreActions: HistoryActions = {
     const key = JSON.stringify(columnsOrder);
     return get().copiedRows[key] ?? [];
   },
+  getCopiedRows: () => {
+    return get().copiedRows;
+  },
+  setCopiedRows: (rows) => {
+    setAuto({ copiedRows: rows });
+  },
+
   clearCopiedRows: () => {
     setAuto({ copiedRows: {} });
   },

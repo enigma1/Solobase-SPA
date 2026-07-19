@@ -5,15 +5,14 @@ import { queriesStoreActions } from '>/services/stores';
 import { useModal } from '>/services/hooks';
 import { MIN_QUERY_CHARS, groupByModes } from '>/services/utils';
 import {
-  ScreenLoader,
-  ComboBox,
+  ComboField,
   CheckboxField,
   TextAreaField,
   InputField,
   DatabaseCombo,
 } from '>/modules';
 import { routes } from '>/config';
-import { SqlQueryModes, CommonDialogHandlers } from '>/types';
+import { QueryItem, SqlQueryModes, CommonDialogHandlers } from '>/types';
 
 type QueryRequestAreaProps = {
   formHandlers: CommonDialogHandlers;
@@ -24,23 +23,28 @@ export const QueryRequestArea = ({
   formHandlers,
   queryTitle = '',
 }: QueryRequestAreaProps) => {
-  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
-  const [multi, setMulti] = useState<boolean>(false);
   const [title, setTitle] = useState<string>(queryTitle);
-  const [query, setQuery] = useState<string>('');
-  const [groupByMode, setGroupByMode] = useState<SqlQueryModes>('default');
+  const existingQuery = queriesStoreActions.getQuery(queryTitle);
+  const [multi, setMulti] = useState(existingQuery?.multi ?? false);
+  const [query, setQuery] = useState(existingQuery?.query ?? '');
+  const [selectedDatabase, setSelectedDatabase] = useState(
+    existingQuery?.database ?? '',
+  );
+
+  const mode = queriesStoreActions.getQuery(queryTitle)?.mode ?? 'default';
+  const [groupByMode, setGroupByMode] = useState<SqlQueryModes>(mode);
 
   const { setButtonStatus } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
 
   const onConfirm = () => {
-    const values = {
+    const values: QueryItem = {
       title,
       query,
       database: selectedDatabase.length > 0 ? selectedDatabase : undefined,
       multi: multi ? multi : undefined,
-      groupByMode,
+      mode: groupByMode,
     };
     queriesStoreActions.addQuery(values);
     if (location.pathname !== routes.front.queryView) {
@@ -54,15 +58,6 @@ export const QueryRequestArea = ({
   const onResetDatabase = () => {
     setSelectedDatabase('');
   };
-
-  useEffect(() => {
-    const existingSql = queriesStoreActions.getQuery(queryTitle ?? '');
-    if (existingSql) {
-      setQuery(existingSql.query);
-      existingSql.database && setSelectedDatabase(existingSql.database);
-      existingSql.multi && setMulti(true);
-    }
-  }, []);
 
   useEffect(() => {
     const disabled = query.trim().length < MIN_QUERY_CHARS;
@@ -126,7 +121,7 @@ export const QueryRequestArea = ({
             label='Query SQL:'
             className='text-dialog-area resize-none input border'
             wrapClass='h-full'
-            defaultValue={query}
+            value={query}
             onChange={(v) => {
               const value = v.currentTarget.value;
               // const disabled = value.length < MIN_QUERY_CHARS;
@@ -146,8 +141,8 @@ export const QueryRequestArea = ({
           />
         </div>
         <div className='flex flex-col space-y-1'>
-          <label htmlFor='select-groupby-mode'>Query Mode:</label>
-          <ComboBox
+          <ComboField
+            label='Query Mode:'
             id='select-groupby-mode'
             value={groupByMode}
             onChange={(v) => setGroupByMode(v as SqlQueryModes)}

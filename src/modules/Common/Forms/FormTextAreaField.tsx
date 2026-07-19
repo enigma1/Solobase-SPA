@@ -21,7 +21,6 @@ export const TextAreaField = ({
   label,
   notice,
   status,
-  value,
   wrapClass,
   ...props
 }: TextAreaProps) => {

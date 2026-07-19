@@ -86,6 +86,12 @@ export const TablesMainView = () => {
   }, [dbSelected, activeTable]);
 
   useEffect(() => {
+    tableStore.api.setPaging({
+      offset: 0,
+    });
+  }, [dbSelected]);
+
+  useEffect(() => {
     if (!isSuccess) return;
 
     tableStore.api.setPaging({
@@ -100,7 +106,7 @@ export const TablesMainView = () => {
     });
   };
 
-  const isBusy = isFetching;
+  const isBusy = !isSuccess && isFetching;
   if (isBusy) return <ScreenLoader />;
 
   if (!dbSelected || rows.length === 0) {

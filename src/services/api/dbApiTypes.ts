@@ -14,6 +14,7 @@ import {
   SqlQueryModes,
   UserCapabilities,
   UserShape,
+  UserPrefs,
 } from '>/types';
 
 export type ApiOptions = {
@@ -43,7 +44,6 @@ export type AbortResponse = BasicResponse;
 export type SessionRestoreResponse = BasicResponse & {
   username: string;
   dbSelected: string | null;
-  preferences: Record<string, any>;
 };
 
 export type LoginRequest = {
@@ -265,6 +265,11 @@ export type ExportDatabasesRequest = {
   databases: string[];
 };
 
+export type ExportTablesRequest = {
+  database: string;
+  tables: string[];
+};
+
 export type ExportDatabasesResponse = BasicResponse & {
   databases: string[];
 };
@@ -288,3 +293,15 @@ export type ImportDataRequest = {
 };
 
 export type ImportDataResponse = BasicResponse;
+
+export type SavePreferencesRequest = {
+  version: number;
+  userPrefs: UserPrefs;
+};
+
+export type SavePreferencesResponse = BasicResponse;
+
+export type LoadPreferencesRequest = {};
+export type LoadPreferencesResponse = BasicResponse & {
+  userPrefs: UserPrefs;
+};

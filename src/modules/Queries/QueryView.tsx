@@ -75,7 +75,7 @@ export const QueryView = () => {
       mutateImport({
         data: currentQuery.query,
         database: currentQuery.database,
-        groupByMode: currentQuery.groupByMode,
+        groupByMode: currentQuery.mode,
       });
       navigate(routes.front.importView);
       return;
@@ -83,7 +83,7 @@ export const QueryView = () => {
     mutate({
       query: currentQuery.query,
       database: currentQuery.database,
-      groupByMode: currentQuery.groupByMode,
+      groupByMode: currentQuery.mode,
     });
   }, [currentQuery]);
 

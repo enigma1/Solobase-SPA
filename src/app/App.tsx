@@ -1,9 +1,6 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useEffect } from 'react';
 import {
-  Routes,
-  Route,
   createBrowserRouter,
-  Await,
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
@@ -26,8 +23,8 @@ import {
   ScreenLoader,
 } from '>/modules';
 import { isNonEmptyString } from '>/services/utils';
-
 import { routes } from '>/config';
+import { AppBootstrap } from './AppBootstrap';
 
 export const App = () => {
   const queryClient = useQueryClient();
@@ -38,7 +35,6 @@ export const App = () => {
       session: state,
     }),
   );
-
   // used to block session restore after logout
   useEffect(() => {
     const canRestore = sessionStorage.getItem('can-restore');
@@ -49,10 +45,6 @@ export const App = () => {
 
   useEffect(() => {
     if (isSuccess && session && isNonEmptyString(session.username)) {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.databases(),
-      });
-
       messageStoreActions.addMessage({
         type: 'success',
         content: {
@@ -69,7 +61,7 @@ export const App = () => {
       element: <RootLayout />,
       children: [
         {
-          index: true, // this is "/" the home page
+          index: true, // set as the home page "/"
           element: <HomeRedirect />,
         },
         {
@@ -125,10 +117,11 @@ export const App = () => {
     },
   ]);
 
-  const isBusy = isFetching;
+  const isBusy = !isSuccess && isFetching;
   if (isBusy) return <ScreenLoader />;
   return (
     <>
+      <AppBootstrap />
       <RouterProvider router={router} />;
     </>
   );

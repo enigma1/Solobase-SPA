@@ -14,11 +14,13 @@ type FormCellFieldProps<
 > = FormCommonFieldProps<T, N> & {
   onSelect?: () => void;
   editorType: DataEditorType;
+  options?: unknown;
   renderEditor: (props: {
     id?: string;
     editorType: DataEditorType;
     field: AnyControlField;
     fieldState: ControllerFieldState;
+    options?: unknown;
   }) => ReactNode;
 };
 
@@ -30,6 +32,7 @@ export const FormCellField = <T extends FieldValues, N extends Path<T>>({
   renderEditor,
   onSelect,
   editorType,
+  options,
   ...props
 }: FormCellFieldProps<T, N>) => {
   return (
@@ -50,6 +53,7 @@ export const FormCellField = <T extends FieldValues, N extends Path<T>>({
               editorType,
               field,
               fieldState,
+              options,
             })}
           </div>
         </FormFieldWrapper>

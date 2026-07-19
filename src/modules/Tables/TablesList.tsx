@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDeleteTablesMutation } from '>/services/queryHooks';
 import {
@@ -10,6 +10,14 @@ import {
   accountStoreActions,
   FactoryTableStore,
 } from '>/services/stores';
+import { dbApi } from '>/services/api/dbApi';
+import {
+  getSingleColumnFromResult,
+  getColumnsFromRow,
+  dialogActions,
+  makeColumnsActive,
+  createFileSaveUrl,
+} from '>/services/utils';
 import {
   PageTableShell,
   EffectiveTableWrapper,
@@ -17,13 +25,8 @@ import {
   ScreenLoader,
   DialogContent,
   dialogFactories,
+  TablesExportPreview,
 } from '>/modules';
-import {
-  getSingleColumnFromResult,
-  getColumnsFromRow,
-  dialogActions,
-  makeColumnsActive,
-} from '>/services/utils';
 import { routes } from '>/config';
 import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
 import type {
@@ -182,8 +185,6 @@ export const TablesList = ({
     });
   };
 
-  const handleSelectedExports = () => {};
-  const handleSaveRows = () => {};
   const handleCreateTable = () => {
     dialogStoreActions.openDialog({
       payload: dialogFactories.createTable(dbSelected),
@@ -231,6 +232,55 @@ export const TablesList = ({
     });
   };
 
+  const confirmSelectedDownloads = async (entries: SqlRow[]) => {
+    const tables = getSingleColumnFromResult({
+      rows: entries,
+      columnsOrder,
+      field: 'TABLE_NAME',
+    });
+    const rsp = await dbApi.exportTables({ database: dbSelected, tables });
+    const disposition = rsp.headers['content-disposition'];
+    const match = disposition?.match(/filename="(.+)"/);
+    const filename = match?.[1] ?? 'exported-tables.sql.gz';
+    createFileSaveUrl(rsp.data, filename);
+    store.api.clearSelected();
+  };
+
+  const handleSelectedDownloads = () => {
+    const sRows = store.get().selectedRows;
+    if (sRows.size === 0) {
+      store.api.setAllRows(rows);
+      return;
+    }
+
+    const rowMap = new Map(rows.map((r) => [r.uiKey, r.row]));
+    const entries: SqlRow[] = [];
+
+    for (const id of sRows) {
+      const row = rowMap.get(id);
+      if (row) entries.push(row);
+    }
+    dialogStoreActions.openDialog({
+      payload: {
+        caption: 'Export Tables',
+        variant: 'info',
+        component: (
+          <TablesExportPreview
+            database={dbSelected}
+            rows={entries}
+            columnsOrder={columnsOrder}
+          />
+        ),
+        actions: dialogActions.confirmCancel({
+          onConfirm: () => {
+            dialogStoreActions.closeDialog();
+            confirmSelectedDownloads(entries);
+          },
+        }),
+      },
+    });
+  };
+
   const handleBack = () => {
     navigate(routes.front.listDatabases, {
       replace: true,
@@ -240,11 +290,9 @@ export const TablesList = ({
   const shellHandlers = {
     onDiscardEdits:
       Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
-    onSave: Object.entries(editedRow).length > 0 ? handleSaveRows : undefined,
-    onExport: handleSelectedExports,
     onCreate: handleCreateTable,
     onDelete: handleDeleteTables,
-    onDownload: handleSelectedExports,
+    onDownload: handleSelectedDownloads,
     onFilterColumns: () => {
       makeColumnsActive(columnsOrder);
     },

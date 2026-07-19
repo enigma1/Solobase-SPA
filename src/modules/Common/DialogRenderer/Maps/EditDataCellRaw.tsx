@@ -1,5 +1,6 @@
 import { useModal } from '>/services/hooks';
-import { NumberField, TextAreaField, JsonEditor } from '>/modules';
+import { hasit, getEnumOptions } from '>/services/utils';
+import { NumberField, TextAreaField, ComboField, JsonEditor } from '>/modules';
 import { SqlTypes } from '>/types';
 
 const numberTypes = [
@@ -14,18 +15,6 @@ const numberTypes = [
   'FLOAT',
   'DOUBLE',
 ];
-
-type HasitProps = {
-  input: string;
-  parts: string[];
-  at?: number;
-};
-
-export const hasit = ({ input, parts, at = 0 }: HasitProps) => {
-  const value = input.toLowerCase();
-
-  return parts.some((part) => value.indexOf(part.toLowerCase(), at) !== -1);
-};
 
 const isNumber = (type?: string) =>
   type ? hasit({ input: type, parts: numberTypes }) : false;
@@ -51,7 +40,7 @@ export const EditDataCellRaw = ({
 }: EditDataCellRawProps) => {
   const { setButtonStatus } = useModal();
   const mode = getModeType(type);
-
+  console.log('type', type);
   if (mode) {
     return (
       <JsonEditor
@@ -65,9 +54,32 @@ export const EditDataCellRaw = ({
         }}
       />
     );
-  } else if (isNumber(type)) {
+  }
+  const enumObj = getEnumOptions(type);
+  if (enumObj && typeof cellValue === 'string') {
+    const options = enumObj.options?.map((item) => ({
+      label: item,
+      value: item,
+    }));
+    return (
+      <ComboField
+        id='sql-value'
+        label='SQL Value:'
+        defaultValue={cellValue}
+        $options={options}
+        onChange={(v: string | string[]) => {
+          onChange(v);
+          setButtonStatus('confirm');
+        }}
+      />
+    );
+  }
+
+  if (isNumber(type)) {
     return (
       <NumberField
+        id='sql-value'
+        label='SQL Value:'
         defaultValue={cellValue == null ? '' : Number(cellValue)}
         onValueChange={(v) => {
           onChange(Number(v));
@@ -75,19 +87,19 @@ export const EditDataCellRaw = ({
         }}
       />
     );
-  } else {
-    return (
-      <TextAreaField
-        defaultValue={String(cellValue ?? '')}
-        id='sql-value'
-        label='SQL Value:'
-        className='text-dialog-area resize-none input border'
-        wrapClass='h-full'
-        onChange={(e) => {
-          onChange(e.target.value);
-          setButtonStatus('confirm');
-        }}
-      />
-    );
   }
+
+  return (
+    <TextAreaField
+      defaultValue={String(cellValue ?? '')}
+      id='sql-value'
+      label='SQL Value:'
+      className='text-dialog-area resize-none input border'
+      wrapClass='h-full'
+      onChange={(e) => {
+        onChange(e.target.value);
+        setButtonStatus('confirm');
+      }}
+    />
+  );
 };

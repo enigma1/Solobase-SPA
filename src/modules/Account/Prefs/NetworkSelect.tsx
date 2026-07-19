@@ -1,30 +1,31 @@
 import { useState } from 'react';
-import { InputField } from '>/modules';
+import { InputField, NumberField } from '>/modules';
 import { useConfigStore } from '>/services/stores';
 import { userPrefs } from '>/services/utils';
 import { dbApi } from '>/services/api';
-import { ItemPreferenceProps } from '</src/types';
+import { backPath } from '>/services/utils';
+import { ItemPreferenceProps } from '>/types';
 
 export const NetworkSelect = ({ onModify }: ItemPreferenceProps) => {
-  const { backend, setBackend, frontPort, setFrontPort } = useConfigStore(
+  const { backPort, setBackport, frontPort, setFrontPort } = useConfigStore(
     ({ state, api }) => ({
       frontPort: state.frontPort,
       setFrontPort: api.setFrontPort,
-      backend: state.backend,
-      setBackend: api.setBackend,
+      backPort: state.backPort,
+      setBackport: api.setBackport,
     }),
   );
-  const [connect, setConnect] = useState<string>(backend);
+  const [backendPort, setBackendPort] = useState<number | undefined>(backPort);
 
   const logout = async () => {
-    if (!connect || connect.length < 4) return;
-
+    if (!backendPort) return;
+    const connect = `${backPath}:${backendPort}`;
     const url = new URL(connect);
     url.port = String(userPrefs.frontPort);
     url.pathname = '/';
     url.search = '';
     url.hash = '';
-    setBackend(connect, false);
+    setBackport(backendPort, false);
     await dbApi.logout();
     window.location.href = url.toString();
   };
@@ -32,14 +33,13 @@ export const NetworkSelect = ({ onModify }: ItemPreferenceProps) => {
   return (
     <>
       <div className='flex flex-col space-y-1'>
-        <InputField
+        <NumberField
           id='fontend-port'
           label='Frontend Port:'
           value={frontPort}
-          onValueChange={(v) => {
-            const portNumber = Number(v);
-            onModify({ frontPort: portNumber });
-            setFrontPort(portNumber);
+          onValueChange={(value) => {
+            onModify({ frontPort: value });
+            setFrontPort(value);
           }}
           onKeyDown={async (e) => {
             if (e.key === 'Enter') {
@@ -52,13 +52,13 @@ export const NetworkSelect = ({ onModify }: ItemPreferenceProps) => {
       </div>
 
       <div className='flex flex-col space-y-1'>
-        <InputField
+        <NumberField
           id='backend-connect'
-          label='Backend:'
-          value={connect}
+          label='Backend Port:'
+          value={backendPort}
           onValueChange={(value) => {
-            onModify({ backend: value });
-            setConnect(value);
+            onModify({ backPort: value });
+            setBackendPort(value);
           }}
           onKeyDown={async (e) => {
             if (e.key === 'Enter') {

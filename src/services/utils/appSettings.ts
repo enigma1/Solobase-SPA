@@ -19,8 +19,8 @@ const SidebarVisibilitySchema = z.object({
 });
 
 const AppInfoConfigSchema = z.object({
-  storageVersion: noTrim('storageVersion').min(1),
-  appVersion: noTrim('appVersion').min(6),
+  storageVersion: z.number().int().positive(),
+  appVersion: z.number().int().positive(),
   buildDate: z.coerce.date(),
 });
 
@@ -46,7 +46,7 @@ const AppSettingsConfigSchema = z.object({
     .max(1000 * 3600),
 });
 
-export const pageSizeValues = [5, 25, 50, 100, 250] as const;
+export const pageSizeValues = [25, 50, 100, 250] as const;
 export const pListings = [
   'userRows',
   'dbRows',
@@ -60,7 +60,7 @@ const PageSizeSchema = z.union(pageSizeValues.map((size) => z.literal(size)));
 
 export type PageListings = (typeof pListings)[number];
 export const UserPrefsConfigSchema = z.object({
-  backend: z.url(),
+  backPort: z.number().int().min(1).max(65535),
   frontPort: z.number().int().min(1).max(65535),
   theme: noTrim('theme').min(1).max(256),
   hiddenColumns: HiddenColumnsSchema,
@@ -77,7 +77,9 @@ export const AppConfigSchema = z.object({
 });
 
 const raw = (window as any).APP_CONFIG;
+
 const validated = AppConfigSchema.parse(raw);
 export const userPrefs = Object.freeze(validated.userPrefs);
 export const appSettings = Object.freeze(validated.appSettings);
 export const appInfo = Object.freeze(validated.appInfo);
+export const backPath = `${window.location.protocol}//${window.location.hostname}`;

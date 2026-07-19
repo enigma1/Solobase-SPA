@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-import { CheckCircle2Icon, XCircleIcon } from 'lucide-react';
 import { useAccountStore } from '>/services/stores';
 
 export const SelfCaps = () => {

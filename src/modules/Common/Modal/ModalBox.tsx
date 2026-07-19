@@ -1,8 +1,7 @@
 import { Children, isValidElement, ReactNode, useEffect, useRef } from 'react';
 import { XIcon } from 'lucide-react';
-import { useModal, ModalContext } from '>/services/hooks';
+import { useModal } from '>/services/hooks';
 import { dialogSizes } from '>/services/utils';
-import { DialogVariants } from '>/types';
 
 type ModalCompoundComponent = React.FC<ModalBoxProps> & {
   Caption: React.FC<{ children: ReactNode }>;
@@ -62,23 +61,7 @@ export const ModalBox: ModalCompoundComponent = ({
 
   const handleClick = (e: React.MouseEvent<HTMLDialogElement>) => {
     e.stopPropagation();
-    // if (e.target === modalRef.current) onClose();
   };
-
-  // const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
-  //   console.log('test-clicks', e.target === modalRef.current);
-  // };
-
-  // useEffect(() => {
-  //   const dialog = modalRef.current;
-  //   if (!dialog) return;
-
-  //   if (isOpen && !dialog.open) {
-  //     dialog.showModal();
-  //   } else if (!isOpen && dialog.open) {
-  //     dialog.close();
-  //   }
-  // }, [isOpen]);
 
   useEffect(() => {
     const dialog = modalRef.current;
@@ -94,7 +77,6 @@ export const ModalBox: ModalCompoundComponent = ({
   }, []);
 
   return (
-    // <div className='dialog-container' onClick={handleContainerClick}>
     <div className='dialog-container'>
       <dialog
         ref={modalRef}

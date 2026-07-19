@@ -13,7 +13,7 @@ export const TablesExportPreview = ({
 }: DatabaseExportPreviewProps) => {
   return (
     <div className='preview-table-wrapper'>
-      <p>{`This action will export the tables from database ${database} shown below.`}</p>
+      <p>{`This action will export the followin tables from database ${database}.`}</p>
       <PreviewTable columnsOrder={columnsOrder} rows={rows} />
     </div>
   );

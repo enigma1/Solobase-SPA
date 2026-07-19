@@ -17,9 +17,9 @@ export const HomeRedirect = () => {
       dialogStoreActions.closeDialog();
       navigate(routes.front.listDatabases, { replace: true });
     }
-    const dbTheme = sessionStorage.getItem('dbTheme');
-    if (dbTheme) {
-      configStoreActions.setTheme(dbTheme);
+    const theme = sessionStorage.getItem('theme');
+    if (theme) {
+      configStoreActions.setTheme(theme);
     }
   }, [isAuthenticated]);
 

@@ -1,7 +1,5 @@
 import { z } from 'zod';
-import isEqual from 'lodash-es/isEqual';
-import cloneDeep from 'lodash-es/cloneDeep';
-import merge from 'lodash-es/merge';
+import { isEqual, cloneDeep, merge } from 'lodash-es';
 import { pageSizeValues } from './appSettings';
 import type {
   BasicResponse,

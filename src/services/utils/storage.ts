@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { messageStoreActions } from '>/services/stores';
 import { UserPrefsConfigSchema, userPrefs } from './appSettings';
 import type { StorageConfig } from '>/types';
 
@@ -21,6 +22,12 @@ export const loadStoredPreferences = (): StorageConfig => {
   const result = UserPrefsConfigSchema.safeParse(merged);
 
   if (!result.success) {
+    messageStoreActions.addMessage({
+      content: {
+        text: 'Invalid stored preferences - update and save your preferences or clear session',
+        duration: 5000,
+      },
+    });
     console.warn(
       'Invalid stored preferences, falling back to defaults',
       result.error,

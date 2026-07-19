@@ -6,11 +6,13 @@ import {
   ListChevronsUpDownIcon,
 } from 'lucide-react';
 import { useModal } from '>/services/hooks';
+import { useSavePreferencesMutation } from '>/services/queryHooks';
 import {
-  useConfigStore,
   messageStoreActions,
   configStoreActions,
   accountStoreActions,
+  queriesStoreActions,
+  historyStoreActions,
 } from '>/services/stores';
 import {
   ThemeSelect,
@@ -21,6 +23,7 @@ import {
   PageSizing,
 } from './Prefs';
 import { CommonDialogHandlers, StorageConfig } from '>/types';
+import { SavePreferencesResponse } from '>/services/api/dbApiTypes';
 
 const sections = [
   'network',
@@ -85,6 +88,38 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
       ) as PreferenceObject,
   );
 
+  const callbacks = {
+    onSuccess: (data: SavePreferencesResponse) => {
+      if (data.ok) {
+        messageStoreActions.addMessage({
+          type: 'success',
+          content: { text: 'Preferences Saved', duration: 3000 },
+        });
+      } else {
+        messageStoreActions.addMessage({
+          type: 'warn',
+          content: {
+            text: data.message ?? 'Error saving preferences',
+            duration: 3000,
+          },
+        });
+      }
+    },
+    onError: (error: any) => {
+      messageStoreActions.addMessage({
+        content: { text: 'Failed to save preferences', duration: 3000 },
+      });
+    },
+  };
+
+  const { mutate, isPending } = useSavePreferencesMutation(
+    ({ api, query }) => ({
+      mutate: api.mutate,
+      isPending: query.isPending,
+    }),
+    callbacks,
+  );
+
   const toggleAllSections = () => {
     const shouldCollapse = Object.values(collapsedSections).some(
       (collapsed) => !collapsed,
@@ -103,25 +138,25 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
     }));
   };
 
-  // const { savePreferences, preferences } = useConfigStore(({ state, api }) => ({
-  //   savePreferences: api.savePreferences,
-  //   preferences: state,
-  // }));
-
   const [tempSettings, setTempSettings] = useState<StorageConfig>(
     configStoreActions.getPreferences(),
   );
   const { setButtonStatus } = useModal();
 
   const onConfirm = () => {
-    messageStoreActions.addMessage({
-      type: 'success',
-      content: {
-        text: `Preferences updated`,
-        duration: 3000,
+    const appConfig = (window as any).APP_CONFIG;
+    const userPrefs = {
+      ...appConfig.userPrefs,
+      ...configStoreActions.getPreferences(),
+      ...tempSettings,
+      queries: {
+        ...queriesStoreActions.getQueries(),
       },
-    });
-    configStoreActions.savePreferences(tempSettings);
+      copiedRows: {
+        ...historyStoreActions.getCopiedRows(),
+      },
+    };
+    mutate({ version: appConfig.appInfo.storageVersion, userPrefs });
   };
 
   const handleModify = (props: Partial<StorageConfig>) => {

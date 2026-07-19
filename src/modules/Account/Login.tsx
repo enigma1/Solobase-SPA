@@ -17,7 +17,7 @@ import {
 import type { LoginRequest, LoginResponse } from '>/services/api';
 import { CommonDialogHandlers } from '>/types';
 
-type LoginFormRequest = LoginRequest & { backend: string };
+type LoginFormRequest = LoginRequest & { backport: number };
 type LoginProps = {
   formHandlers: CommonDialogHandlers;
 };
@@ -28,7 +28,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
   // const navigate = useNavigate();
   // const location = useLocation();
 
-  const backend = configStoreActions.getBackend();
+  const backport = configStoreActions.getBackport();
 
   const {
     control,
@@ -37,7 +37,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
     getValues,
     formState: { isValid, errors },
   } = useForm<LoginFormRequest>({
-    defaultValues: { username: '', password: '', backend },
+    defaultValues: { username: '', password: '', backport },
     mode: 'onChange',
   });
 
@@ -47,7 +47,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
 
   const callbacks = {
     onSuccess: (data: LoginResponse) => {
-      configStoreActions.setBackend(getValues('backend'));
+      configStoreActions.setBackport(getValues('backport'));
       const username = getValues('username');
       accountStoreActions.setUsername(username);
       accountStoreActions.setAuthenticated(true);
@@ -82,7 +82,7 @@ export const Login = ({ formHandlers }: LoginProps) => {
   );
 
   const onLoginSubmit = async (data: LoginFormRequest) => {
-    configStoreActions.setBackend(data.backend);
+    configStoreActions.setBackport(data.backport);
     const request = {
       username: data.username,
       password: data.password,
@@ -145,17 +145,12 @@ export const Login = ({ formHandlers }: LoginProps) => {
           <div className='space-y-1'>
             <FormTextField
               id='back-end'
-              name='backend'
-              label='Back End URL:'
+              name='backport'
+              label='Back End Port:'
               control={control}
             />
           </div>
         </form>
-        <p className='space-y-1 text-sm font-semibold'>
-          Typically the domain of the{' '}
-          <span className='stand'>Back End URL</span> should match the domain
-          you see on the browser
-        </p>
       </div>
     </div>
   );

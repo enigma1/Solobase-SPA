@@ -32,7 +32,7 @@ export type FieldAdapter = {
 export type FormCommonFieldProps<
   T extends FieldValues,
   N extends Path<T>,
-> = Omit<CommonFieldProps, 'onValueChange'> & {
+> = Omit<CommonFieldProps, 'onValueChange' | 'defaultValue'> & {
   name: N;
   control: Control<T>;
   rules?: RegisterOptions<T, N>;

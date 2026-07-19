@@ -1,6 +1,6 @@
 import { useFormContext, ControllerFieldState } from 'react-hook-form';
 import { buildRulesFromColumn } from '>/services/utils';
-import { FormCellField, JsonEditor } from '>/modules';
+import { FormCellField, JsonEditor, ComboBox } from '>/modules';
 import { DataEditorType, SqlColumnsShape, AnyControlField } from '>/types';
 import { CreateDataRowsForm, DataRowForm } from './commonTypes';
 
@@ -9,12 +9,14 @@ type RenderEditorProps = {
   field: AnyControlField;
   fieldState: ControllerFieldState;
   editorType: DataEditorType;
+  options?: unknown;
 };
 const renderEditor = ({
   id,
   field,
   fieldState,
   editorType,
+  options,
 }: RenderEditorProps) => {
   switch (editorType) {
     case 'textarea':
@@ -39,6 +41,16 @@ const renderEditor = ({
           checked={!!field.value}
           onChange={(e) => field.onChange(e.target.checked)}
           className='check'
+        />
+      );
+
+    case 'selection':
+      const enumOptions = Array.isArray(options) ? options : [];
+      return (
+        <ComboBox
+          onChange={field.onChange}
+          value={field.value}
+          $options={enumOptions.map((v: string) => ({ label: v, value: v }))}
         />
       );
 
@@ -98,6 +110,7 @@ export const DataRowEntry = ({
               label={`${columnName}:`}
               rules={rules}
               editorType={cell.editorType}
+              options={cell.options}
               renderEditor={renderEditor}
             />
           </div>

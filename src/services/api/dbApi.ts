@@ -54,15 +54,18 @@ import {
   DeleteTablesRequest,
   DeleteTablesResponse,
   ExportDatabasesRequest,
-  ExportDatabasesResponse,
+  ExportTablesRequest,
   ImportDataRequest,
   ImportDataResponse,
   GetTableDetailsRequest,
   GetTableDetailsResponse,
   GetTableColumnsInfoRequest,
   GetTableColumnsInfoResponse,
+  LoadPreferencesRequest,
+  LoadPreferencesResponse,
+  SavePreferencesRequest,
+  SavePreferencesResponse,
 } from './dbApiTypes';
-import { PrimeObject } from '>/types';
 
 type ApiOptions = {
   signal?: AbortSignal;
@@ -79,6 +82,13 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+apiClient.interceptors.request.use((config) => {
+  config.headers['Solobase-SPA-Version'] = (
+    window as any
+  ).APP_CONFIG.appInfo.appVersion;
+  return config;
+});
 
 const apiCall = <T>(fn: () => Promise<any>, unwrap = true) =>
   handleApiAxios(async () => {
@@ -120,6 +130,16 @@ const exportDatabases = (data: ExportDatabasesRequest) =>
   apiCall(
     () =>
       apiClient.post('/db/export-databases', data, {
+        responseType: 'blob',
+        timeout: 0, // Let it finish
+      }),
+    false,
+  );
+
+const exportTables = (data: ExportTablesRequest) =>
+  apiCall(
+    () =>
+      apiClient.post('/db/export-tables', data, {
         responseType: 'blob',
         timeout: 0, // Let it finish
       }),
@@ -206,10 +226,14 @@ const deleteTables = (data: DeleteTablesRequest) =>
     apiClient.post('/db/delete-tables', data),
   );
 
-const saveSettings = (data: PrimeObject) =>
-  apiCall<void>(() => apiClient.post('/db/save-settings', data));
-const loadSettings = () =>
-  apiCall<PrimeObject>(() => apiClient.get('/db/load-settings'));
+const savePreferences = (data: SavePreferencesRequest) =>
+  apiCall<SavePreferencesResponse>(() =>
+    apiClient.post('/app/save-preferences', data),
+  );
+const loadPreferences = (data: LoadPreferencesRequest) =>
+  apiCall<LoadPreferencesResponse>(() =>
+    apiClient.post('/app/load-preferences', data),
+  );
 
 export const dbApi = {
   ping,
@@ -243,7 +267,8 @@ export const dbApi = {
   editTable,
   deleteTables,
   deleteUsers,
-  saveSettings,
-  loadSettings,
+  savePreferences,
+  loadPreferences,
   exportDatabases,
+  exportTables,
 } as const;

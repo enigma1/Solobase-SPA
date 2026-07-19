@@ -129,6 +129,7 @@ export const PageTableShell = ({
                 className={`btn-secondary ${hasSelects && 'icon-warn'}`}
                 onClick={onDownload}
                 title='Export Data from all or selected Rows'
+                disabled={!hasSelects}
               >
                 <DatabaseBackupIcon size={24} />
               </button>

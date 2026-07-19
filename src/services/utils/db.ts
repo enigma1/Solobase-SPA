@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { hasit } from './strings';
 import {
   SqlTypes,
   SqlObject,
@@ -173,9 +174,22 @@ export const buildRulesFromColumn = (col: SqlColumns) => {
   return rules;
 };
 
+export const getEnumOptions = (
+  type?: string,
+): DataCell<string[]> | undefined => {
+  if (!type) return;
+  const match = type.match(/^enum\((.*)\)$/i);
+  if (match) {
+    const options =
+      match?.[1]
+        .match(/'((?:''|[^'])*)'/g)
+        ?.map((s) => s.slice(1, -1).replace(/''/g, "'")) ?? [];
+    return { editorType: 'selection', options, value: '' };
+  }
+};
+
 const defaultValueForColumn = (column: SqlColumns): DataCell => {
   const type = column.type.toLowerCase();
-
   if (type === 'json') {
     return {
       editorType: 'json',
@@ -201,6 +215,9 @@ const defaultValueForColumn = (column: SqlColumns): DataCell => {
   if (isDate(type)) {
     return { editorType: 'input', value: null };
   }
+
+  const enumOptions = getEnumOptions(type);
+  if (enumOptions) return enumOptions;
 
   return {
     editorType: 'input',
