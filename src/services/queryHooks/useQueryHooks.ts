@@ -64,6 +64,8 @@ const sessionRestoreInitialData: SessionRestoreResponse = {
   ...defaultResponse,
   username: '',
   dbSelected: null,
+  capabilities: [],
+  preferences: {},
 };
 
 type RestoreHookProps = DataHookProps<SessionRestoreResponse>;

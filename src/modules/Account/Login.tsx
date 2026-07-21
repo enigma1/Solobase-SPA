@@ -49,8 +49,6 @@ export const Login = ({ formHandlers }: LoginProps) => {
     onSuccess: (data: LoginResponse) => {
       const username = getValues('username');
       queryClient.clear();
-      // queryClient.removeQueries();
-
       configStoreActions.setBackport(getValues('backport'));
       accountStoreActions.batch(() => {
         accountStoreActions.setCapabilities(data.capabilities);

@@ -44,6 +44,8 @@ export type AbortResponse = BasicResponse;
 export type SessionRestoreResponse = BasicResponse & {
   username: string;
   dbSelected: string | null;
+  preferences: Record<string, any>;
+  capabilities: string[];
 };
 
 export type LoginRequest = {

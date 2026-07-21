@@ -1,7 +1,27 @@
 # Solobase-SPA
-The Solobase-SPA offers a simple and intuitive interface for MySQL database operations, schema management and data imports/exports.
+The Solobase-SPA offers a simple and intuitive interface for MySQL database operations, schema management, and data imports/exports. Built with ReactJS, it provides a graphical interface for managing databases, executing SQL queries, editing data, and configuring user preferences.
 
-The **Solobase-Server** is a lightweight backend service based on Fastify designed for MySQL data management. Connects via session and utilizes both xDevAPI and mysql2 connections.
+### Screenshots
+#### Main Interface
+![Solobase main interface](docs/images/interface1.png)
+#### Preferences
+![Solobase preferences](docs/images/preferences.png)
+#### Importing scripts
+![Solobase preferences](docs/images/import-script.png)
+#### Create Table Columns
+![Solobase preferences](docs/images/create-table-columns.png)
+
+### Main capabilities:
+- Database browsing and navigation
+- Database and table management
+- Table structure inspection
+- Data browsing and editing
+- SQL query execution
+- Query history and saved queries
+- Import and export operations
+- User preferences and application settings
+- Database user management
+- Query result inspection and management
 
 ## Support This Project
 If you find this extension useful, you can support development via PayPal:
@@ -9,62 +29,81 @@ If you find this extension useful, you can support development via PayPal:
 Thank you for helping keep this project maintained and improving!
 written by: Mark Samios [@enigma1](https://github.com/enigma1)
 
-## Features
-#### Database Management
-- Connect and manage MySQL database sessions
-- Browse available databases
-- Select active databases for management operations
+## Requirements (Tested on)
+- Node.js >= v20
+- npm >= v10
+- A running [Solobase-Proxy](https://github.com/enigma1/Solobase-Proxy-Agent) or equivalent for different domains
+- A running [Solobase-Server](https://github.com/enigma1/Solobase-Server) instance
+- A running MySQL database instance (last test on v9.6.0 but should run on v8 also) with a MySQL user having permissions for database management operations
+- A modern browser like Firefox
+- The tool be deployed in secure or non-secure modes depending on the environment
+
+
+## Full List of Features
+### Database Navigation and Management
+- Browse databases and tables
+- View database metadata
 - Create, modify, and delete databases
-- Retrieve database metadata and information
--
-#### Database Tables Management
-- Browse database tables
-- View table definitions and metadata
-- Inspect table columns, types, constraints, and indexes
-- Create new tables
-- Modify existing table structures
-- Delete tables
+- Create and modify table structures
+- Manage table columns
+- Add, remove, and modify indexes
 
-#### Data Management
-- Browse table data with row fetching
-- Create, update, and delete data rows
-- Execute raw SQL queries
-- Stream query results
-- Abort running SQL operations
+### Data Editing
+- Browse table data
+- Create, update, and delete rows
+- Copy and paste rows between operations
+- Paste default values when creating databases, tables, and rows
+- Use field-specific editors depending on data type:
+  - Numeric fields
+  - Text fields
+  - Text areas
+  - JSON data
+  - ENUM and SET values
 
-#### User Management
-- View database users
-- Create users
-- Edit user configuration
-- Delete users
+### JSON Data Editor
+- Integrated JSON editor for structured data
+- Edit and validate JSON values directly inside the interface
+- Supports JSON-based database fields
 
-#### Import and Export
-- Export complete databases as SQL archives
-- Export selected tables with schema and data
+### SQL Query Execution
+- Execute single SQL statements
+- Execute multiline SQL scripts
+- Run arbitrary SQL queries
+- View query results
+- Abort long-running operations
+
+### Database Compatibility
+- Legacy mode support for older MySQL structures
+- Adapt database operations depending on server capabilities
+
+### Import and Export
 - Import SQL data
-- Stream large exports using compressed responses
+- Export database objects and data
+- Manage large data operations through the interface
 
-#### Authentication and Sessions
-- Session-based authentication
-- Secure cookie handling
-- Session validation
-- Login/logout management
-- Automatic session cleanup
+### User Experience
+- Graphical database administration interface
+- Context-aware controls based on database field types
+- Custom editors for complex data structures
+- Persistent user preferences
+- Query history and saved operations
 
-#### API Features
-- Fastify-based HTTP API
-- JSON API responses
-- Streaming responses for large operations
-- Request validation using schemas
-- Structured error handling
-- SQL query tracking and diagnostics
+
+## Architecture
+Solobase-SPA is the frontend application of the Solobase platform.
+
+- ReactJS single-page application
+- Communicates with the Solobase backend API
+- Provides the graphical interface for database operations
+- Handles client-side state management and user interaction
 
 #### Typical deployment
-Browser -> Optional Local Proxy -> **Solobase-Server**
+**Solobase-SPA** -> Optional Local Proxy -> Solobase-Server
 
 #### Environment
 - Tested on node v20-22
 - Tested on npm v10-11
+- Tested with MySQL 9.6.0
 
 #### Installation
 git clone <Solobase-SPA>
@@ -114,7 +153,7 @@ Notice there is no domain to specify as the front end needs to match the back-en
 
 You can connect in SSL or NON-SSL modes point the browser to the domain of you your choice and make sure the backed uses the same domain.
 
-To create a certificate...
+To create certificates for the back-end...
 ```batch
 openssl req -x509 -newkey rsa:4096 -nodes \
   -keyout server.key \
@@ -136,13 +175,13 @@ npm run dev
 otherwise for *production*
 ```
 npm run build
-npm run start
+npm run preview
 ```
 Output files will be generated under the *dist* folder
 
 
 ##### External Frontend Deployment
-If the Solobase frontend SPA is deployed separately from **Solobase-Server** (for example, hosted on another machine or served from a different origin), an additional proxy component can be used to handle the frontend-to-server connection.
+If the Solobase frontend SPA is deployed separately from **Solobase-Server** (for example, hosted on another machine or served from a different origin), an additional proxy component can be used to handle the frontend-to-server connection. See the following repositories for details.
 
 The optional proxy component is available here:
 https://github.com/enigma1/Solobase-Proxy-Agent

@@ -4,7 +4,7 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { messageStoreActions } from '>/services/stores';
+import { messageStoreActions, accountStoreActions } from '>/services/stores';
 import { useSessionRestore } from '>/services/queryHooks';
 import {
   RootLayout,
@@ -43,6 +43,8 @@ export const App = () => {
 
   useEffect(() => {
     if (isSuccess && session && isNonEmptyString(session.username)) {
+      console.log('session', session);
+      accountStoreActions.setCapabilities(session.capabilities);
       messageStoreActions.addMessage({
         type: 'success',
         content: {
