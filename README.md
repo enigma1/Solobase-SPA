@@ -106,7 +106,7 @@ Solobase-SPA is the frontend application of the Solobase platform.
 - Tested with MySQL 9.6.0
 
 #### Installation
-git clone <Solobase-SPA>
+git clone [Solobase-SPA](https://github.com/enigma1/Solobase-SPA)
 cd <Solobase-SPA> folder
 npm i
 

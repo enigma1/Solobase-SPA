@@ -39,7 +39,7 @@ export const HomeRedirect = () => {
             For documentation about this tool and latest updates, visit:
             <br />
             <a
-              href='https://github.com/enigma1'
+              href='https://github.com/enigma1/Solobase-SPA'
               className='stand link border-b'
               target='_blank'
               rel='noreferrer'
