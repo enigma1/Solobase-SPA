@@ -16,6 +16,10 @@ export const MessageList = ({ mode }: MessageListProps) => {
     removeMessage: api.removeMessage,
   }));
 
+  const onClose = (msg: Message<MessageContent>) => {
+    msg.id && msg.mode && removeMessage(msg.id, msg.mode);
+  };
+
   return (
     <>
       {messages.map((msg, idx) => {
@@ -25,9 +29,7 @@ export const MessageList = ({ mode }: MessageListProps) => {
             type={msg.type ?? 'error'}
             msg={msg.content.text}
             duration={msg.content.duration}
-            onClose={() =>
-              msg.id && msg.mode && removeMessage(msg.id, msg.mode)
-            }
+            onClose={msg.fixed ? undefined : () => onClose(msg)}
           />
         );
       })}

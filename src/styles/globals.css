@@ -48,13 +48,13 @@
   --color-info: color-mix(in oklch, var(--info) 80%, var(--color-text) 20%);
 
   --color-error-bg:
-    color-mix(in oklch, var(--error), transparent 88%);
+    color-mix(in oklch, var(--error), transparent 10%);
   --color-warn-bg:
-    color-mix(in oklch, var(--warn), transparent 88%);
+    color-mix(in oklch, var(--warn), transparent 20%);
   --color-success-bg:
-    color-mix(in oklch, var(--success), transparent 88%);
+    color-mix(in oklch, var(--success), transparent 20%);
   --color-info-bg:
-    color-mix(in oklch, var(--info), transparent 88%);
+    color-mix(in oklch, var(--info), transparent 20%);
 
 
   /* interactive states */

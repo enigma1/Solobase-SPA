@@ -52,22 +52,22 @@ export const MessageBar = ({
     error: {
       color: 'var(--color-text)',
       background:
-        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%), var(--color-error-bg) 25%',
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 25%, var(--color-error-bg) 75%',
     },
     warn: {
       color: 'var(--color-text)',
       background:
-        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%,  var(--color-warn-bg) 25%)',
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 25%,  var(--color-warn-bg) 75%)',
     },
     info: {
       color: 'var(--color-text)',
       background:
-        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%), var(--color-info-bg) 25%',
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 25%), var(--color-info-bg) 75%',
     },
     success: {
       color: 'var(--color-text)',
       background:
-        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 100%), var(--color-success-bg) 25%',
+        'linear-gradient(75deg in oklch, var(--color-srf-elevated) 25%), var(--color-success-bg) 75%',
     },
   };
 

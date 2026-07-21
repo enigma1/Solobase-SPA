@@ -226,6 +226,7 @@ export const TablesList = ({
               database: dbSelected,
               tables: tableNames,
             });
+            store.api.clearSelected();
           },
         }),
       },

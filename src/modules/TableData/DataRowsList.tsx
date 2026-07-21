@@ -264,6 +264,7 @@ export const DataRowsList = ({
           onConfirm: () => {
             dialogStoreActions.closeDialog();
             mutateDelete(rowsTransformed);
+            store.api.clearSelected();
           },
         }),
       },

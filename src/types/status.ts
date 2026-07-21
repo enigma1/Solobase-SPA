@@ -4,6 +4,7 @@ export type Message<TContent> = {
   id?: string;
   type?: StatusType;
   mode?: MessageMode;
+  fixed?: boolean;
   content: TContent;
 };
 

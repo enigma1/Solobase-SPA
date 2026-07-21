@@ -227,6 +227,9 @@ export const RootLayout = () => {
         <NavigationDebugger />
         {online && (
           <>
+            <div>
+              <MessageList mode='top' />
+            </div>
             {headerVisibility && (
               <header className='app-header'>
                 <div className='app-logo'>

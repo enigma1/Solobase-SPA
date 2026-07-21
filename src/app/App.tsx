@@ -22,7 +22,7 @@ import {
   ScreenLoader,
 } from '>/modules';
 import { isNonEmptyString } from '>/services/utils';
-import { routes } from '>/config';
+import { routes, demoMode } from '>/config';
 import { AppBootstrap } from './AppBootstrap';
 
 export const App = () => {
@@ -35,6 +35,17 @@ export const App = () => {
   );
   // used to block session restore after logout
   useEffect(() => {
+    if (demoMode) {
+      messageStoreActions.addMessage({
+        type: 'error',
+        mode: 'top',
+        fixed: true,
+        id: 'demo',
+        content: {
+          text: `Demo Mode — Mocked backend with prerecorded responses which may no exactly match your previous selections.`,
+        },
+      });
+    }
     const canRestore = sessionStorage.getItem('can-restore');
     if (canRestore !== 'true') {
       sessionStorage.setItem('can-restore', 'true');
