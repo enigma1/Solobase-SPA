@@ -24,6 +24,7 @@ vite-output
 .env.test.local
 .env.production.local
 .bash*
+stats.html
 
 npm-debug.log*
 yarn-debug.log*
