@@ -19,7 +19,7 @@ const initialState: TablesState = {
   editedRow: {},
 };
 
-const baseStore = makeStore<TablesState>(() => initialState);
+const baseStore = makeStore<TablesState>(() => ({ ...initialState }));
 const { get, set, setAuto } = baseStore;
 
 export const tablesStoreActions: TablesActions = {

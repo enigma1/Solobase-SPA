@@ -216,7 +216,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
     };
   }) => {
     const payload: DialogPayload = {
-      initialSize: 'xs',
+      initialSize: 'md',
       caption: 'Columns Preferences',
       component: <FilterColumns {...filterProps} />,
       variant: 'info',
@@ -232,7 +232,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
 
     const labels = [undefined, 'Save Preferences'];
     const payload: DialogPayload = {
-      initialSize: 'md',
+      initialSize: 'xl',
       caption: 'Settings',
       component: <Preferences formHandlers={handlers} />,
       variant: 'info',

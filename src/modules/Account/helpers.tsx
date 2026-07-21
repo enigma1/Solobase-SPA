@@ -7,6 +7,7 @@ import {
 import { dialogActions } from '>/services/utils';
 import { dbApi } from '>/services/api';
 import { Login, DialogContent, dialogFactories } from '>/modules';
+import { queryClient } from '>/config/reactQuery';
 import { CommonDialogHandlers } from '>/types';
 
 export const handleLogin = (
@@ -69,6 +70,7 @@ export const handleLogout = () => {
             });
           }
           accountStoreActions.initialize({ online: true });
+          queryClient.removeQueries();
         },
       }),
     },

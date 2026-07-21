@@ -17,6 +17,7 @@ export type AccountStoreState = {
 };
 
 export type AccountStoreActions = {
+  batch: (fn: () => void) => void;
   initialize: (cfg?: Partial<AccountStoreState>) => void;
   restoreSession: (data: SessionRestoreResponse) => { username: string } | null;
   getActiveDatabase: () => string | null;
@@ -44,9 +45,10 @@ const initialState: AccountStoreState = {
 } as const;
 
 const baseStore = makeStore<AccountStoreState>(() => initialState);
-const { get, set, setAuto } = baseStore;
+const { get, set, setAuto, batch } = baseStore;
 
 export const accountStoreActions: AccountStoreActions = {
+  batch,
   initialize: (cfg) => {
     set(() => ({ ...initialState, ...cfg }));
   },

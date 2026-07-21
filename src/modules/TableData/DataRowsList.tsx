@@ -274,13 +274,6 @@ export const DataRowsList = ({
     const row = rowMap.get(uid);
     if (row) {
       historyStoreActions.addCopiedRow({ row, columnsOrder });
-      addMessage({
-        type: 'info',
-        content: {
-          text: 'Row Copied',
-          duration: 2000,
-        },
-      });
     }
   };
 

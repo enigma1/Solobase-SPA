@@ -21,7 +21,7 @@ export const HiddenColumns = ({ modified, onModify }: ItemPreferenceProps) => {
   }
   return (
     <>
-      {Object.keys(hiddenColumns).map((col, idx) => {
+      {hiddenColumnsList.map((col, idx) => {
         return (
           <div key={`${col}-${idx}`} className='area-item'>
             <CheckboxField

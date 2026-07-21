@@ -1,11 +1,6 @@
 import { PageListings } from '>/services/utils/appSettings';
 import { SqlRow, QueryItem, CopiedRow } from './db';
 
-export type ItemPreferenceProps = {
-  onModify: (tempSettings: Partial<StorageConfig>) => void;
-  modified: StorageConfig;
-};
-
 export type SidebarVisibilityTypes = {
   sideDatabases: boolean;
   sideTables: boolean;
@@ -27,4 +22,10 @@ export type StorageConfig = {
 export type UserPrefs = StorageConfig & {
   queries: Record<string, QueryItem>;
   copiedRows: Record<string, SqlRow[]>;
+};
+
+export type ItemPreferenceProps = {
+  modified: UserPrefs;
+  onModify: (tempSettings: Partial<UserPrefs>) => void;
+  saveCount: number;
 };

@@ -114,4 +114,23 @@
     background-color: var(--color-text-muted);
     opacity: 0;
   }
+
+
+  @keyframes copied-flash-animation {
+    0% {
+      background-color: var(--state-selected);
+    }
+
+    50% {
+      background-color: var(--state-flash);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  .copied-flash {
+    animation: copied-flash-animation 900ms ease-out;
+  }
 }

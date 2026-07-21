@@ -27,7 +27,10 @@ export type HistoryActions = {
   setCopiedRows: (rows: Record<string, SqlRow[]>) => void;
 };
 
-const baseStore = makeStore<HistoryState>(() => initialState);
+const baseStore = makeStore<HistoryState>(() => {
+  return { ...initialState };
+});
+
 const { get, setAuto } = baseStore;
 
 export const historyStoreActions: HistoryActions = {

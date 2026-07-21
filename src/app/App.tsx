@@ -4,9 +4,8 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { messageStoreActions } from '>/services/stores';
-import { queryKeys, useSessionRestore } from '>/services/queryHooks';
+import { useSessionRestore } from '>/services/queryHooks';
 import {
   RootLayout,
   AuthGuard,
@@ -27,7 +26,6 @@ import { routes } from '>/config';
 import { AppBootstrap } from './AppBootstrap';
 
 export const App = () => {
-  const queryClient = useQueryClient();
   const { session, isSuccess, isFetching } = useSessionRestore(
     ({ query, state }) => ({
       isFetching: query.isFetching,
@@ -121,8 +119,9 @@ export const App = () => {
   if (isBusy) return <ScreenLoader />;
   return (
     <>
-      <AppBootstrap />
-      <RouterProvider router={router} />;
+      <AppBootstrap>
+        <RouterProvider router={router} />;
+      </AppBootstrap>
     </>
   );
 };

@@ -76,8 +76,8 @@ export const tableColumnTypes = [
     id: 'enum',
     label: 'Enumeration',
     options: [
-      { value: 'ENUM', params: ['Enum'] },
-      { value: 'SET', params: ['Set'] },
+      { value: 'ENUM', params: ['Values'] },
+      { value: 'SET', params: ['Values'] },
     ],
   },
 
@@ -174,17 +174,25 @@ export const buildRulesFromColumn = (col: SqlColumns) => {
   return rules;
 };
 
-export const getEnumOptions = (
+export const getComboOptions = (
   type?: string,
 ): DataCell<string[]> | undefined => {
   if (!type) return;
-  const match = type.match(/^enum\((.*)\)$/i);
+
+  const match = type.match(/^(enum|set)\((.*)\)$/i);
+
   if (match) {
     const options =
-      match?.[1]
+      match[2]
         .match(/'((?:''|[^'])*)'/g)
-        ?.map((s) => s.slice(1, -1).replace(/''/g, "'")) ?? [];
-    return { editorType: 'selection', options, value: '' };
+        ?.map((s) => s.slice(1, -1).replace(/''/g, "'"))
+        .filter(Boolean) ?? [];
+
+    return {
+      editorType: 'selection',
+      options,
+      value: '',
+    };
   }
 };
 
@@ -216,8 +224,8 @@ const defaultValueForColumn = (column: SqlColumns): DataCell => {
     return { editorType: 'input', value: null };
   }
 
-  const enumOptions = getEnumOptions(type);
-  if (enumOptions) return enumOptions;
+  const comboOptions = getComboOptions(type);
+  if (comboOptions) return comboOptions;
 
   return {
     editorType: 'input',

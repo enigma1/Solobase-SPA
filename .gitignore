@@ -14,6 +14,7 @@ vite-output
 
 # production
 /build
+/dist
 
 # misc
 /tmp

@@ -1,23 +1,38 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   configStoreActions,
   queriesStoreActions,
   historyStoreActions,
   messageStoreActions,
+  useAccountStore,
 } from '>/services/stores';
 import { useLoadPreferences } from '>/services/queryHooks';
+import { ScreenLoader } from '>/modules';
 
-export const AppBootstrap = () => {
-  const { userPrefs, isSuccess } = useLoadPreferences(({ state, query }) => ({
-    userPrefs: state.userPrefs,
-    isSuccess: query.isSuccess,
-  }));
+export const AppBootstrap = ({ children }: { children: React.ReactNode }) => {
+  const [bootstrap, setBootstrap] = useState<boolean>(false);
+  const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
+  const { userPrefs, isFetched, isFetching } = useLoadPreferences(
+    ({ state, query }) => ({
+      userPrefs: state.userPrefs,
+      isSuccess: query.isSuccess,
+      isFetching: query.isFetching,
+      isFetched: query.isFetched,
+    }),
+  );
+
+  const ready = !isAuthenticated || (isFetched && !isFetching);
 
   useEffect(() => {
-    if (!isSuccess) return;
+    if (!ready) return;
+    if (!isAuthenticated) {
+      setBootstrap(true);
+      return;
+    }
     if (!userPrefs) {
       configStoreActions.savePreferences();
       configStoreActions.setTheme();
+      setBootstrap(true);
       return;
     }
     const { queries, copiedRows, ...mainPrefs } = userPrefs;
@@ -25,14 +40,18 @@ export const AppBootstrap = () => {
     configStoreActions.setTheme(mainPrefs.theme);
     queriesStoreActions.setQueries(queries);
     historyStoreActions.setCopiedRows(copiedRows);
+    setBootstrap(true);
     messageStoreActions.addMessage({
       type: 'success',
       content: {
-        text: `User preferences loaded`,
+        text: `User preferences set`,
         duration: 3000,
       },
     });
-  }, [isSuccess, userPrefs]);
+  }, [userPrefs, ready, isAuthenticated]);
 
-  return null;
+  if (!bootstrap) {
+    return <ScreenLoader />;
+  }
+  return children;
 };

@@ -40,6 +40,23 @@ export type SetStoreOptions = {
 export const makeStore = <T extends object>(init: StateCreator<T>) => {
   const emitter = createEmitter<T>();
   let store: T;
+  let batchDepth = 0;
+  let pendingEmit = false;
+
+  const batch = (fn: () => void) => {
+    batchDepth++;
+
+    try {
+      fn();
+    } finally {
+      batchDepth--;
+
+      if (batchDepth === 0 && pendingEmit) {
+        pendingEmit = false;
+        emitter.emit(store);
+      }
+    }
+  };
 
   const get = () => store;
 
@@ -50,9 +67,15 @@ export const makeStore = <T extends object>(init: StateCreator<T>) => {
     const { wait = false, caller = 'unknown' } = options;
 
     const next = updater(store);
+
     if (next !== store) {
       store = next;
-      emitter.emit(store);
+
+      if (batchDepth > 0) {
+        pendingEmit = true;
+      } else {
+        emitter.emit(store);
+      }
     }
 
     if (wait) {
@@ -133,12 +156,14 @@ export const makeStore = <T extends object>(init: StateCreator<T>) => {
   useStore.get = get;
   useStore.set = set;
   useStore.setAuto = setAuto;
+  useStore.batch = batch;
 
   // Return function/object structure
   return useStore as typeof useStore & {
     get: typeof get;
     set: typeof set;
     setAuto: typeof setAuto;
+    batch: typeof batch;
   };
 };
 

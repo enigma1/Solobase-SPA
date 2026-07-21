@@ -42,7 +42,7 @@ export const configStoreActions: ConfigActions = {
   setTheme: (value) => {
     const theme = value ?? get().theme;
     document.documentElement.setAttribute('data-theme', theme);
-    value && setAuto({ theme: value });
+    setAuto({ theme });
   },
   setHiddenColumns: (cols) => {
     setAuto({ hiddenColumns: cols });

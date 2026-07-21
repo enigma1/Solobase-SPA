@@ -230,7 +230,7 @@ export const TableColumnEntry = ({
             key={`cols-${index}-${param}`}
             id={`cols-${index}-${param}`}
             name={`cols.${currentIndex}.params.${param}`}
-            label={`${p}: `}
+            label={`${p}:`}
             control={control}
             rules={{
               validate: {

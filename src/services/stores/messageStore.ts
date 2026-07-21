@@ -20,7 +20,7 @@ const initialState: StoreState<unknown> = {
   messages: {},
 };
 
-const baseStore = makeStore<StoreState<unknown>>(() => initialState);
+const baseStore = makeStore<StoreState<unknown>>(() => ({ ...initialState }));
 const { get, setAuto } = baseStore;
 
 export const messageStoreActions: MessageStoreActions<unknown> = {

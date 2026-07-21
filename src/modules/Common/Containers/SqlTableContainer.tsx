@@ -1,4 +1,4 @@
-import { useMemo, type RefObject } from 'react';
+import { useState, useMemo, type RefObject } from 'react';
 import { SquarePenIcon, PencilLineIcon, CopyIcon } from 'lucide-react';
 import { useColumnResize } from '>/services/hooks';
 import type { FactoryTableStore } from '>/services/stores';
@@ -47,6 +47,8 @@ export const SqlTableContainer = ({
   onCopyRow,
 }: SqlTableContainerProps) => {
   const { useFactoryTableStore } = store;
+  const [copiedRow, setCopiedRow] = useState<string | null>(null);
+
   const columnIndices = useMemo(
     () => Object.fromEntries(columnsOrder.map((name, idx) => [name, idx])),
     [columnsOrder],
@@ -64,6 +66,16 @@ export const SqlTableContainer = ({
     outerRef,
     resizeLineRef,
   );
+
+  const handleCopyRow = (uid: string) => {
+    setCopiedRow(uid);
+    onCopyRow?.(uid);
+
+    setTimeout(() => {
+      setCopiedRow(null);
+    }, 700);
+  };
+
   const isEditable = onEditCell;
 
   return (
@@ -107,7 +119,7 @@ export const SqlTableContainer = ({
           return (
             <tr
               key={`row-${uid}-${idx}`}
-              className={`${rowBg}`}
+              className={`${rowBg} ${copiedRow === uid ? 'copied-flash' : ''}`}
               onClick={() => {
                 onSelectRow?.(uid);
               }}
@@ -126,8 +138,8 @@ export const SqlTableContainer = ({
                     <button
                       title='Copy this row'
                       className='btn-secondary p-0 bg-transparent border-0'
-                      onClick={(e) => {
-                        onCopyRow(uid);
+                      onClick={() => {
+                        handleCopyRow(uid);
                       }}
                     >
                       <CopyIcon size={18} className='inline-block' />

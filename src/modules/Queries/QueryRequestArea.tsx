@@ -96,7 +96,7 @@ export const QueryRequestArea = ({
         </div>
       </div>
       <div className='area-content'>
-        <div className='flex flex-col space-y-1'>
+        <div className='wrapper space-y-1'>
           <InputField
             id='query-title'
             label='Title:'
@@ -109,13 +109,13 @@ export const QueryRequestArea = ({
             }}
           />
         </div>
-        <div className='flex flex-col space-y-1'>
+        <div className='wrapper space-y-1'>
           <DatabaseCombo
             selectedDatabase={selectedDatabase}
             onChange={setSelectedDatabase}
           />
         </div>
-        <div className='flex flex-col space-y-1 w-full h-full'>
+        <div className='full wrapper space-y-1'>
           <TextAreaField
             id='query-sql'
             label='Query SQL:'
@@ -130,7 +130,7 @@ export const QueryRequestArea = ({
             }}
           />
         </div>
-        <div className='flex flex-col space-y-1'>
+        <div className='wrapper space-y-1'>
           <CheckboxField
             checked={multi}
             onChange={(value) => {
@@ -140,7 +140,7 @@ export const QueryRequestArea = ({
             label='Multi-Statement Query'
           />
         </div>
-        <div className='flex flex-col space-y-1'>
+        <div className='wrapper space-y-1'>
           <ComboField
             label='Query Mode:'
             id='select-groupby-mode'

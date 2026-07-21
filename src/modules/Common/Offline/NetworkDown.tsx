@@ -94,7 +94,7 @@ export const NetworkDown = () => {
               <br />
               For example: 5650
             </p>
-            <div className='flex flex-col my-3 space-y-1'>
+            <div className='wrapper my-3 space-y-1'>
               <NumberField
                 id='query-title'
                 label='Set Connection Endpoint Port:'

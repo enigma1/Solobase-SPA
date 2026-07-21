@@ -1,5 +1,5 @@
 import { useModal } from '>/services/hooks';
-import { hasit, getEnumOptions } from '>/services/utils';
+import { hasit, getComboOptions } from '>/services/utils';
 import { NumberField, TextAreaField, ComboField, JsonEditor } from '>/modules';
 import { SqlTypes } from '>/types';
 
@@ -40,7 +40,6 @@ export const EditDataCellRaw = ({
 }: EditDataCellRawProps) => {
   const { setButtonStatus } = useModal();
   const mode = getModeType(type);
-  console.log('type', type);
   if (mode) {
     return (
       <JsonEditor
@@ -55,20 +54,31 @@ export const EditDataCellRaw = ({
       />
     );
   }
-  const enumObj = getEnumOptions(type);
-  if (enumObj && typeof cellValue === 'string') {
-    const options = enumObj.options?.map((item) => ({
+  const comboObj = getComboOptions(type);
+  if (comboObj && typeof cellValue === 'string') {
+    const isMulti = type ? hasit({ input: type, parts: ['set('] }) : false;
+    const value = isMulti
+      ? cellValue
+          .split(',')
+          .map((v) => v.trim())
+          .filter(Boolean)
+      : cellValue;
+
+    const options = comboObj.options?.map((item) => ({
       label: item,
       value: item,
     }));
+
     return (
       <ComboField
         id='sql-value'
         label='SQL Value:'
-        defaultValue={cellValue}
+        defaultValue={value}
+        $multiple={isMulti}
         $options={options}
         onChange={(v: string | string[]) => {
-          onChange(v);
+          const sqlValue = Array.isArray(v) ? v.filter(Boolean).join(',') : v;
+          onChange(sqlValue);
           setButtonStatus('confirm');
         }}
       />

@@ -32,7 +32,7 @@ export const NetworkSelect = ({ onModify }: ItemPreferenceProps) => {
 
   return (
     <>
-      <div className='flex flex-col space-y-1'>
+      <div className='wrapper space-y-1'>
         <NumberField
           id='fontend-port'
           label='Frontend Port:'
@@ -51,7 +51,7 @@ export const NetworkSelect = ({ onModify }: ItemPreferenceProps) => {
         />
       </div>
 
-      <div className='flex flex-col space-y-1'>
+      <div className='wrapper space-y-1'>
         <NumberField
           id='backend-connect'
           label='Backend Port:'

@@ -19,7 +19,7 @@ const initialState: DatabasesState = {
   editedRow: {},
 };
 
-const baseStore = makeStore<DatabasesState>(() => initialState);
+const baseStore = makeStore<DatabasesState>(() => ({ ...initialState }));
 const { get, set, setAuto } = baseStore;
 
 export const databasesStoreActions: DatabasesActions = {

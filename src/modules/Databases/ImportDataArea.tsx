@@ -148,7 +148,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
         </div>
       </div>
       <div className='area-content'>
-        <div className='flex flex-col space-y-1'>
+        <div className='wrapper space-y-1'>
           {/* <ComboField
             label='Database:'
             id='select-database'
@@ -165,7 +165,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
             onChange={setSelectedDatabase}
           />
         </div>
-        <div className='flex flex-col space-y-1'>
+        <div className='wrapper space-y-1'>
           <DropFileField
             value={file}
             onValueChange={setFile}
@@ -184,7 +184,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
             }}
           />
         </div>
-        <div className='flex flex-col space-y-1 w-full h-full'>
+        <div className='wrapper space-y-1 w-full h-full'>
           <TextAreaField
             id='raw-data'
             label='Raw Data:'
@@ -197,7 +197,7 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
             }}
           />
         </div>
-        <div className='flex flex-col space-y-1'>
+        <div className='wrapper space-y-1'>
           <ComboField
             id='select-groupby-mode'
             label='Query Mode:'

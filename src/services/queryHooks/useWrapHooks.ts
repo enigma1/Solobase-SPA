@@ -9,10 +9,12 @@ import { routes } from '>/config';
 import type {
   ImportDataResponse,
   SelectDatabaseResponse,
+  SavePreferencesResponse,
 } from '>/services/api/dbApiTypes';
 import {
   useSelectDatabaseMutation,
   useImportDataMutation,
+  useSavePreferencesMutation,
 } from './useWriteHooks';
 import { MutationRequestMeta } from './defs';
 
@@ -88,5 +90,45 @@ export const useImportDataWrap = (metaOptions?: MutationRequestMeta) => {
     metaOptions,
   );
 
+  return mutation;
+};
+
+export const useSavePreferencesWrap = (metaOptions?: {
+  onSuccess: () => void;
+}) => {
+  const callbacks = {
+    onSuccess: (data: SavePreferencesResponse) => {
+      if (data.ok) {
+        metaOptions?.onSuccess();
+        messageStoreActions.addMessage({
+          type: 'success',
+          content: { text: 'Preferences Saved', duration: 3000 },
+        });
+      } else {
+        messageStoreActions.addMessage({
+          type: 'warn',
+          content: {
+            text: data.message ?? 'Error saving preferences',
+            duration: 3000,
+          },
+        });
+      }
+    },
+    onError: (error: any) => {
+      messageStoreActions.addMessage({
+        content: { text: 'Failed to save preferences', duration: 3000 },
+      });
+    },
+  };
+
+  const mutation = useSavePreferencesMutation(
+    ({ api, state, query }) => ({
+      isPending: query.isPending,
+      mutate: api.mutate,
+      mutateAsync: api.mutateAsync,
+      response: state,
+    }),
+    callbacks,
+  );
   return mutation;
 };

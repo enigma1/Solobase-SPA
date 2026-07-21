@@ -1,7 +1,7 @@
 {
   "author": "Mark Samios",
   "name": "Solobase-SPA",
-  "version": "0.1.02",
+  "version": "0.1.03",
   "license": "GPL-3.0",
   "description": "Solobase Single Page Administration for MySQL Databases",
   "keywords": [
@@ -75,6 +75,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
+    "preview": "vite preview",
     "build:single": "vite build --config vite.single.config.ts",
     "test:exp": "node --experimental-vm-modules node_modules/.bin/jest",
     "test": "vitest"

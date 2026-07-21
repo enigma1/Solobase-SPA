@@ -14,11 +14,13 @@ export const PreviewTable = ({
   return (
     <div className='area-container'>
       <div className='area-listing'>
-        <table className={`table ${extraClassName}`}>
+        <table className={`table table-fixed ${extraClassName}`}>
           <thead>
             <tr>
               {columnsOrder.map((colName, cidx) => (
-                <th key={`preview-th-${colName}-${cidx}`}>{colName}</th>
+                <th key={`preview-th-${colName}-${cidx}`}>
+                  <div className='truncate'>{colName}</div>
+                </th>
               ))}
             </tr>
           </thead>
@@ -46,7 +48,12 @@ export const PreviewTable = ({
                       return String(value);
                     };
                     return (
-                      <td key={`preview-td-${idx}-${cidx}`}>{getValue()}</td>
+                      <td
+                        key={`preview-td-${idx}-${cidx}`}
+                        className='truncate'
+                      >
+                        {getValue()}
+                      </td>
                     );
                   })}
                 </tr>

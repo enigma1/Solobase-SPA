@@ -29,7 +29,6 @@ export default defineConfig({
     tsconfigPaths: true, // Enable tsconfig paths resolution
   },
 
-  // compilerOptions: ['vite/client'],
   plugins: [
     ssl(),
     react(),
@@ -54,6 +53,6 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
-    outDir: 'vite-output',
+    outDir: 'dist',
   },
 });

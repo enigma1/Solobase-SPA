@@ -18,6 +18,5 @@
     @apply flex flex-[0_0_auto] rounded-md border items-center gap-2 px-2 py-1.5;
     background: transparent;
     border-color: var(--color-border);
-
   }
 }

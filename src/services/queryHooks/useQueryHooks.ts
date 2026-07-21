@@ -38,7 +38,6 @@ export const useLoadPreferences = <TSelected = PreferencesHookProps>(
   selector?: (args: PreferencesHookProps) => TSelected,
 ) => {
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
-
   const q = useQuery<LoadPreferencesResponse, Error>({
     queryKey: queryKeys.preferences(),
     queryFn: async (): Promise<LoadPreferencesResponse> => {

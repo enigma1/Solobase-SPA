@@ -47,13 +47,16 @@ export const Login = ({ formHandlers }: LoginProps) => {
 
   const callbacks = {
     onSuccess: (data: LoginResponse) => {
-      configStoreActions.setBackport(getValues('backport'));
       const username = getValues('username');
-      accountStoreActions.setUsername(username);
-      accountStoreActions.setAuthenticated(true);
-      accountStoreActions.setCapabilities(data.capabilities);
       queryClient.clear();
+      // queryClient.removeQueries();
 
+      configStoreActions.setBackport(getValues('backport'));
+      accountStoreActions.batch(() => {
+        accountStoreActions.setCapabilities(data.capabilities);
+        accountStoreActions.setUsername(username);
+        accountStoreActions.setAuthenticated(true);
+      });
       messageStoreActions.addMessage({
         type: 'success',
         content: {

@@ -42,14 +42,18 @@ export const ComboField = ({
   $status,
   wrapClass,
   wrapLayout,
+  $multiple,
   ...props
 }: ComboFieldProps) => {
-  const [internalValue, setInternalValue] = useState(props.defaultValue);
+  const [internalValue, setInternalValue] = useState(
+    props.defaultValue ?? ($multiple ? [] : ''),
+  );
   const isControlled = 'value' in props;
   const currentValue = isControlled ? props.value : internalValue;
 
   const controlledProps = {
     ...props,
+    $multiple,
     value: currentValue,
   };
 

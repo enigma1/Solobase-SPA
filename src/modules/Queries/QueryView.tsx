@@ -7,6 +7,7 @@ import {
   dialogStoreActions,
   useQueriesStore,
   messageStoreActions,
+  historyStoreActions,
 } from '>/services/stores';
 import {
   ScreenLoader,
@@ -105,6 +106,13 @@ export const QueryView = () => {
     });
   };
 
+  const handleCopyRow = (uid: string) => {
+    const rowObj = viewRows[Number(uid)];
+    if (rowObj) {
+      historyStoreActions.addCopiedRow({ row: rowObj.row, columnsOrder });
+    }
+  };
+
   const onEditSql = () => {
     currentQuery &&
       dialogStoreActions.openDialog({
@@ -165,6 +173,7 @@ export const QueryView = () => {
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
+          onCopyRow={handleCopyRow}
         />
       </EffectiveTableWrapper>
     </>

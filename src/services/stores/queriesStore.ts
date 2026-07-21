@@ -12,7 +12,7 @@ export type QueriesActions = {
   initialize: () => void;
   setQueries: (queries: Record<string, QueryItem>) => void;
   addQuery: (query: QueryItem, select?: boolean) => void;
-  removeQuery: (title?: string) => void;
+  removeQueries: (title?: string[]) => void;
   getQueriesCount: () => number;
   isQuerySelected: (title: string) => boolean;
   clearSelectedQuery: () => void;
@@ -30,7 +30,7 @@ const initialState: QueriesState = {
   queries: {},
 };
 
-const baseStore = makeStore<QueriesState>(() => initialState);
+const baseStore = makeStore<QueriesState>(() => ({ ...initialState }));
 const { get, set, setAuto } = baseStore;
 
 export const queriesStoreActions: QueriesActions = {
@@ -58,17 +58,24 @@ export const queriesStoreActions: QueriesActions = {
       return next;
     });
   },
-  removeQuery: (inputTitle) => {
-    const title = inputTitle ?? '';
+  removeQueries: (inputTitles) => {
+    const titles = inputTitles ?? [''];
+
     set((s) => {
-      const { [title]: removed, ...rest } = s.queries;
-      return {
+      const nextQueries = { ...s.queries };
+
+      for (const title of titles) {
+        delete nextQueries[title];
+      }
+
+      const result = {
         ...s,
-        queries: { ...rest },
-        ...(s.selectedQueryTitle === title && {
+        queries: nextQueries,
+        ...(titles.includes(s.selectedQueryTitle ?? '') && {
           selectedQueryTitle: undefined,
         }),
       };
+      return result;
     });
   },
   getQueriesCount: () =>
