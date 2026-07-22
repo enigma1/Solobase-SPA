@@ -79,7 +79,7 @@ export const SimpleTableContainer = ({
                   <span className='truncate'>{colName}</span>
                 </div>
                 <div
-                  onMouseDown={(e) => startResize(e, colName)}
+                  onPointerDown={(e) => startResize(e, colName)}
                   className='col-handle'
                 />
               </th>

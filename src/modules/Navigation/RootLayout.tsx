@@ -186,7 +186,7 @@ const AuthSideContent = () => {
         </aside>
         <div
           className='resize-handle'
-          onMouseDown={(e) =>
+          onPointerDown={(e) =>
             startSidebarResize({
               e,
               sidebarRef,

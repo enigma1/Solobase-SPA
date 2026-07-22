@@ -96,7 +96,7 @@ export const SqlTableContainer = ({
                   <span className='truncate'>{colName}</span>
                 </div>
                 <div
-                  onMouseDown={(e) => startResize(e, colName)}
+                  onPointerDown={(e) => startResize(e, colName)}
                   className='col-handle'
                 />
               </th>
@@ -181,7 +181,6 @@ export const SqlTableContainer = ({
                     className={`editable ${editedRow?.[uid]?.[colIndex] ? 'selected' : ''}`}
                   >
                     {getValue()}
-
                     <button
                       className='btn p-0 edit'
                       onClick={(e) => {

@@ -12,7 +12,7 @@ import { configStoreActions } from '>/services/stores';
 const MIN_WIDTH = 80;
 
 type StartSidebarResize = {
-  e: React.MouseEvent;
+  e: React.PointerEvent;
   sidebarRef: RefObject<HTMLElement | null>;
 };
 export const startSidebarResize = ({ e, sidebarRef }: StartSidebarResize) => {
@@ -24,27 +24,27 @@ export const startSidebarResize = ({ e, sidebarRef }: StartSidebarResize) => {
   const startWidth = sidebarRef.current!.offsetWidth;
   const startClientX = e.clientX;
 
-  const onMouseMove = (moveEvent: MouseEvent) => {
+  const onPointerMove = (moveEvent: PointerEvent) => {
     const delta = moveEvent.clientX - startClientX;
     const newWidth = startWidth + delta;
 
     sidebarRef.current!.style.width = `${newWidth}px`;
   };
 
-  const onMouseUp = () => {
+  const onPointerUp = () => {
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
 
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
 
     configStoreActions.savePreferences({
       sidebarWidth: sidebarRef.current!.offsetWidth,
     });
   };
 
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('pointermove', onPointerMove);
+  document.addEventListener('pointerup', onPointerUp);
 };
 
 export const useColumnResize = (
@@ -54,7 +54,7 @@ export const useColumnResize = (
 ) => {
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
 
-  const startResize = (e: React.MouseEvent, key: string) => {
+  const startResize = (e: React.PointerEvent, key: string) => {
     e.preventDefault();
 
     document.body.style.cursor = 'col-resize';
@@ -64,7 +64,7 @@ export const useColumnResize = (
     const startWidth = parent.offsetWidth;
     const startClientX = e.clientX;
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    const onPointerMove = (moveEvent: PointerEvent) => {
       const rect = outerRef.current!.getBoundingClientRect();
       const delta = moveEvent.clientX - startClientX;
       const newWidth = Math.max(MIN_WIDTH, startWidth + delta);
@@ -77,36 +77,20 @@ export const useColumnResize = (
         resizeLineRef.current.style.left = `${x}px`;
         resizeLineRef.current!.style.opacity = '1';
       }
-
-      // console.log('mousemove', {
-      //   x,
-      //   ref: resizeLineRef.current,
-      // });
     };
 
-    const onMouseUp = () => {
+    const onPointerUp = () => {
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
 
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
 
       if (resizeLineRef.current) {
         resizeLineRef.current!.style.opacity = '0';
       }
 
       setColWidths((prev) => {
-        // const lastColKey = columnsOrder[columnsOrder.length - 1];
-
-        // Sum all columns except the last, taking the updated width for the dragged column
-        // const sumExceptLast = columnsOrder
-        //   .slice(0, -1)
-        //   .reduce((sum, colKey) => {
-        //     return sum + (prev[colKey] ?? 0); // old width
-        //   }, 0);
-
-        // const containerWidth = outerRef?.current?.offsetWidth ?? 0;
-        // const lastColWidth = Math.max(containerWidth - sumExceptLast, 80);
         return {
           ...prev,
           [key]: parent.offsetWidth,
@@ -115,8 +99,8 @@ export const useColumnResize = (
       });
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
   };
 
   // initialize column widths
