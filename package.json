@@ -1,7 +1,7 @@
 {
   "author": "Mark Samios",
   "name": "Solobase-SPA",
-  "version": "0.1.06",
+  "version": "0.1.07",
   "license": "GPL-3.0",
   "description": "Solobase Single Page Administration for MySQL Databases",
   "keywords": [
