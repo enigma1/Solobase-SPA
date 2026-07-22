@@ -56,4 +56,9 @@
       @apply w-full h-full;
     }
   }
+
+  .resize-handle,
+  .col-handle {
+    touch-action: none;
+  }
 }
