@@ -25,6 +25,7 @@ export const startSidebarResize = ({ e, sidebarRef }: StartSidebarResize) => {
   const startClientX = e.clientX;
 
   const onPointerMove = (moveEvent: PointerEvent) => {
+    moveEvent.preventDefault();
     const delta = moveEvent.clientX - startClientX;
     const newWidth = startWidth + delta;
 
@@ -43,7 +44,9 @@ export const startSidebarResize = ({ e, sidebarRef }: StartSidebarResize) => {
     });
   };
 
-  document.addEventListener('pointermove', onPointerMove);
+  document.addEventListener('pointermove', onPointerMove, {
+    passive: false,
+  });
   document.addEventListener('pointerup', onPointerUp);
 };
 

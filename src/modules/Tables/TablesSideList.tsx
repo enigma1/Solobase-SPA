@@ -59,6 +59,12 @@ export const TablesSideList = () => {
   );
 
   useEffect(() => {
+    store.api.setPaging({
+      offset: 0,
+    });
+  }, [dbSelected]);
+
+  useEffect(() => {
     if (!isSuccess) return;
 
     store.api.setPaging({

@@ -6,7 +6,7 @@
 
   .preference-section-header {
     @apply flex items-center p-2 gap-2 w-full;
-    background: var(--color-srf-high);
+    background: var(--color-srf-peak);
     color: var(--color-text-peak);
   }
 
