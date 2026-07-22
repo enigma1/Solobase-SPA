@@ -1,13 +1,8 @@
-import {
-  makeStore,
-  userPrefs,
-  loadStoredPreferences,
-  storePreferences,
-  backPath,
-} from '>/services/utils';
+import { makeStore, userPrefs, backPath } from '>/services/utils';
 import { apiClient } from '>/services/api/client';
-import { StorageConfig, SidebarVisibilityTypes } from '>/types';
 import { PageListings } from '>/services/utils/appSettings';
+import { fullBackendUrl } from '>/config';
+import { StorageConfig, SidebarVisibilityTypes } from '>/types';
 
 export type ConfigActions = {
   setTheme: (value?: string) => void;
@@ -17,7 +12,6 @@ export type ConfigActions = {
   setSidebarVisibility: (visibility: SidebarVisibilityTypes) => void;
   getPreferences: () => StorageConfig;
   savePreferences: (prefs?: Partial<StorageConfig>) => void;
-  // restorePreferences: (defaultsOnly: boolean) => void;
   setBackport: (backport?: number, updateClient?: boolean) => void;
   getBackport: () => number;
   setFrontPort: (port?: number) => void;
@@ -30,10 +24,10 @@ export type ConfigStore = StorageConfig & ConfigActions;
 const initialState: StorageConfig = userPrefs;
 
 const baseStore = makeStore<StorageConfig>(() => {
-  apiClient.defaults.baseURL = `${backPath}:${userPrefs.backPort}`;
+  apiClient.defaults.baseURL =
+    fullBackendUrl ?? `${backPath}:${userPrefs.backPort}`;
   return {
     ...initialState,
-    // ...loadStoredPreferences(),
   };
 });
 const { get, set, setAuto } = baseStore;
@@ -70,17 +64,8 @@ export const configStoreActions: ConfigActions = {
   getPreferences: () => get(),
   savePreferences: (settings?: Partial<StorageConfig>) => {
     const modSettings = settings ?? get();
-    // storePreferences(modSettings);
     setAuto({ ...modSettings });
   },
-
-  // restorePreferences: (defaultsOnly = false) => {
-  //   const combinedState = {
-  //     ...initialState,
-  //     ...(!defaultsOnly && loadStoredPreferences()),
-  //   };
-  //   set(() => combinedState);
-  // },
 };
 
 type SelectorProps = {

@@ -42,7 +42,7 @@ export const App = () => {
         fixed: true,
         id: 'demo',
         content: {
-          text: `Demo Mode — Mocked backend with prerecorded responses which may no exactly match your previous selections.`,
+          text: `Solobase SPA Demo Mode — Mocked backend with prerecorded responses which may not exactly match previous selections.`,
         },
       });
     }

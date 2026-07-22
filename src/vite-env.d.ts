@@ -2,6 +2,7 @@
 
 declare interface ImportMetaEnv {
   readonly VITE_DEMO_MODE?: string;
+  readonly VITE_BACKEND_URL?: string;
 }
 
 declare interface ImportMeta {
