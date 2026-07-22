@@ -1,6 +1,8 @@
 # Solobase-SPA
 The Solobase-SPA offers a simple and intuitive interface for MySQL database operations, schema management, and data imports/exports. Built with ReactJS, it provides a graphical interface for managing databases, executing SQL queries, editing data, and configuring user preferences.
 
+There is a [demo site](https://solobase-spa.onrender.com) I've setup with a mocked backend with prerecorded responses to see the UI.
+
 ### Screenshots
 #### Main Interface
 ![Solobase main interface](docs/images/interface1.png)
