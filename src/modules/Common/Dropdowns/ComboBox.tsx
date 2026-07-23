@@ -52,7 +52,7 @@ export const ComboBox = (props: ComboBoxProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const floatingRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  // const currentOpen = $open ?? internalOpen;
+  const noOptions = 'no options';
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -294,7 +294,9 @@ export const ComboBox = (props: ComboBoxProps) => {
           setQuery(e.target.value);
           setInternalOpen(true);
         }}
-        placeholder={hasSelection ? '' : isEmpty ? 'No options' : $placeholder}
+        placeholder={
+          hasSelection ? '' : isEmpty ? $placeholder || noOptions : noOptions
+        }
         className={`combo-input`}
         data-read-only={isReadOnly}
         readOnly={isReadOnly}

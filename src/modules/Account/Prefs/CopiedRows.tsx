@@ -81,36 +81,42 @@ export const CopiedRows = ({ modified, onModify }: ItemPreferenceProps) => {
   }
 
   return (
-    <div className='wrapper gap-6'>
-      {Object.entries(copiedRows).map(([columnsJson, rows], idx) => {
-        const viewRows = rows.map((row, idk) => ({
-          row,
-          uiKey: `${idk}-${columnsJson}`,
-        }));
+    <>
+      <p className='p-2 field-warn-bg'>
+        Copied Rows matching a table's schema are shown when you insert data
+        rows. Uncheck to remove.
+      </p>
+      <div className='wrapper gap-6'>
+        {Object.entries(copiedRows).map(([columnsJson, rows], idx) => {
+          const viewRows = rows.map((row, idk) => ({
+            row,
+            uiKey: `${idk}-${columnsJson}`,
+          }));
 
-        const columnsOrder = JSON.parse(columnsJson);
-        const fit = columnsOrder.length <= 6 ? 'w-fit' : '';
-        return (
-          <div key={`${columnsJson}-${idx}`} className='space-y-2'>
-            <MiniTable
-              key={columnsJson}
-              rows={viewRows}
-              columnsOrder={columnsOrder}
-              extraClassName={fit}
-              selectedRows={selectedRows}
-              onSelectRow={handleRowSelect}
-            />
-            <div className='focus-line px-3 py-2'>
-              <CheckboxField
-                checked={modified.copiedRows[columnsJson] !== undefined}
-                onChange={(value) => handleRowGroups(columnsJson, value)}
-                id={`row-group-${idx}`}
-                label={columnsJson}
+          const columnsOrder = JSON.parse(columnsJson);
+          const fit = columnsOrder.length <= 6 ? 'w-fit' : '';
+          return (
+            <div key={`${columnsJson}-${idx}`} className='space-y-2'>
+              <MiniTable
+                key={columnsJson}
+                rows={viewRows}
+                columnsOrder={columnsOrder}
+                extraClassName={fit}
+                selectedRows={selectedRows}
+                onSelectRow={handleRowSelect}
               />
+              <div className='focus-line px-3 py-2'>
+                <CheckboxField
+                  checked={modified.copiedRows[columnsJson] !== undefined}
+                  onChange={(value) => handleRowGroups(columnsJson, value)}
+                  id={`row-group-${idx}`}
+                  label={columnsJson}
+                />
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 };

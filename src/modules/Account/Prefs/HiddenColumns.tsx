@@ -21,20 +21,27 @@ export const HiddenColumns = ({ modified, onModify }: ItemPreferenceProps) => {
   }
   return (
     <>
-      {hiddenColumnsList.map((col, idx) => {
-        return (
-          <div key={`${col}-${idx}`} className='area-item'>
-            <CheckboxField
-              checked={!!modHiddenColumns[col]}
-              onChange={(value) => {
-                handleColumnChange(col, value);
-              }}
-              id={`hidden-column-${idx}`}
-              label={col}
-            />
-          </div>
-        );
-      })}
+      <p className='p-2 field-warn-bg'>
+        The following columns are hidden from view from all databases and
+        tables. Uncheck to display.
+      </p>
+      <div className='wrapper'>
+        {hiddenColumnsList.map((col, idx) => {
+          return (
+            <div key={`${col}-${idx}`} className='area-item'>
+              <CheckboxField
+                checked={!!modHiddenColumns[col]}
+                onChange={(value) => {
+                  handleColumnChange(col, value);
+                }}
+                id={`hidden-column-${idx}`}
+                label={col}
+                labelClass='check-label full'
+              />
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 };

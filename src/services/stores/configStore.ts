@@ -48,8 +48,7 @@ export const configStoreActions: ConfigActions = {
   setBackport: (port, updateClient = true) => {
     setAuto({ backPort: port });
     if (updateClient) {
-      apiClient.defaults.baseURL =
-        fullBackendUrl ?? `${backPath}:${userPrefs.backPort}`;
+      apiClient.defaults.baseURL = fullBackendUrl ?? `${backPath}:${port}`;
     }
   },
   getFrontPort: () => get().frontPort,

@@ -30,8 +30,12 @@ export const Queries = ({
   }, [saveCount]);
 
   return (
-    <div className='wrapper'>
-      <div className='area-listing'>
+    <>
+      <p className='p-2 field-warn-bg'>
+        Deselecting arbitrary queries will delete them when you apply the
+        changes
+      </p>
+      <div className='wrapper'>
         {Object.keys(queries).map((q, idx) => {
           return (
             <div key={`query-prefs-${idx}`} className='area-item'>
@@ -42,11 +46,12 @@ export const Queries = ({
                 }}
                 id={`query-${q}`}
                 label={q}
+                labelClass='check-label full'
               />
             </div>
           );
         })}
       </div>
-    </div>
+    </>
   );
 };

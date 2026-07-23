@@ -26,6 +26,7 @@ export const HeaderVisibility = ({ onModify }: ItemPreferenceProps) => {
         }}
         id='header-all'
         label='Show Header'
+        labelClass='check-label full'
       />
     </div>
   );
@@ -69,6 +70,7 @@ export const SidebarVisibility = ({
           }}
           id='sidebar-all'
           label='Show/hide Sidebar'
+          labelClass='check-label full'
         />
       </div>
       {bars.map((bar, idx) => {
@@ -88,6 +90,7 @@ export const SidebarVisibility = ({
               }}
               id={`sidebar-${idx}`}
               label={bar}
+              labelClass='check-label full'
             />
           </div>
         );

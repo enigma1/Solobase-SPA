@@ -18,6 +18,7 @@ type FieldWrapperProps = FootNoticeProps & {
   wrapClass?: string;
   $status?: string;
   $notice?: string;
+  labelClass?: string;
 };
 
 export const FormFieldWrapper = ({
@@ -28,12 +29,13 @@ export const FormFieldWrapper = ({
   wrapClass,
   $status,
   $notice,
+  labelClass = 'check-label',
 }: FieldWrapperProps) => {
   if (wrapLayout === 'inline') {
     return (
       <div className={['field', wrapClass].join(' ')} data-layout={wrapLayout}>
         {label && (
-          <label data-status={$status} className='check-label'>
+          <label data-status={$status} className={labelClass}>
             {children}
             {label}
           </label>
@@ -45,7 +47,7 @@ export const FormFieldWrapper = ({
   return (
     <div className={['field', wrapClass].join(' ')} data-layout={wrapLayout}>
       {label && (
-        <label htmlFor={htmlFor} data-status={$status} className='check-label'>
+        <label htmlFor={htmlFor} data-status={$status} className={labelClass}>
           {label}
         </label>
       )}

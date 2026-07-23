@@ -142,6 +142,7 @@ export const DataRowsForm = ({
                       $options={$copyOptions}
                       value={copyOption?.toString() ?? ''}
                       onChange={handleCopyChange}
+                      $placeholder='No Copied Rows'
                     />
                     <button
                       type='button'
