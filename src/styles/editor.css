@@ -11,6 +11,12 @@
     border-color: var(--color-border);
   }
 
+  .field .field-control .jsoneditor-outer {
+    & textarea {
+      @apply resize-y;
+    }
+  }
+
   & .jsoneditor-tree {
     background: transparent;
 

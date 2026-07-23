@@ -50,11 +50,13 @@ export const JsonEditor = ({ value, onChange, options }: JsonEditorProps) => {
   }, []);
 
   // sync external value → editor
-  useEffect(() => {
-    if (!editorRef.current) return;
+  // useEffect(() => {
+  //   if (!editorRef.current) return;
 
-    editorRef.current.update(value ?? null);
-  }, [value]);
+  //   if (options?.mode !== 'text') {
+  //     editorRef.current.update(value ?? null);
+  //   }
+  // }, [value]);
 
   return <div ref={containerRef} className='h-full' />;
 };

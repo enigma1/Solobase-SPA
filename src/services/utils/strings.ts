@@ -23,7 +23,10 @@ type HasitProps = {
 export const hasit = ({ input, parts, at = 0 }: HasitProps) => {
   const value = input.toLowerCase();
 
-  return parts.some((part) => value.indexOf(part.toLowerCase(), at) !== -1);
+  return parts.some((part) => {
+    const prefix = part.toLowerCase();
+    return value.startsWith(prefix, at);
+  });
 };
 
 export const extractNameFromRequired = (param: string) =>

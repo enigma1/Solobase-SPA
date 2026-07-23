@@ -161,7 +161,7 @@
   }
 
   .check-label {
-    @apply flex items-center gap-2 cursor-pointer text-sm;
+    @apply flex items-center gap-2 cursor-pointer text-sm w-fit;
     white-space: nowrap;
     color: var(--color-text);
   }

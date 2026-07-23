@@ -33,6 +33,15 @@ const renderEditor = ({
         <JsonEditor value={field.value} onChange={(v) => field.onChange(v)} />
       );
 
+    case 'object':
+      return (
+        <JsonEditor
+          value={field.value}
+          onChange={(v) => field.onChange(v)}
+          options={{ mode: 'text' }}
+        />
+      );
+
     case 'boolean':
       return (
         <input

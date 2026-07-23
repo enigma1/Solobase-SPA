@@ -295,7 +295,7 @@ export const ComboBox = (props: ComboBoxProps) => {
           setInternalOpen(true);
         }}
         placeholder={
-          hasSelection ? '' : isEmpty ? $placeholder || noOptions : noOptions
+          hasSelection ? '' : isEmpty ? noOptions : $placeholder || noOptions
         }
         className={`combo-input`}
         data-read-only={isReadOnly}

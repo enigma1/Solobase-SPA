@@ -34,7 +34,13 @@ export const MiniTable = ({
           const rowBg = idx % 2 === 0 ? 'even' : 'odd';
 
           return (
-            <tr key={`mini-tr-${idx}`} className={rowBg}>
+            <tr
+              key={`mini-tr-${idx}`}
+              className={rowBg}
+              onClick={() => {
+                onSelectRow?.(uiKey, !(selectedRows?.[uiKey] ?? false));
+              }}
+            >
               <td
                 className='align-middle w-8'
                 onClick={(e) => e.stopPropagation()}

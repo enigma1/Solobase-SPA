@@ -149,17 +149,6 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
       </div>
       <div className='area-content'>
         <div className='wrapper space-y-1'>
-          {/* <ComboField
-            label='Database:'
-            id='select-database'
-            value={selectedDatabase}
-            onChange={(v) => setSelectedDatabase(v as string)}
-            $options={dbNames.map((name: string) => ({
-              value: name,
-              label: name,
-            }))}
-            $placeholder='Select Database'
-          /> */}
           <DatabaseCombo
             selectedDatabase={selectedDatabase}
             onChange={setSelectedDatabase}

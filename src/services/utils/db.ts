@@ -12,6 +12,43 @@ import {
   SqlQueryModes,
 } from '>/types';
 
+export const tableColumnKeyList = [
+  { value: 'PRIMARY', label: 'Primary' },
+  { value: 'UNIQUE', label: 'Unique' },
+  { value: 'INDEX', label: 'Index' },
+  { value: 'FOREIGN', label: 'Foreign Key' },
+];
+
+export const numberTypes = [
+  'TINYINT',
+  'SMALLINT',
+  'MEDIUMINT',
+  'INT',
+  'INTEGER',
+  'BIGINT',
+  'DECIMAL',
+  'NUMERIC',
+  'FLOAT',
+  'DOUBLE',
+];
+
+export const objectTypes = [
+  'BINARY',
+  'VARBINARY',
+  'TINYBLOB',
+  'BLOB',
+  'MEDIUMBLOB',
+  'LONGBLOB',
+  'POINT',
+  'LINESTRING',
+  'POLYGON',
+  'MULTIPOINT',
+  'MULTILINESTRING',
+  'MULTIPOLYGON',
+  'GEOMETRY',
+  'GEOMETRYCOLLECTION',
+];
+
 export const tableColumnTypes = [
   {
     id: 'numeric',
@@ -105,6 +142,12 @@ export const tableColumnTypes = [
   },
 ];
 
+export const groupByModes: { label: string; value: SqlQueryModes }[] = [
+  { label: 'Server Default', value: 'default' },
+  { label: 'Legacy Enabled', value: 'legacy' },
+  { label: 'Strict Modern', value: 'strict' },
+];
+
 export const flatColumnTypeSet = new Set(
   tableColumnTypes.flatMap((group) =>
     group.options.map((option) => option.value.toUpperCase()),
@@ -144,17 +187,17 @@ export const buildRulesFromColumn = (col: SqlColumns) => {
 
   const type = col.type.toLowerCase();
 
-  if (type.includes('varchar')) {
+  if (hasit({ input: type, parts: ['varchar'] })) {
     const match = type.match(/\((\d+)\)/);
     if (match) rules.maxLength = Number(match[1]);
   }
 
-  if (type.includes('varbinary')) {
+  if (hasit({ input: type, parts: ['varbinary'] })) {
     const match = type.match(/\((\d+)\)/);
     if (match) rules.maxLength = Number(match[1]);
   }
 
-  if (type.includes('int')) {
+  if (hasit({ input: type, parts: numberTypes })) {
     rules.validate = (v: SqlTypes) =>
       v === null || v === '' || !isNaN(Number(v)) || 'Must be number';
   }
@@ -196,6 +239,9 @@ export const getComboOptions = (
   }
 };
 
+const isInitialObject = (type: string) =>
+  hasit({ input: type, parts: objectTypes });
+
 const defaultValueForColumn = (column: SqlColumns): DataCell => {
   const type = column.type.toLowerCase();
   if (type === 'json') {
@@ -226,6 +272,10 @@ const defaultValueForColumn = (column: SqlColumns): DataCell => {
 
   const comboOptions = getComboOptions(type);
   if (comboOptions) return comboOptions;
+
+  if (isInitialObject(type)) {
+    return { editorType: 'object', value: null };
+  }
 
   return {
     editorType: 'input',
@@ -262,12 +312,6 @@ export const emptyTableColumnKey = (): TableShapeKey => ({
   references: undefined,
 });
 
-export const tableColumnKeyList = [
-  { value: 'PRIMARY', label: 'Primary' },
-  { value: 'UNIQUE', label: 'Unique' },
-  { value: 'INDEX', label: 'Index' },
-  { value: 'FOREIGN', label: 'Foreign Key' },
-];
 // Merge column data given the original row array and edited columns array
 // Edited columns will become the update values
 // and everything else becomes a "where" condition because is untouched
@@ -294,9 +338,3 @@ export const normalizeSql = (sql: string) =>
     .replace(/[ \t]+/g, ' ') // collapse spaces/tabs
     .replace(/\n{3,}/g, '\n\n') // reduce excessive blank lines
     .trim();
-
-export const groupByModes: { label: string; value: SqlQueryModes }[] = [
-  { label: 'Server Default', value: 'default' },
-  { label: 'Legacy Enabled', value: 'legacy' },
-  { label: 'Strict Modern', value: 'strict' },
-];

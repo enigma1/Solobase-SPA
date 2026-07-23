@@ -178,7 +178,7 @@ export const DataRowsList = ({
         caption: `SQL Edits`,
         variant: 'warn',
         component: (
-          <DialogContent note={`Table: ${colName} @row:[${rId}]`}>
+          <DialogContent note={`${cols[colName].type} @${colName}[${rId}]`}>
             <EditDataCellRaw
               type={cols[colName].type}
               value={valueRef.current}

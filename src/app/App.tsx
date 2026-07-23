@@ -54,7 +54,6 @@ export const App = () => {
 
   useEffect(() => {
     if (isSuccess && session && isNonEmptyString(session.username)) {
-      console.log('session', session);
       accountStoreActions.setCapabilities(session.capabilities);
       messageStoreActions.addMessage({
         type: 'success',

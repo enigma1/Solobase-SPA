@@ -18,6 +18,7 @@ export type DataEditorType =
   | 'textarea'
   | 'json'
   | 'boolean'
+  | 'object'
   | 'selection';
 
 export type DataCell<TOptions = unknown> = {

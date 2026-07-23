@@ -1,20 +1,12 @@
 import { useModal } from '>/services/hooks';
-import { hasit, getComboOptions } from '>/services/utils';
+import {
+  hasit,
+  getComboOptions,
+  numberTypes,
+  objectTypes,
+} from '>/services/utils';
 import { NumberField, TextAreaField, ComboField, JsonEditor } from '>/modules';
 import { SqlTypes } from '>/types';
-
-const numberTypes = [
-  'TINYINT',
-  'SMALLINT',
-  'MEDIUMINT',
-  'INT',
-  'INTEGER',
-  'BIGINT',
-  'DECIMAL',
-  'NUMERIC',
-  'FLOAT',
-  'DOUBLE',
-];
 
 const isNumber = (type?: string) =>
   type ? hasit({ input: type, parts: numberTypes }) : false;
@@ -22,7 +14,7 @@ const isNumber = (type?: string) =>
 const getModeType = (type?: string) => {
   if (!type) return 'text';
   if (type === 'json') return 'tree';
-  if (hasit({ input: type, parts: ['binary', 'varbinary'] })) {
+  if (hasit({ input: type, parts: objectTypes })) {
     return 'text';
   }
 };
