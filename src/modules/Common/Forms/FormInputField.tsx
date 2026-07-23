@@ -79,6 +79,7 @@ export const FormInputField = <T extends FieldValues, N extends Path<T>>({
         return (
           <InputField
             {...field}
+            value={field.value ?? ''}
             {...rest}
             id={id}
             label={label}

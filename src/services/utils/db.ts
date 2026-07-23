@@ -283,13 +283,25 @@ const defaultValueForColumn = (column: SqlColumns): DataCell => {
   };
 };
 
-export const transformColumnsToDefaults = (cols: SqlColumnsShape) => {
-  return Object.values(cols).map(defaultValueForColumn);
+type TransformColumnsToDefaultsProps = {
+  cols: SqlColumnsShape;
+  columnsOrder: string[];
 };
 
-export const emptyDataRow = (cols: SqlColumnsShape) => ({
+export const transformColumnsToDefaults = ({
+  cols,
+  columnsOrder,
+}: TransformColumnsToDefaultsProps) => {
+  return columnsOrder.map((column) => defaultValueForColumn(cols[column]));
+};
+
+type EmptyDataRowProps = {
+  cols: SqlColumnsShape;
+  columnsOrder: string[];
+};
+export const emptyDataRow = ({ cols, columnsOrder }: EmptyDataRowProps) => ({
   uid: uuidv4(),
-  values: transformColumnsToDefaults(cols),
+  values: transformColumnsToDefaults({ cols, columnsOrder }),
 });
 
 export const emptyTableColumn = (): TableShapeColumn => ({

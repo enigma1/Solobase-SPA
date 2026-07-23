@@ -36,6 +36,7 @@ export const CreateDataRows = ({
       cols: state.cols,
       columnsOrder: state.columnsOrder,
       isFetching: query.isFetching,
+      isFetched: query.isFetched,
       isSuccess: query.isSuccess,
       isError: query.isError,
     }),
@@ -63,21 +64,30 @@ export const CreateDataRows = ({
     setButtonsStatuses(buttonsState);
   };
 
-  // const onValidation = (valid: boolean) => updateButtons(step, valid);
-
   const goPrevStep = () => {
     const prev = prevStep(step);
     setStep(prev);
-    // updateButtons(prev, true);
   };
 
   const goNextStep = () => {
     const next = nextStep(step);
     setStep(next);
-    //updateButtons(next, false);
   };
 
   const onValidation = (valid: boolean) => updateButtons(step, valid);
+
+  const form = useForm<CreateDataRowsForm>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      rowsData: [],
+    },
+  });
+
+  const {
+    handleSubmit,
+    formState: { isValid, errors },
+  } = form;
 
   useEffect(() => {
     wizardHandlers.next = goNextStep;
@@ -94,24 +104,20 @@ export const CreateDataRows = ({
 
   useEffect(() => {
     if (isSuccess) {
+      const row = emptyDataRow({ cols, columnsOrder });
       form.reset({
-        rowsData: [emptyDataRow(cols)],
+        rowsData: [row],
       });
     }
   }, [isSuccess, cols, columnsOrder]);
 
-  const form = useForm<CreateDataRowsForm>({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    defaultValues: {
-      rowsData: [],
-    },
-  });
-
-  const {
-    handleSubmit,
-    formState: { isValid, errors },
-  } = form;
+  // console.log(
+  //   'RENDER CYCLE',
+  //   columnsOrder,
+  //   cols,
+  //   columnsOrder.length,
+  //   form.getValues('rowsData')[0]?.values.length,
+  // );
 
   useEffect(() => {
     updateButtons(step, isValid);
@@ -168,7 +174,10 @@ export const CreateDataRows = ({
     });
   };
 
-  const isBusy = isPending || isFetching;
+  const rowValuesLength = form.getValues('rowsData')[0]?.values.length ?? 0;
+  const isFormSynced = columnsOrder.length === rowValuesLength;
+  const isBusy = isPending || isFetching || !isFormSynced;
+
   if (isBusy) return <ScreenLoader />;
 
   return (

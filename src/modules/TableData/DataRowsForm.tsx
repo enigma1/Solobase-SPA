@@ -31,7 +31,11 @@ export const DataRowsForm = ({
   onValidation,
 }: DataRowsFormProps) => {
   const [copyOption, setCopyOption] = useState<number>(-1);
-  const rowDefaults = useMemo(() => transformColumnsToDefaults(cols), [cols]);
+  const rowDefaults = useMemo(
+    () => transformColumnsToDefaults({ cols, columnsOrder }),
+    [cols, columnsOrder],
+  );
+
   const copiedRows = useMemo(
     () => historyStoreActions.getCopiedRowsList(columnsOrder),
     [columnsOrder],
@@ -97,7 +101,7 @@ export const DataRowsForm = ({
   const canAddRow = fields.length < MAX_INSERT_DATA_ROWS;
 
   const onAddRow = () => {
-    const item = emptyDataRow(cols);
+    const item = emptyDataRow({ cols, columnsOrder });
     append(item);
   };
 
