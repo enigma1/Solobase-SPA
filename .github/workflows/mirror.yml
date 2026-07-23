@@ -14,5 +14,5 @@ jobs:
 
       - name: Push to Codeberg
         run: |
-          git remote add codeberg https://marksamios:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/marksamios/Solobase-Server.git
+          git remote add codeberg https://marksamios:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/marksamios/Solobase-SPA.git
           git push codeberg --mirror
