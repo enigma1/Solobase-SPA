@@ -15,15 +15,23 @@ jobs:
 
       - name: Push to Codeberg
         run: |
+          git clone --mirror https://github.com/enigma1/Solobase-SPA.git mirror.git
+          cd mirror.git
           git remote add codeberg https://marksamios:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/marksamios/Solobase-SPA.git
           git push codeberg +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
 
       - name: Push to GitLab
         run: |
+          rm -rf mirror.git
+          git clone --mirror https://github.com/enigma1/Solobase-SPA.git mirror.git
+          cd mirror.git
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/Enigma1R/Solobase-SPA.git
           git push gitlab +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
 
       - name: Push to Bitbucket
         run: |
+          rm -rf mirror.git
+          git clone --mirror https://github.com/enigma1/Solobase-SPA.git mirror.git
+          cd mirror.git
           git remote add bitbucket https://enigmajs:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org:enigmajs/solobase-spa.git
           git push bitbucket +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
