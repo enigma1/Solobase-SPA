@@ -16,3 +16,12 @@ jobs:
         run: |
           git remote add codeberg https://marksamios:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/marksamios/Solobase-SPA.git
           git push codeberg --mirror
+      - name: Push to GitLab
+        run: |
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/marksamios/Solobase-SPA.git
+          git push gitlab --mirror
+
+      - name: Push to Bitbucket
+        run: |
+          git remote add bitbucket https://marksamios:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/marksamios/Solobase-SPA.git
+          git push bitbucket --mirror
