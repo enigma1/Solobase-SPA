@@ -1,5 +1,5 @@
-import { useRef, useMemo, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { dbApi } from '>/services/api';
 import {
   useDeleteDatabasesMutation,
@@ -19,6 +19,7 @@ import {
   createFileSaveUrl,
   dialogActions,
   makeColumnsActive,
+  databaseFields,
 } from '>/services/utils';
 import {
   ScreenLoader,
@@ -150,7 +151,7 @@ export const DatabasesList = ({
     const databases = getSingleColumnFromResult({
       rows: dbEntries,
       columnsOrder,
-      field: 'SCHEMA_NAME',
+      field: databaseFields.name,
     });
     const rsp = await dbApi.exportDatabases({ databases });
     const disposition = rsp.headers['content-disposition'];
@@ -212,7 +213,7 @@ export const DatabasesList = ({
     const dbNames = getSingleColumnFromResult({
       rows: dbEntries,
       columnsOrder,
-      field: 'SCHEMA_NAME',
+      field: databaseFields.name,
     });
 
     dialogStoreActions.openDialog({
@@ -241,10 +242,12 @@ export const DatabasesList = ({
     const fields = getColumnsFromRow({
       row,
       columnsOrder,
-      fields: ['SCHEMA_NAME'],
+      fields: [databaseFields.name],
     });
-    if (typeof fields['SCHEMA_NAME'] !== 'string') return;
-    mutateDatabaseSelection({ database: fields['SCHEMA_NAME'] });
+    const db = fields[databaseFields.name];
+    if (typeof db !== 'string') return;
+    mutateDatabaseSelection({ database: db });
+
     navigate(routes.front.listTables);
   };
 
@@ -255,9 +258,9 @@ export const DatabasesList = ({
       row,
       columnsOrder,
       fields: [
-        'SCHEMA_NAME',
-        'DEFAULT_CHARACTER_SET_NAME',
-        'DEFAULT_COLLATION_NAME',
+        databaseFields.name,
+        databaseFields.charset,
+        databaseFields.collation,
       ],
     });
     const handlers: CommonDialogHandlers = {

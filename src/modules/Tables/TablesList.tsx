@@ -17,6 +17,7 @@ import {
   dialogActions,
   makeColumnsActive,
   createFileSaveUrl,
+  databaseFields,
 } from '>/services/utils';
 import {
   PageTableShell,
@@ -150,12 +151,14 @@ export const TablesList = ({
     const fields = getColumnsFromRow({
       row,
       columnsOrder,
-      fields: ['TABLE_NAME'],
+      fields: [databaseFields.table],
     });
 
-    if (typeof fields['TABLE_NAME'] !== 'string') return;
+    const tableName = fields[databaseFields.table];
+    if (typeof tableName !== 'string') return;
 
-    accountStoreActions.setActiveTable(fields['TABLE_NAME']);
+    accountStoreActions.setActiveTable(tableName);
+
     if (location.pathname !== routes.front.listData) {
       navigate(routes.front.listData);
     }
@@ -169,12 +172,12 @@ export const TablesList = ({
       row,
       columnsOrder,
       fields: [
-        'TABLE_NAME',
-        'ENGINE',
-        'TABLE_COLLATION',
-        'AUTO_INCREMENT',
-        'ROW_FORMAT',
-        'TABLE_COMMENT',
+        databaseFields.table,
+        databaseFields.engine,
+        databaseFields.tCollation,
+        databaseFields.autoInc,
+        databaseFields.rowFormat,
+        databaseFields.comment,
       ],
     });
     dialogStoreActions.openDialog({
@@ -205,7 +208,7 @@ export const TablesList = ({
     const tableNames = getSingleColumnFromResult({
       rows: tableEntries,
       columnsOrder,
-      field: 'TABLE_NAME',
+      field: databaseFields.table,
     });
 
     dialogStoreActions.openDialog({
@@ -237,7 +240,7 @@ export const TablesList = ({
     const tables = getSingleColumnFromResult({
       rows: entries,
       columnsOrder,
-      field: 'TABLE_NAME',
+      field: databaseFields.table,
     });
     const rsp = await dbApi.exportTables({ database: dbSelected, tables });
     const disposition = rsp.headers['content-disposition'];

@@ -6,7 +6,7 @@ import {
   createFactoryTableStore,
 } from '>/services/stores';
 import { useTables } from '>/services/queryHooks';
-import { getColumnsFromRow } from '>/services/utils';
+import { getColumnsFromRow, databaseFields } from '>/services/utils';
 import { EmptyPage, ScreenLoader, dialogFactories } from '>/modules';
 import type { ViewRow, SqlRow } from '>/types';
 import { TablesList } from './TablesList';
@@ -68,7 +68,7 @@ export const TablesMainView = () => {
       const { TABLE_NAME } = getColumnsFromRow({
         row: row.row,
         columnsOrder,
-        fields: ['TABLE_NAME'],
+        fields: [databaseFields.table],
       });
 
       if (TABLE_NAME === activeTable) {

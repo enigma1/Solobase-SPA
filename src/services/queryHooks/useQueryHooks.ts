@@ -15,6 +15,7 @@ import {
   LoadPreferencesResponse,
 } from '>/services/api';
 import {
+  databaseFields,
   getSingleColumnFromResult,
   defaultResponse,
   defaultListResponse,
@@ -115,7 +116,7 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
 //   initialData,
 //   createApi: (data) => ({
 //     getDbNames: () =>
-//       getSingleColumnFromResult(data.rows, data.columnsOrder, 'SCHEMA_NAME'),
+//       getSingleColumnFromResult(data.rows, data.columnsOrder, databaseFields.name),
 //   }),
 // });
 
@@ -154,7 +155,7 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
         getSingleColumnFromResult({
           rows: data.rows,
           columnsOrder: data.columnsOrder,
-          field: 'SCHEMA_NAME',
+          field: databaseFields.name,
         }),
     };
   }, [data.rows, data.columnsOrder]);
@@ -313,7 +314,7 @@ export const useUsers = <TSelected = UsersHookProps>(
         getSingleColumnFromResult({
           rows: data.rows,
           columnsOrder: data.columnsOrder,
-          field: 'SCHEMA_NAME',
+          field: databaseFields.name,
         }),
     };
   }, [data.rows, data.columnsOrder]);

@@ -1,3 +1,4 @@
+// All MySQL specifics
 import { v4 as uuidv4 } from 'uuid';
 import { hasit } from './strings';
 import {
@@ -11,6 +12,18 @@ import {
   DataCell,
   SqlQueryModes,
 } from '>/types';
+
+export const databaseFields = {
+  name: 'SCHEMA_NAME',
+  table: 'TABLE_NAME',
+  charset: 'DEFAULT_CHARACTER_SET_NAME',
+  collation: 'DEFAULT_COLLATION_NAME',
+  engine: 'ENGINE',
+  tCollation: 'TABLE_COLLATION',
+  autoInc: 'AUTO_INCREMENT',
+  rowFormat: 'ROW_FORMAT',
+  comment: 'TABLE_COMMENT',
+} as const;
 
 export const tableColumnKeyList = [
   { value: 'PRIMARY', label: 'Primary' },
@@ -46,7 +59,7 @@ export const objectTypes = [
   'MULTILINESTRING',
   'MULTIPOLYGON',
   'GEOMETRY',
-  'GEOMETRYCOLLECTION',
+  'GEOMCOLLECTION',
 ];
 
 export const tableColumnTypes = [
@@ -137,7 +150,7 @@ export const tableColumnTypes = [
       { value: 'MULTILINESTRING' },
       { value: 'MULTIPOLYGON' },
 
-      { value: 'GEOMETRYCOLLECTION' },
+      { value: 'GEOMCOLLECTION' },
     ],
   },
 ];
@@ -156,11 +169,6 @@ export const flatColumnTypeSet = new Set(
 
 const getVarcharLength = (type: string) => {
   const match = type.match(/varchar\((\d+)\)/i);
-  return match ? Number(match[1]) : null;
-};
-
-const getVarbinLength = (type: string) => {
-  const match = type.match(/varbinary\((\d+)\)/i);
   return match ? Number(match[1]) : null;
 };
 

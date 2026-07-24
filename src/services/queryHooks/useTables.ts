@@ -12,6 +12,7 @@ import {
   defaultListResponse,
   defaultPageResponse,
   getSingleColumnFromResult,
+  databaseFields,
 } from '>/services/utils';
 import { BasicRowsShape } from '>/types';
 import { queryKeys, STALE_TIME, DataHookProps } from './defs';
@@ -61,7 +62,7 @@ export const useTables = <TSelected = TablesHookProps>(
         getSingleColumnFromResult({
           rows: data.rows,
           columnsOrder: data.columnsOrder,
-          field: 'TABLE_NAME',
+          field: databaseFields.table,
         }),
     };
   }, [data.rows, data.columnsOrder]);

@@ -1,6 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import { useDatabases } from '>/services/queryHooks';
-import { getColumnsFromRow } from '>/services/utils';
+import { getColumnsFromRow, databaseFields } from '>/services/utils';
 import { ScreenLoader, EmptyPage } from '>/modules';
 import { createFactoryTableStore, useAccountStore } from '>/services/stores';
 import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
@@ -60,7 +60,7 @@ export const DatabasesMainView = () => {
       const { SCHEMA_NAME } = getColumnsFromRow({
         row: row.row,
         columnsOrder,
-        fields: ['SCHEMA_NAME'],
+        fields: [databaseFields.name],
       });
 
       if (SCHEMA_NAME === dbSelected) {
