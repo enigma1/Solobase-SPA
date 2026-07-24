@@ -33,5 +33,5 @@ jobs:
           rm -rf mirror.git
           git clone --mirror https://github.com/enigma1/Solobase-SPA.git mirror.git
           cd mirror.git
-          git remote add bitbucket https://enigmajs:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org:enigmajs/solobase-spa.git
+          git remote add bitbucket https://enigmajs:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/enigmajs/solobase-spa.git
           git push bitbucket +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
