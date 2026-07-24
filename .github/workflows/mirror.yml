@@ -13,21 +13,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Remove remote tracking refs
-        run: |
-          git for-each-ref --format='delete %(refname)' refs/remotes | git update-ref --stdin
-
       - name: Push to Codeberg
         run: |
           git remote add codeberg https://marksamios:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/marksamios/Solobase-SPA.git
-          git push codeberg --mirror
+          git push codeberg +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
 
       - name: Push to GitLab
         run: |
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/Enigma1R/Solobase-SPA.git
-          git push gitlab --mirror
+          git push gitlab +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
 
       - name: Push to Bitbucket
         run: |
           git remote add bitbucket https://enigmajs:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org:enigmajs/solobase-spa.git
-          git push bitbucket --mirror
+          git push bitbucket +refs/heads/*:refs/heads/* +refs/tags/*:refs/tags/*
