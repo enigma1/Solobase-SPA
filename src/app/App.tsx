@@ -42,7 +42,7 @@ export const App = () => {
         fixed: true,
         id: 'demo',
         content: {
-          text: `Solobase SPA Demo Mode — Mocked backend with prerecorded responses which may not exactly match previous selections.`,
+          text: `Solobase SPA Demo Mode — Mocked backend with prerecorded database responses which may not exactly match previous selections. For details: https://github.com/enigma1/Solobase-SPA`,
         },
       });
     }

@@ -1,8 +1,9 @@
 import { makeStore } from '>/services/utils/emitter';
-import { DialogState, DialogStore } from '>/types';
+import { DialogState, DialogStore, ApiError } from '>/types';
 
 const initialState: DialogStore = {
   dialog: null,
+  response: null,
 };
 
 const baseStore = makeStore<DialogStore>(() => ({ ...initialState }));
@@ -14,24 +15,30 @@ export type DialogStoreActions = {
   openDialogAsync: (dialog: DialogState) => Promise<void>;
   closeDialogAsync: () => Promise<void>;
   getActive: () => DialogState | null;
+  setError: (response: ApiError | null) => void;
+  clearError: () => void;
 };
 
 export const dialogStoreActions: DialogStoreActions = {
   openDialog: (dialog) => {
-    setAuto({ dialog });
+    setAuto({ dialog, response: null });
   },
   closeDialog: () => {
-    setAuto({ dialog: null });
+    setAuto({ dialog: null, response: null });
   },
 
   openDialogAsync: async (dialog) => {
-    await setAuto({ dialog }, { wait: true });
+    await setAuto({ dialog, response: null }, { wait: true });
   },
 
   closeDialogAsync: async () => {
-    await setAuto({ dialog: null }, { wait: true });
+    await setAuto({ dialog: null, response: null }, { wait: true });
   },
   getActive: () => get().dialog,
+  setError: (response) => {
+    setAuto({ response });
+  },
+  clearError: () => setAuto({ response: null }),
 };
 
 type DialogProps = {

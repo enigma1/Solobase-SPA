@@ -21,7 +21,7 @@ export const HiddenColumns = ({ modified, onModify }: ItemPreferenceProps) => {
   }
   return (
     <>
-      <p className='p-2 field-warn-bg'>
+      <p className='p-2 field-warn-bg stand'>
         The following columns are hidden from view from all databases and
         tables. Uncheck to display.
       </p>

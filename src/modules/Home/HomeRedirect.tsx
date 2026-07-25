@@ -8,6 +8,8 @@ import {
 } from '>/services/stores';
 import { handleLogin } from '>/modules';
 
+const currentYear = new Date().getFullYear();
+
 export const HomeRedirect = () => {
   const navigate = useNavigate();
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
@@ -32,8 +34,8 @@ export const HomeRedirect = () => {
         <div className='page-section bg-transparent max-w-lg'>
           <p className='central'>
             Access and manage your MySQL databases, monitor server activity,
-            edit data, handle imports and exports, and configure your
-            environment securely from one place.
+            edit data, handle imports and exports and configure your environment
+            securely from one place.
           </p>
           <p className='central stand'>
             For documentation about this tool and latest updates, visit:
@@ -44,7 +46,25 @@ export const HomeRedirect = () => {
               target='_blank'
               rel='noreferrer'
             >
-              Enigma1 on GitHub
+              Solobase SPA - Database frontend
+            </a>
+            <br />
+            <a
+              href='https://github.com/enigma1/Solobase-Server'
+              className='stand link border-b'
+              target='_blank'
+              rel='noreferrer'
+            >
+              Solobase Server - Backend Service
+            </a>
+            <br />
+            <a
+              href='https://github.com/enigma1/Solobase-Proxy-Agent'
+              className='stand link border-b'
+              target='_blank'
+              rel='noreferrer'
+            >
+              Solobase Proxy - Proxy Agent
             </a>
           </p>
           <p className='central'>
@@ -55,6 +75,7 @@ export const HomeRedirect = () => {
               Login
             </button>
           </p>
+          <p className='central stand text-xs'>{`Copyright (c) ${currentYear} Mark Samios`}</p>
         </div>
       </div>
     </>

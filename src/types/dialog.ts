@@ -1,4 +1,5 @@
 import type { ReactNode, SyntheticEvent } from 'react';
+import { ApiError } from './errors';
 
 export type DialogVariants = 'success' | 'error' | 'info' | 'warn';
 export type ButtonStatus = 'hidden' | 'disabled';
@@ -59,4 +60,5 @@ export type DialogMap<T extends { type: string; payload: unknown }> = {
 
 export type DialogStore = {
   dialog: DialogState | null;
+  response: ApiError | null;
 };

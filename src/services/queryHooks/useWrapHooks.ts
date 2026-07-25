@@ -56,6 +56,7 @@ export const useSelectDatabaseWrap = () => {
 export const useImportDataWrap = (metaOptions?: MutationRequestMeta) => {
   const callbacks = {
     onSuccess: (data: ImportDataResponse) => {
+      metaOptions?.onSuccess?.(data);
       accountStoreActions.setActiveDatabase(null);
       if (!data.ok) {
         messageStoreActions.addMessage({
@@ -93,13 +94,11 @@ export const useImportDataWrap = (metaOptions?: MutationRequestMeta) => {
   return mutation;
 };
 
-export const useSavePreferencesWrap = (metaOptions?: {
-  onSuccess: () => void;
-}) => {
+export const useSavePreferencesWrap = (metaOptions?: MutationRequestMeta) => {
   const callbacks = {
     onSuccess: (data: SavePreferencesResponse) => {
       if (data.ok) {
-        metaOptions?.onSuccess();
+        metaOptions?.onSuccess?.();
         messageStoreActions.addMessage({
           type: 'success',
           content: { text: 'Preferences Saved', duration: 3000 },

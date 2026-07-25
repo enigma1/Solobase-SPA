@@ -25,6 +25,7 @@ import {
   PageSizing,
   CopiedRows,
   Queries,
+  Misc,
 } from './Prefs';
 import { UserPrefs, CommonDialogHandlers } from '>/types';
 
@@ -37,6 +38,7 @@ const sections = [
   'hiddenColumns',
   'copiedRows',
   'queries',
+  'misc',
 ] as const;
 
 type PreferenceSection = (typeof sections)[number];
@@ -84,7 +86,7 @@ type PreferencesProps = {
   formHandlers: CommonDialogHandlers;
 };
 export const Preferences = ({ formHandlers }: PreferencesProps) => {
-  const [saveCount, setSaveCount] = useState<number>(0);
+  const [currentTrigger, setCurrentTrigger] = useState<number>(0);
 
   const [collapsedSections, setCollapsedSections] = useState<
     Record<PreferenceSection, boolean>
@@ -96,7 +98,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
   );
 
   const onSaveSuccess = () => {
-    setSaveCount((count) => count + 1);
+    setCurrentTrigger((count) => count + 1);
   };
 
   const { mutate, isPending } = useSavePreferencesWrap({
@@ -176,6 +178,10 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             </button>
           </div>
         </div>
+        <p className='p-2 field-warn-bg stand'>
+          Unless saved, changes made to preferences do not persist among
+          different sessions.
+        </p>
         <div className='area-content'>
           <PreferenceSection
             title='Network Settings'
@@ -185,7 +191,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <NetworkSelect
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
           <PreferenceSection
@@ -196,7 +202,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <ThemeSelect
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
           <PreferenceSection
@@ -207,7 +213,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <PageSizing
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
 
@@ -219,7 +225,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <HeaderVisibility
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
           <PreferenceSection
@@ -230,7 +236,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <SidebarVisibility
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
           <PreferenceSection
@@ -241,7 +247,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <HiddenColumns
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
           <PreferenceSection
@@ -252,7 +258,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <CopiedRows
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
           <PreferenceSection
@@ -263,7 +269,18 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
             <Queries
               modified={tempSettings}
               onModify={handleModify}
-              saveCount={saveCount}
+              triggerSave={currentTrigger}
+            />
+          </PreferenceSection>
+          <PreferenceSection
+            title='Miscellaneous'
+            collapsed={collapsedSections.misc}
+            onToggle={() => toggleSection('misc')}
+          >
+            <Misc
+              modified={tempSettings}
+              onModify={handleModify}
+              triggerSave={currentTrigger}
             />
           </PreferenceSection>
         </div>

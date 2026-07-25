@@ -54,7 +54,6 @@ export const apiErrorResolver = async (e: unknown) => {
     throw networkError;
   }
   if (hasObjectProps(e, ['response'])) {
-    console.log('axios-error', e.response);
     const axiosError = e as any;
 
     const status = axiosError.response?.status;

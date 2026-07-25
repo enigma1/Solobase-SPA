@@ -17,6 +17,7 @@ export type ConfigActions = {
   setFrontPort: (port?: number) => void;
   getFrontPort: () => number;
   getPageSizes: () => Record<PageListings, number>;
+  showSystemDatabases: (show: boolean) => void;
 };
 
 export type ConfigStore = StorageConfig & ConfigActions;
@@ -37,6 +38,9 @@ export const configStoreActions: ConfigActions = {
     const theme = value ?? get().theme;
     document.documentElement.setAttribute('data-theme', theme);
     setAuto({ theme });
+  },
+  showSystemDatabases: (show) => {
+    setAuto({ allowSystemDatabases: show });
   },
   setHiddenColumns: (cols) => {
     setAuto({ hiddenColumns: cols });

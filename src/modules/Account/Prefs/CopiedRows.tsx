@@ -82,7 +82,7 @@ export const CopiedRows = ({ modified, onModify }: ItemPreferenceProps) => {
 
   return (
     <>
-      <p className='p-2 field-warn-bg'>
+      <p className='p-2 field-warn-bg stand'>
         Copied Rows matching a table's schema are shown when you insert data
         rows. Uncheck to remove.
       </p>

@@ -23,6 +23,13 @@ const initialState: StoreState<unknown> = {
 const baseStore = makeStore<StoreState<unknown>>(() => ({ ...initialState }));
 const { get, setAuto } = baseStore;
 
+const serializeMessage = (msg: Message<unknown>) =>
+  JSON.stringify({
+    type: msg.type ?? 'error',
+    fixed: msg.fixed ?? false,
+    content: msg.content,
+  });
+
 export const messageStoreActions: MessageStoreActions<unknown> = {
   addMessage: (msg) => {
     const params = {
@@ -31,6 +38,15 @@ export const messageStoreActions: MessageStoreActions<unknown> = {
       type: msg.type ?? 'error',
       id: msg.id ?? uuidv4(),
     };
+    const currentSerial = serializeMessage(params);
+    const existing = (get().messages[params.mode] ?? []).find(
+      (m) => serializeMessage(m) === currentSerial,
+    );
+
+    if (existing?.id) {
+      return existing.id;
+    }
+
     setAuto((state) => ({
       messages: {
         ...state.messages,

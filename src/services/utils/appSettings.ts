@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { getAppConfig } from '>/config';
 
 const noTrim = (name: string) =>
   z
@@ -65,6 +66,7 @@ export const UserPrefsConfigSchema = z.object({
   theme: noTrim('theme').min(1).max(256),
   hiddenColumns: HiddenColumnsSchema,
   headerVisibility: z.boolean(),
+  allowSystemDatabases: z.boolean(),
   sidebarWidth: z.int().min(10).max(1024),
   sidebarVisibility: SidebarVisibilitySchema,
   pageSizes: z.record(PageListingsSchema, PageSizeSchema),
@@ -76,9 +78,7 @@ export const AppConfigSchema = z.object({
   appInfo: AppInfoConfigSchema,
 });
 
-const raw = (window as any).APP_CONFIG;
-
-const validated = AppConfigSchema.parse(raw);
+const validated = AppConfigSchema.parse(getAppConfig());
 export const userPrefs = Object.freeze(validated.userPrefs);
 export const appSettings = Object.freeze(validated.appSettings);
 export const appInfo = Object.freeze(validated.appInfo);

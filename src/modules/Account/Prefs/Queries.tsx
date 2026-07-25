@@ -6,7 +6,7 @@ import { ItemPreferenceProps } from '>/types';
 export const Queries = ({
   modified,
   onModify,
-  saveCount,
+  triggerSave,
 }: ItemPreferenceProps) => {
   const { queries, setQueries } = useQueriesStore(({ state, api }) => ({
     queries: state.queries,
@@ -26,12 +26,12 @@ export const Queries = ({
   };
 
   useEffect(() => {
-    if (saveCount > 0) setQueries(modified.queries);
-  }, [saveCount]);
+    if (triggerSave > 0) setQueries(modified.queries);
+  }, [triggerSave]);
 
   return (
     <>
-      <p className='p-2 field-warn-bg'>
+      <p className='p-2 field-warn-bg stand'>
         Deselecting arbitrary queries will delete them when you apply the
         changes
       </p>

@@ -14,6 +14,7 @@ export type StorageConfig = {
   hiddenColumns: Record<string, boolean>;
   sidebarVisibility: SidebarVisibilityTypes;
   headerVisibility: boolean;
+  allowSystemDatabases: boolean;
   theme: string;
   sidebarWidth: number;
   pageSizes: Record<PageListings, number>;
@@ -27,5 +28,5 @@ export type UserPrefs = StorageConfig & {
 export type ItemPreferenceProps = {
   modified: UserPrefs;
   onModify: (tempSettings: Partial<UserPrefs>) => void;
-  saveCount: number;
+  triggerSave: number;
 };

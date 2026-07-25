@@ -79,7 +79,7 @@ export const MessageBar = ({
 
   return (
     <div
-      className={`${animationClasses} px-4 py-2 shadow-md flex justify-between items-center`}
+      className={`${animationClasses} px-4 py-2 shadow-md flex justify-between items-center border-b`}
       style={{
         ...typeStyles[type],
         animationDuration: duration ? `${duration}ms` : '0ms',

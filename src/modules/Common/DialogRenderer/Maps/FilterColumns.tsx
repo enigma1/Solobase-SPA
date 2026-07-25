@@ -17,10 +17,10 @@ export const FilterColumns = ({
 
   return (
     <div className='area-container'>
-      <div className='area-item text-xs'>
-        Unselected columns are hidden. Columns with the same name will be hidden
-        from all databases and tables
-      </div>
+      <p className='p-2 field-warn-bg stand'>
+        Unselected columns are hidden. This selection has a global effect.
+        Deselected column names will be hidden from all databases and tables.
+      </p>
       <div className='area-listing'>
         {columnsOrder.map((col, idx) => {
           const bgStyle = idx % 2 ? 'odd' : 'even';

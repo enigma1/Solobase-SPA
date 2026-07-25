@@ -78,7 +78,6 @@ export const DatabasesSideList = () => {
 
   const handleChange = async (dbName: string) => {
     if (!dbName) {
-      console.log('no database selected');
       return;
     }
     mutate({ database: dbName });

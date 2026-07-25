@@ -7,12 +7,14 @@ import { ApiError } from '>/types';
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
+      const e = error as ApiError;
+      console.error('QueryCache', error);
       dialogStoreActions.openDialog({
         payload: {
           caption: 'General Error',
           component: (
             <DialogContent note='Data Fetching Error'>
-              {(error as Error).message}
+              {e.message}
             </DialogContent>
           ),
           actions: dialogActions.ack(),
@@ -22,8 +24,14 @@ export const queryClient = new QueryClient({
   }),
   mutationCache: new MutationCache({
     onError: (error) => {
-      console.log('MutationCache', error);
       const e = error as ApiError;
+      console.error('MutationCache', error);
+      const isActive = dialogStoreActions.getActive();
+      if (isActive) {
+        dialogStoreActions.setError(e);
+        return;
+      }
+
       dialogStoreActions.openDialog({
         payload: {
           caption: 'Action Failed',
@@ -33,8 +41,8 @@ export const queryClient = new QueryClient({
               <p className='text-sm'>{e.message}</p>
               {e.details && (
                 <ul>
-                  {e.details.map((d) => (
-                    <li>{d}</li>
+                  {e.details.map((d, idx) => (
+                    <li key={`mutation-error-${idx}`}>{d}</li>
                   ))}
                 </ul>
               )}

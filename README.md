@@ -1,7 +1,16 @@
 # Solobase-SPA
-The Solobase-SPA offers a simple and intuitive interface for MySQL database operations, schema management, and data imports/exports. Built with ReactJS, it provides a graphical interface for managing databases, executing SQL queries, editing data, and configuring user preferences.
+The Solobase-SPA offers a simple and intuitive interface for MySQL database operations, schema management, and data imports/exports. Built with ReactJS, it provides a graphical interface for managing databases, executing SQL queries, editing data and configuring user preferences.
 
 There is a [demo site](https://solobase-spa.onrender.com) I've setup with a mocked backend with prerecorded responses to see the UI.
+
+The front end requires the back end service and possibly a proxy to get around browser restrictions
+
+The Solobase Server is located here:
+https://github.com/enigma1/Solobase-Server
+
+The optional proxy component is available here:
+https://github.com/enigma1/Solobase-Proxy-Agent
+
 
 ### Screenshots
 #### Main Interface
@@ -103,17 +112,19 @@ Solobase-SPA is the frontend application of the Solobase platform.
 **Solobase-SPA** -> Optional Local Proxy -> Solobase-Server
 
 #### Environment
-- Tested on node v20-22
+- Tested on node v20-24
 - Tested on npm v10-11
 - Tested with MySQL 9.6.0
 
 #### Installation
+```bash
 git clone [Solobase-SPA](https://github.com/enigma1/Solobase-SPA)
 cd <Solobase-SPA> folder
 npm i
+```
 
 #### Configuration
-**Solobase-SPA** is configured through the `index.html` file. You can modify the default values to suit you needs. These option appear under the APP_CONFIG object.
+**Solobase-SPA** is configured through the `index.html` file. You can modify the default values that suit you needs. These options are under the APP_CONFIG object.
 
 ##### User Preferences
 Switch for color scheme is called `theme`.
@@ -156,7 +167,7 @@ Notice there is no domain to specify as the front end needs to match the back-en
 You can connect in SSL or NON-SSL modes point the browser to the domain of you your choice and make sure the backed uses the same domain.
 
 To create certificates for the back-end...
-```batch
+```bash
 openssl req -x509 -newkey rsa:4096 -nodes \
   -keyout server.key \
   -out server.crt \
@@ -164,18 +175,18 @@ openssl req -x509 -newkey rsa:4096 -nodes \
 ```
 
 Configure the following variables:
-```batch
+```bash
 TLS_KEY=/path/to/server.key
 TLS_CERT=/path/to/server.crt
 ```
 
 #### Operation
 For *development* use
-```
+```bash
 npm run dev
 ```
 otherwise for *production*
-```
+```bash
 npm run build
 npm run preview
 ```

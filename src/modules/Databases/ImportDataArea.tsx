@@ -2,20 +2,28 @@ import { SyntheticEvent, useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DeleteIcon, RotateCcwIcon } from 'lucide-react';
 import { useModal } from '>/services/hooks';
-import { messageStoreActions, historyStoreActions } from '>/services/stores';
+import {
+  messageStoreActions,
+  historyStoreActions,
+  useDialogStore,
+} from '>/services/stores';
 import { useDatabases, useImportDataWrap } from '>/services/queryHooks';
 import {
   ScreenLoader,
   ComboField,
   TextAreaField,
   DropFileField,
+  DialogContent,
+  QueryErrorDetails,
 } from '>/modules';
 import {
   MIN_QUERY_CHARS,
   sqlStringConvert,
   groupByModes,
+  cx,
 } from '>/services/utils';
 import { dbApi } from '>/services/api';
+import type { ImportDataResponse } from '>/services/api/dbApiTypes';
 import { routes } from '>/config';
 import { SqlQueryModes, CommonDialogHandlers } from '>/types';
 import { DatabaseCombo } from './DatabaseCombo';
@@ -34,9 +42,8 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
   const location = useLocation();
   const { setButtonStatus } = useModal();
 
-  const { isFetching, dbNames } = useDatabases({}, ({ api, query }) => {
+  const { isFetching } = useDatabases({}, ({ api, query }) => {
     return {
-      dbNames: api.getDbNames(),
       isSuccess: query.isSuccess,
       isError: query.isError,
       isLoading: query.isLoading,
@@ -44,13 +51,32 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
     };
   });
 
+  const { errorResponse, clearError, closeDialog } = useDialogStore(
+    ({ state, api }) => ({
+      errorResponse: state.response,
+      clearError: api.clearError,
+      closeDialog: api.closeDialog,
+    }),
+  );
+
+  const onSuccess = (data: ImportDataResponse) => {
+    if (file && data.ok) {
+      closeDialog();
+    }
+  };
+
   const { mutate, mutateAsync, isPending, response } = useImportDataWrap({
     ctrl: controllerRef,
+    onSuccess,
   });
 
   useEffect(() => {
-    if (file || rawData.length > MIN_QUERY_CHARS) setButtonStatus('confirm');
-  }, [file, rawData]);
+    if (!errorResponse && (file || rawData.length > MIN_QUERY_CHARS))
+      setButtonStatus('confirm');
+    else {
+      setButtonStatus('confirm', 'disabled');
+    }
+  }, [file, rawData, errorResponse]);
 
   const onClearArea = () => {
     setRawData('');
@@ -103,6 +129,10 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
     controllerRef.current?.abort();
   };
 
+  const handleError = () => {
+    clearError();
+  };
+
   useEffect(() => {
     formHandlers.confirm = onConfirm;
     formHandlers.close = onClose;
@@ -122,78 +152,97 @@ export const ImportDataArea = ({ formHandlers }: ImportDataAreaProps) => {
 
   return (
     <div className='area-container'>
-      <div className='area-spacer'>
-        <h1 className='area-title'>Import Data / Run Script</h1>
-        <div className='area-actions'>
-          <div className='btn-group'>
-            <button
-              type='button'
-              className='btn-secondary'
-              onClick={onResetDatabase}
-              title='Do not use database'
-              disabled={selectedDatabase === ''}
-            >
-              <RotateCcwIcon size={24} />
-            </button>
-            <button
-              type='button'
-              className='btn-secondary'
-              onClick={onClearArea}
-              title='Clear Query'
-              disabled={rawData === ''}
-            >
-              <DeleteIcon size={24} />
-            </button>
+      {errorResponse && (
+        <div className='animate-top-slide overflow-hidden'>
+          <DialogContent
+            className='animate-in zoom-in-95 duration-300'
+            classSpacer='caption error'
+            note='Query execution failed'
+            onClose={handleError}
+          >
+            <QueryErrorDetails error={errorResponse} />
+          </DialogContent>
+        </div>
+      )}
+      <div
+        className={cx(
+          'flex flex-1 flex-col min-h-0 transition-all duration-300',
+          errorResponse && 'opacity-40 pointer-events-none',
+        )}
+      >
+        <div className='area-spacer'>
+          <h1 className='area-title'>Import Data / Run Script</h1>
+          <div className='area-actions'>
+            <div className='btn-group'>
+              <button
+                type='button'
+                className='btn-secondary'
+                onClick={onResetDatabase}
+                title='Do not use database'
+                disabled={selectedDatabase === ''}
+              >
+                <RotateCcwIcon size={24} />
+              </button>
+              <button
+                type='button'
+                className='btn-secondary'
+                onClick={onClearArea}
+                title='Clear Query'
+                disabled={rawData === ''}
+              >
+                <DeleteIcon size={24} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div className='area-content'>
-        <div className='wrapper space-y-1'>
-          <DatabaseCombo
-            selectedDatabase={selectedDatabase}
-            onChange={setSelectedDatabase}
-          />
-        </div>
-        <div className='wrapper space-y-1'>
-          <DropFileField
-            value={file}
-            onValueChange={setFile}
-            containerProps={{
-              className: 'test',
-            }}
-            inputProps={{
-              accept: '.sql,.gz,.sql.gz',
-            }}
-            texts={{
-              title: 'Drop SQL data file here',
-              subtitle: 'or browse for a file',
-              browseButton: 'Browse...',
-              replaceButton: 'Replace File',
-              removeButton: 'Clear',
-            }}
-          />
-        </div>
-        <div className='wrapper space-y-1 w-full h-full'>
-          <TextAreaField
-            id='raw-data'
-            label='Raw Data:'
-            className='text-dialog-area resize-none input border'
-            wrapClass='h-full'
-            defaultValue={rawData}
-            onChange={(v) => {
-              const value = v.currentTarget.value;
-              setRawData(value);
-            }}
-          />
-        </div>
-        <div className='wrapper space-y-1'>
-          <ComboField
-            id='select-groupby-mode'
-            label='Query Mode:'
-            value={groupByMode}
-            onChange={(v) => setGroupByMode(v as SqlQueryModes)}
-            $options={groupByModes.map((mode) => ({ ...mode }))}
-          />
+        <div className='area-content'>
+          <div className='wrapper space-y-1'>
+            <DatabaseCombo
+              selectedDatabase={selectedDatabase}
+              onChange={setSelectedDatabase}
+            />
+          </div>
+          <div className='wrapper space-y-1'>
+            <DropFileField
+              value={file}
+              onValueChange={setFile}
+              containerProps={{
+                className: 'test',
+              }}
+              inputProps={{
+                accept: '.sql,.gz,.sql.gz',
+              }}
+              texts={{
+                title: 'Drop SQL data file here',
+                subtitle: 'or browse for a file',
+                browseButton: 'Browse...',
+                replaceButton: 'Replace File',
+                removeButton: 'Clear',
+              }}
+            />
+          </div>
+          <div className='wrapper space-y-1 w-full h-full'>
+            <TextAreaField
+              id='raw-data'
+              label='Raw Data:'
+              className='text-dialog-area resize-none input border'
+              wrapClass='h-full'
+              defaultValue={rawData}
+              onChange={(v) => {
+                const value = v.currentTarget.value;
+                setRawData(value);
+              }}
+            />
+          </div>
+          <div className='wrapper space-y-1'>
+            <ComboField
+              id='select-groupby-mode'
+              label='Query Mode:'
+              value={groupByMode}
+              onChange={(v) => setGroupByMode(v as SqlQueryModes)}
+              $options={groupByModes.map((mode) => ({ ...mode }))}
+            />
+          </div>
         </div>
       </div>
     </div>

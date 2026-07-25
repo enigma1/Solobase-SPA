@@ -18,6 +18,7 @@ export const STALE_TIME = 5 * 60 * 1000; // Set default to 5 minutes
 export type MutationRequestMeta = {
   ctrl?: RefObject<AbortController | null>;
   timeout?: number;
+  onSuccess?: (data?: any) => void;
 };
 
 export type InferData<T> = T extends MutationFunction<infer R, any> ? R : never;

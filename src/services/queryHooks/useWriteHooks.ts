@@ -320,6 +320,9 @@ export const useSavePreferencesMutation = createMutationHook<
       await qc.invalidateQueries({
         queryKey: queryKeys.preferences(),
       });
+      await qc.invalidateQueries({
+        queryKey: queryKeys.databases(),
+      });
     },
   },
 });

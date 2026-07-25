@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { messageStoreActions } from '>/services/stores';
+import { messageStoreActions, useDialogStore } from '>/services/stores';
 import {
   useCreateDataRowsMutation,
   useTableColumnsInfoHook,
 } from '>/services/queryHooks';
 import { useModal } from '>/services/hooks';
-import { ScreenLoader } from '>/modules';
-import { emptyDataRow } from '>/services/utils';
+import { ScreenLoader, DialogContent, QueryErrorDetails } from '>/modules';
+import { emptyDataRow, cx } from '>/services/utils';
 import { WizardHandlers, ButtonStatus } from '>/types';
 import { DataRowsForm } from './DataRowsForm';
 import { DataRowsReview } from './DataRowsReview';
@@ -42,6 +42,14 @@ export const CreateDataRows = ({
     }),
   );
 
+  const { errorResponse, clearError, closeDialog } = useDialogStore(
+    ({ state, api }) => ({
+      errorResponse: state.response,
+      clearError: api.clearError,
+      closeDialog: api.closeDialog,
+    }),
+  );
+
   const nextStep = (current: TableFormStep): TableFormStep => {
     const idx = stepOrder.indexOf(current);
     return stepOrder[Math.min(idx + 1, stepOrder.length - 1)];
@@ -56,12 +64,19 @@ export const CreateDataRows = ({
     const isFirstStep = step === stepOrder[0];
     const isLastStep = step === stepOrder[stepOrder.length - 1];
 
-    const buttonsState: ButtonsGroupState = {
+    const buttonsNormalState: ButtonsGroupState = {
       previous: !isFirstStep ? undefined : 'hidden',
       next: isLastStep ? 'hidden' : valid ? undefined : 'disabled',
       finish: isLastStep ? undefined : 'hidden',
     };
-    setButtonsStatuses(buttonsState);
+    const buttonsDisabledState: ButtonsGroupState = {
+      previous: !isFirstStep ? 'disabled' : 'hidden',
+      next: isLastStep ? 'hidden' : 'disabled',
+      finish: isLastStep ? 'disabled' : 'hidden',
+    };
+    setButtonsStatuses(
+      errorResponse ? buttonsDisabledState : buttonsNormalState,
+    );
   };
 
   const goPrevStep = () => {
@@ -74,7 +89,9 @@ export const CreateDataRows = ({
     setStep(next);
   };
 
-  const onValidation = (valid: boolean) => updateButtons(step, valid);
+  const onValidation = (valid: boolean) => {
+    updateButtons(step, valid);
+  };
 
   const form = useForm<CreateDataRowsForm>({
     mode: 'onChange',
@@ -90,17 +107,20 @@ export const CreateDataRows = ({
   } = form;
 
   useEffect(() => {
-    wizardHandlers.next = goNextStep;
-    wizardHandlers.previous = goPrevStep;
-    wizardHandlers.finish = async () =>
-      await handleSubmit((data) => onSubmit(data))();
-
-    return () => {
+    const clearHandlers = () => {
       wizardHandlers.next = undefined;
       wizardHandlers.previous = undefined;
       wizardHandlers.finish = undefined;
     };
-  }, [step]);
+
+    wizardHandlers.next = goNextStep;
+    wizardHandlers.previous = goPrevStep;
+    wizardHandlers.finish = async () => {
+      await handleSubmit((data) => onSubmit(data))();
+    };
+
+    return clearHandlers;
+  }, [step, errorResponse]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -111,17 +131,9 @@ export const CreateDataRows = ({
     }
   }, [isSuccess, cols, columnsOrder]);
 
-  // console.log(
-  //   'RENDER CYCLE',
-  //   columnsOrder,
-  //   cols,
-  //   columnsOrder.length,
-  //   form.getValues('rowsData')[0]?.values.length,
-  // );
-
   useEffect(() => {
     updateButtons(step, isValid);
-  }, [isValid, step]);
+  }, [isValid, step, errorResponse]);
 
   const createDataRowsCallbacks = {
     onSuccess: (data: any) => {
@@ -139,6 +151,7 @@ export const CreateDataRows = ({
           },
         });
       }
+      closeDialog();
     },
     onError: (error: any) => {
       messageStoreActions.addMessage({
@@ -156,10 +169,6 @@ export const CreateDataRows = ({
     createDataRowsCallbacks,
   );
 
-  // const onSelectRow = (rowId: string) => {
-  //   setActiveRowUid(rowId);
-  // };
-
   const onSubmit = (data: CreateDataRowsForm) => {
     const rows = data.rowsData.map((row) =>
       row.values.map((cell) => cell.value),
@@ -174,6 +183,10 @@ export const CreateDataRows = ({
     });
   };
 
+  const handleError = () => {
+    clearError();
+  };
+
   const rowValuesLength = form.getValues('rowsData')[0]?.values.length ?? 0;
   const isFormSynced = columnsOrder.length === rowValuesLength;
   const isBusy = isPending || isFetching || !isFormSynced;
@@ -181,24 +194,44 @@ export const CreateDataRows = ({
   if (isBusy) return <ScreenLoader />;
 
   return (
-    <form className='space-y-4 flex flex-1 flex-col min-h-0'>
-      {step === 'insert' && (
-        <DataRowsForm
-          form={form}
-          cols={cols}
-          columnsOrder={columnsOrder}
-          onValidation={onValidation}
-        />
+    <>
+      {errorResponse && (
+        <div className='animate-top-slide overflow-hidden border-b pb-1'>
+          <DialogContent
+            className='animate-in zoom-in-95 duration-300'
+            classSpacer='caption error'
+            note='Query execution failed'
+            onClose={handleError}
+          >
+            <QueryErrorDetails error={errorResponse} />
+          </DialogContent>
+        </div>
       )}
-      {step === 'review' && (
-        <DataRowsReview
-          database={database}
-          table={table}
-          form={form}
-          columnsOrder={columnsOrder}
-          onValidation={onValidation}
-        />
-      )}
-    </form>
+
+      <form
+        className={cx(
+          'space-y-4 flex flex-1 flex-col min-h-0 transition-all duration-300',
+          errorResponse && 'opacity-40 pointer-events-none',
+        )}
+      >
+        {step === 'insert' && (
+          <DataRowsForm
+            form={form}
+            cols={cols}
+            columnsOrder={columnsOrder}
+            onValidation={onValidation}
+          />
+        )}
+        {step === 'review' && (
+          <DataRowsReview
+            database={database}
+            table={table}
+            form={form}
+            columnsOrder={columnsOrder}
+            onValidation={onValidation}
+          />
+        )}
+      </form>
+    </>
   );
 };

@@ -35,7 +35,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         .enabledConfirmCancel({
           onConfirm: async () => {
             await handlers.confirm();
-            dialogStoreActions.closeDialog();
+            // dialogStoreActions.closeDialog();
           },
           onCancel: () => {
             handlers?.close?.();
@@ -62,7 +62,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
       actions: dialogActions.enabledConfirmCancel({
         onConfirm: () => {
           handlers.confirm();
-          dialogStoreActions.closeDialog();
+          // dialogStoreActions.closeDialog();
         },
       }),
     };
@@ -84,7 +84,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         .enabledConfirmCancel({
           onConfirm: () => {
             handlers.confirm();
-            dialogStoreActions.closeDialog();
+            // dialogStoreActions.closeDialog();
           },
         })
         .map((control, idx) => ({
@@ -199,7 +199,7 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
         },
         onFinish: async () => {
           await handlers.finish?.();
-          dialogStoreActions.closeDialog();
+          // dialogStoreActions.closeDialog();
         },
       }),
     };

@@ -1,9 +1,6 @@
 import { queriesStoreActions } from '>/services/stores';
 import { apiClient } from './client';
 import { handleApiAxios } from './apiHelpers';
-import { routes } from '>/config/routes';
-import { ApiFunction } from './dbApiTypes';
-import { MutationRequestMeta } from '>/services/queryHooks';
 
 import {
   BasicResponse,
@@ -12,8 +9,6 @@ import {
   SessionRestoreResponse,
   LoginRequest,
   LoginResponse,
-  RunQueryRequest,
-  RunQueryResponse,
   RunRawQueryRequest,
   RunRawQueryResponse,
   FetchDatabasesRequest,
@@ -23,8 +18,6 @@ import {
   FetchRowsRequest,
   FetchRowsResponse,
   FetchDatabaseInfoResponse,
-  // InsertDataRowsRequest,
-  // InsertDataRowsResponse,
   DeleteDataRowsRequest,
   DeleteDataRowsResponse,
   UpdateDataRowsRequest,
@@ -250,10 +243,8 @@ export const dbApi = {
   fetchDatabases,
   fetchTables,
   fetchRows,
-  // runQuery,
   importData,
   runRawQuery,
-  // insertDataRows,
   createDataRows,
   deleteDataRows,
   updateDataRows,
