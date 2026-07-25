@@ -15,6 +15,7 @@ export type StorageConfig = {
   sidebarVisibility: SidebarVisibilityTypes;
   headerVisibility: boolean;
   allowSystemDatabases: boolean;
+  objectEditorForJson: boolean;
   theme: string;
   sidebarWidth: number;
   pageSizes: Record<PageListings, number>;

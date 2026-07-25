@@ -18,6 +18,7 @@ export type ConfigActions = {
   getFrontPort: () => number;
   getPageSizes: () => Record<PageListings, number>;
   showSystemDatabases: (show: boolean) => void;
+  showObjectEditorForJson: (show: boolean) => void;
 };
 
 export type ConfigStore = StorageConfig & ConfigActions;
@@ -42,6 +43,10 @@ export const configStoreActions: ConfigActions = {
   showSystemDatabases: (show) => {
     setAuto({ allowSystemDatabases: show });
   },
+  showObjectEditorForJson: (show) => {
+    setAuto({ objectEditorForJson: show });
+  },
+
   setHiddenColumns: (cols) => {
     setAuto({ hiddenColumns: cols });
   },

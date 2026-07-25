@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import { useConfigStore } from '>/services/stores';
 import { SqlTypes } from '>/types';
 import JSONEditor, { type JSONEditorMode } from 'jsoneditor';
 import 'jsoneditor/dist/jsoneditor.min.css';
@@ -17,22 +18,29 @@ type JsonEditorProps = {
 
 export const JsonEditor = ({ value, onChange, options }: JsonEditorProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<JSONEditor | null>(null);
+  const jsonToObj = useConfigStore(({ state }) => state.objectEditorForJson);
 
   useEffect(() => {
+    const mode = jsonToObj ? 'text' : options?.mode;
     const editor = new JSONEditor(containerRef.current!, {
-      mode: options?.mode,
+      mode: jsonToObj ? 'text' : options?.mode,
       mainMenuBar: options?.mainMenuBar ?? false,
-      onChangeJSON: (json: SqlTypes) => {
-        onChange(json);
-      },
-      onChangeText: (text: string) => {
-        try {
-          onChange(JSON.parse(text));
-        } catch {
-          onChange(text);
-        }
-      },
+      ...(mode === 'text' || mode === 'code'
+        ? {
+            onChangeText: (text: string) => {
+              try {
+                onChange(JSON.parse(text));
+              } catch {
+                onChange(text);
+              }
+            },
+          }
+        : {
+            onChangeJSON: (json: SqlTypes) => {
+              onChange(json);
+            },
+          }),
     });
 
     editor.set(value ?? null);
@@ -47,7 +55,7 @@ export const JsonEditor = ({ value, onChange, options }: JsonEditorProps) => {
       editor.destroy();
       editorRef.current = null;
     };
-  }, []);
+  }, [jsonToObj, options?.mode]);
 
   // sync external value → editor
   // useEffect(() => {

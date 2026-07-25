@@ -16,9 +16,12 @@ export const TablesMainView = () => {
     () => createFactoryTableStore({ listingType: 'tableRows' }),
     [],
   );
-  const { cPaging } = tableStore.useFactoryTableStore(({ state }) => ({
-    cPaging: state.paging,
-  }));
+  const { cPaging, clearSelected } = tableStore.useFactoryTableStore(
+    ({ state, api }) => ({
+      cPaging: state.paging,
+      clearSelected: api.clearSelected,
+    }),
+  );
 
   const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
     activeTable: state.activeTable,
@@ -57,7 +60,7 @@ export const TablesMainView = () => {
   const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
       row,
-      uiKey: idx.toString(),
+      uiKey: (cPaging.offset + idx).toString(),
     }));
   }, [rows]);
 
@@ -83,6 +86,7 @@ export const TablesMainView = () => {
     if (!dbSelected || !activeTable) {
       tablesDataStoreActions.initialize();
     }
+    clearSelected();
   }, [dbSelected, activeTable]);
 
   useEffect(() => {

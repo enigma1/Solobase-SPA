@@ -67,6 +67,7 @@ export const UserPrefsConfigSchema = z.object({
   hiddenColumns: HiddenColumnsSchema,
   headerVisibility: z.boolean(),
   allowSystemDatabases: z.boolean(),
+  objectEditorForJson: z.boolean(),
   sidebarWidth: z.int().min(10).max(1024),
   sidebarVisibility: SidebarVisibilitySchema,
   pageSizes: z.record(PageListingsSchema, PageSizeSchema),
