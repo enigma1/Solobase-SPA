@@ -1,5 +1,5 @@
 export * from './storage';
-export * from './basics';
+export * from './extras';
 export * from './controls';
 export * from './status';
 export * from './db';

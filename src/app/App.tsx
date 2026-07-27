@@ -4,7 +4,11 @@ import {
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { messageStoreActions, accountStoreActions } from '>/services/stores';
+import {
+  messageStoreActions,
+  accountStoreActions,
+  dialogStoreActions,
+} from '>/services/stores';
 import { useSessionRestore } from '>/services/queryHooks';
 import {
   RootLayout,
@@ -20,8 +24,9 @@ import {
   UsersList,
   ImportView,
   ScreenLoader,
+  DialogContent,
 } from '>/modules';
-import { isNonEmptyString } from '>/services/utils';
+import { isNonEmptyString, dialogActions } from '>/services/utils';
 import { routes, demoMode } from '>/config';
 import { AppBootstrap } from './AppBootstrap';
 
@@ -49,6 +54,30 @@ export const App = () => {
     const canRestore = sessionStorage.getItem('can-restore');
     if (canRestore !== 'true') {
       sessionStorage.setItem('can-restore', 'true');
+    }
+    const startupError = dialogStoreActions.getError();
+
+    if (startupError) {
+      dialogStoreActions.openDialog({
+        anonymous: true,
+        payload: {
+          caption: 'Action Failed',
+          component: (
+            <DialogContent note='Initialization Errors'>
+              <h3>{startupError.error}</h3>
+              <p className='text-sm'>{startupError.message}</p>
+              {startupError.details && (
+                <ul>
+                  {startupError.details.map((d, idx) => (
+                    <li key={`initialization-errors-${idx}`}>{d}</li>
+                  ))}
+                </ul>
+              )}
+            </DialogContent>
+          ),
+          actions: dialogActions.ack(),
+        },
+      });
     }
   }, []);
 

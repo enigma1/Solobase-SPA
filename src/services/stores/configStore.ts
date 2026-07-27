@@ -1,11 +1,12 @@
 import { makeStore, userPrefs, backPath } from '>/services/utils';
+import { loadExternalTheme } from '>/services/customized';
 import { apiClient } from '>/services/api/client';
-import { PageListings } from '>/services/utils/appSettings';
+import type { PageListings } from '>/services/utils/appSettings';
 import { fullBackendUrl } from '>/config';
 import { StorageConfig, SidebarVisibilityTypes } from '>/types';
 
 export type ConfigActions = {
-  setTheme: (value?: string) => void;
+  setTheme: (value?: string) => Promise<void>;
   getHiddenColumns: () => Record<string, boolean>;
   setHiddenColumns: (cols: Record<string, boolean>) => void;
   setHeaderVisibility: (visible: boolean) => void;
@@ -35,8 +36,9 @@ const baseStore = makeStore<StorageConfig>(() => {
 const { get, set, setAuto } = baseStore;
 
 export const configStoreActions: ConfigActions = {
-  setTheme: (value) => {
+  setTheme: async (value) => {
     const theme = value ?? get().theme;
+    await loadExternalTheme(theme);
     document.documentElement.setAttribute('data-theme', theme);
     setAuto({ theme });
   },

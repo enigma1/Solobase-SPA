@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { FetchDatabasesResponseSchema } from '>/contracts';
 import { useAccountStore } from '>/services/stores';
 import { queryKeys, STALE_TIME, DataHookProps, HookStore } from './defs';
 import {
@@ -137,8 +138,11 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
     queryKey: queryKeys.databases(request?.paging),
     // select: (data) => data.databases, // transform to string[] for easier usage
     queryFn: async () => {
-      const data = await dbApi.fetchDatabases(request ?? defaultPageRequest);
-      return data;
+      const response = await dbApi.fetchDatabases(
+        request ?? defaultPageRequest,
+      );
+      FetchDatabasesResponseSchema.parse(response);
+      return response;
     },
     staleTime: STALE_TIME,
     enabled: isAuthenticated,

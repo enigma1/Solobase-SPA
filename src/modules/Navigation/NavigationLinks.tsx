@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   CogIcon,
   LogOutIcon,
@@ -7,23 +6,17 @@ import {
   DatabaseArrowUpIcon,
 } from 'lucide-react';
 import { useConfigStore, dialogStoreActions } from '>/services/stores';
-import {
-  ComboBox,
-  Auth,
-  QueryInput,
-  DialogContent,
-  dialogFactories,
-} from '>/modules';
-import { dialogActions } from '>/services/utils';
+import { useThemeOptions } from '>/services/hooks';
+import { ComboBox, Auth, QueryInput, dialogFactories } from '>/modules';
 import { handleLogout } from '>/modules/Account';
-import { routes, themes } from '>/config';
 
 export const AuthNavigationLinks = () => {
-  // const buttonRef = useRef<HTMLButtonElement>(null);
   const { theme, setTheme } = useConfigStore(({ state, api }) => ({
     theme: state.theme,
     setTheme: api.setTheme,
   }));
+
+  const mergedThemes = useThemeOptions();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -54,10 +47,8 @@ export const AuthNavigationLinks = () => {
             <ComboBox
               value={theme}
               onChange={(t) => setTheme(t as string)}
-              $options={themes.map((t) => ({
-                value: t,
-                label: t,
-              }))}
+              //$options={mergedThemes}
+              $groups={mergedThemes}
               $placeholder='Select Theme'
             />
           </div>

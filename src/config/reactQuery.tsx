@@ -9,6 +9,11 @@ export const queryClient = new QueryClient({
     onError: (error) => {
       const e = error as ApiError;
       console.error('QueryCache', error);
+      const isActive = dialogStoreActions.getActive();
+      if (isActive) {
+        dialogStoreActions.setError(e);
+        return;
+      }
       dialogStoreActions.openDialog({
         payload: {
           caption: 'General Error',

@@ -15,6 +15,7 @@ import {
   Guest,
   DropdownMenu,
   GlobalDialog,
+  GlobalDialogError,
   dialogFactories,
 } from '>/modules';
 // For testing purposes only, remove in production
@@ -27,7 +28,7 @@ import {
   handleYourPrivileges,
   handleClearSession,
 } from '>/modules/Account';
-import { useDebouncer } from '>/services/hooks/common';
+import { useDebouncer } from '</src/services/hooks/misc';
 import { AuthNavigationLinks } from './NavigationLinks';
 import Logo from '>/assets/images/solo-base-xp.svg?react';
 
@@ -261,6 +262,7 @@ export const RootLayout = () => {
         </div>
       </div>
       <GlobalDialog />
+      <GlobalDialogError />
     </>
   );
 };

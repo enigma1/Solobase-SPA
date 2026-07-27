@@ -1,3 +1,4 @@
+import type { AxiosResponse } from 'axios';
 import { queriesStoreActions } from '>/services/stores';
 import { apiClient } from './client';
 import { handleApiAxios } from './apiHelpers';
@@ -59,6 +60,7 @@ import {
   SavePreferencesRequest,
   SavePreferencesResponse,
 } from './dbApiTypes';
+import { QueryLogEntry } from '>/types';
 
 type ApiOptions = {
   signal?: AbortSignal;
@@ -83,16 +85,23 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-const apiCall = <T>(fn: () => Promise<any>, unwrap = true) =>
+const apiCall = <T>(fn: () => Promise<AxiosResponse<T>>) =>
   handleApiAxios(async () => {
     const res = await fn();
-    if (Array.isArray(res.data?.queries) && res.data.queries.length) {
-      queriesStoreActions.addExecutedQueries(res.data.queries);
+
+    if (Array.isArray((res.data as any)?.queries)) {
+      queriesStoreActions.addExecutedQueries((res.data as any).queries);
     }
-    return unwrap ? res.data : res;
+
+    return res.data;
   });
 
-const ping = () => apiCall<{ ok: true }>(() => apiClient.get('/api/active'));
+const apiCallRaw = <T>(fn: () => Promise<AxiosResponse<T>>) =>
+  handleApiAxios(async () => {
+    return await fn();
+  });
+
+const ping = () => apiCall<BasicResponse>(() => apiClient.get('/api/active'));
 const checkSession = () =>
   apiCall<SessionRestoreResponse>(() => apiClient.get('/api/check-session'));
 
@@ -120,23 +129,19 @@ const runRawQuery = (data: RunRawQueryRequest, { signal }: ApiOptions) =>
   );
 
 const exportDatabases = (data: ExportDatabasesRequest) =>
-  apiCall(
-    () =>
-      apiClient.post('/db/export-databases', data, {
-        responseType: 'blob',
-        timeout: 0, // Let it finish
-      }),
-    false,
+  apiCallRaw(() =>
+    apiClient.post('/db/export-databases', data, {
+      responseType: 'blob',
+      timeout: 0, // Let it finish
+    }),
   );
 
 const exportTables = (data: ExportTablesRequest) =>
-  apiCall(
-    () =>
-      apiClient.post('/db/export-tables', data, {
-        responseType: 'blob',
-        timeout: 0, // Let it finish
-      }),
-    false,
+  apiCallRaw(() =>
+    apiClient.post('/db/export-tables', data, {
+      responseType: 'blob',
+      timeout: 0, // Let it finish
+    }),
   );
 
 const fetchUsers = (data: FetchUsersRequest) =>

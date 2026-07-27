@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
 import { App } from './app/App';
+import { customThemesReady } from './config';
 import { queryClient } from './config/reactQuery';
 import { configStoreActions } from './services/stores';
 
@@ -14,7 +15,8 @@ if (!container) {
   );
 }
 
-configStoreActions.setTheme();
+await customThemesReady;
+await configStoreActions.setTheme();
 ReactDOM.createRoot(container).render(
   /*
   <React.StrictMode>

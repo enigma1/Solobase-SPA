@@ -1,5 +1,5 @@
 // Simple mount check hook
-import { useRef, useEffect, useCallback, MutableRefObject } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 export const useMount = () => {
   const mount = useRef(true);

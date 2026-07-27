@@ -1,6 +1,6 @@
 import { useConfigStore } from '>/services/stores';
+import { useThemeOptions } from '>/services/hooks';
 import { ComboField } from '>/modules';
-import { themes } from '>/config';
 import { ItemPreferenceProps } from '>/types';
 
 export const ThemeSelect = ({ onModify }: ItemPreferenceProps) => {
@@ -8,6 +8,8 @@ export const ThemeSelect = ({ onModify }: ItemPreferenceProps) => {
     theme: state.theme,
     setTheme: api.setTheme,
   }));
+
+  const groupedThemes = useThemeOptions();
 
   return (
     <ComboField
@@ -20,10 +22,7 @@ export const ThemeSelect = ({ onModify }: ItemPreferenceProps) => {
         });
         setTheme(t as string);
       }}
-      $options={themes.map((t) => ({
-        value: t,
-        label: t,
-      }))}
+      $groups={groupedThemes}
       $placeholder='Select Theme'
     />
   );

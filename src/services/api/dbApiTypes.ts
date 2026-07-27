@@ -15,6 +15,7 @@ import {
   UserCapabilities,
   UserShape,
   UserPrefs,
+  QueryLogEntry,
 } from '>/types';
 
 export type ApiOptions = {
@@ -31,13 +32,13 @@ export type BasicResponse = {
   ok: boolean;
   message: string;
   route: string;
-  queries: string[];
+  queries: QueryLogEntry[];
 };
 
 export type AuthResponse<TData = BasicResponse> = {
   data: TData;
 };
-export type CleanupResponse = AuthResponse;
+export type CleanupResponse = BasicResponse & AuthResponse;
 
 export type AbortResponse = BasicResponse;
 
