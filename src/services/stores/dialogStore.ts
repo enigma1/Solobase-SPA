@@ -22,7 +22,6 @@ export type DialogStoreActions = {
 
 export const dialogStoreActions: DialogStoreActions = {
   openDialog: (dialog) => {
-    if (get().dialog) return;
     // setAuto({ dialog, response: null });
     setAuto({ dialog });
   },
@@ -30,13 +29,10 @@ export const dialogStoreActions: DialogStoreActions = {
     setAuto({ dialog: null, response: null });
   },
 
-  // await setAuto({ dialog, response: null }, { wait: true });
   openDialogAsync: async (dialog) => {
     await new Promise((resolve) => setTimeout(resolve, 0));
-
-    if (!get().dialog) {
-      await setAuto({ dialog });
-    }
+    // await setAuto({ dialog, response: null }, { wait: true });
+    await setAuto({ dialog });
   },
 
   closeDialogAsync: async () => {
