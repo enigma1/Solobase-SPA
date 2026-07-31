@@ -7,7 +7,7 @@ import {
   configStoreActions,
 } from '>/services/stores';
 import { NumberField } from '>/modules';
-import { routes } from '>/config/routes';
+import { routes, demoMode } from '>/config';
 
 const formatDuration = (d: Temporal.Duration) => {
   const total = Math.floor(d.total({ unit: 'seconds' }));
@@ -82,11 +82,22 @@ export const NetworkDown = () => {
         <div className='page-content justify-center items-center'>
           <h1 className='page-title text-4xl font-bold'>Network Down</h1>
           <div className='page-section bg-transparent max-w-lg'>
-            <p className='central'>
-              It seems like you're offline or the system is misconfigured and
-              cannot connect to a back endpoint. System will automatically
-              reconnect once connectivity is restored.
-            </p>
+            {demoMode ? (
+              <p className='central'>
+                Solo SPA currently runs in Demo Mode and it may take up to{' '}
+                <span className='font-bold'>
+                  30 seconds to startup the server
+                </span>
+                . System will automatically reconnect once connectivity is
+                restored.
+              </p>
+            ) : (
+              <p className='central'>
+                It seems like you're offline or the system is misconfigured and
+                cannot connect to a back endpoint. System will automatically
+                reconnect once connectivity is restored.
+              </p>
+            )}
             <p className='central'>
               Enter a connection port endpoint below for your Solobase Agent
               local proxy or directly to the Solobase Host Server if the SPA is
