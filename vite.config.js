@@ -15,9 +15,9 @@ const isExternal = (id) => {
 const isTest = process.env.NODE_ENV === 'test';
 
 const aliasPaths = {
-  '>': resolve(__dirname, './src'),
+  '>': resolve(import.meta.dirname, 'src'),
   // For everything else
-  '<': resolve(__dirname, './'),
+  '<': resolve(import.meta.dirname, './'),
 };
 
 const isAliasValid = Object.values(aliasPaths).every((p) => !isExternal(p));
