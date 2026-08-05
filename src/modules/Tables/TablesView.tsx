@@ -12,9 +12,14 @@ import type { ViewRow, SqlRow } from '>/types';
 import { TablesList } from './TablesList';
 
 export const TablesMainView = () => {
+  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
+    activeTable: state.activeTable,
+    dbSelected: state.dbSelected,
+  }));
+
   const tableStore = useMemo(
     () => createFactoryTableStore({ listingType: 'tableRows' }),
-    [],
+    [dbSelected],
   );
   const { cPaging, clearSelected } = tableStore.useFactoryTableStore(
     ({ state, api }) => ({
@@ -22,11 +27,6 @@ export const TablesMainView = () => {
       clearSelected: api.clearSelected,
     }),
   );
-
-  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
-    activeTable: state.activeTable,
-    dbSelected: state.dbSelected,
-  }));
 
   const {
     rows,

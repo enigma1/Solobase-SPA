@@ -8,7 +8,7 @@
   }
 
   .page-toolbar {
-    @apply flex flex-[0_0_auto] items-center gap-2 px-3 py-2;
+    @apply flex flex-[0_0_auto] flex-wrap items-center gap-2 px-3 py-2;
     /* background-color: var(--color-srf); */
     background: linear-gradient(54deg in oklch, var(--color-srf) 39%, var(--color-srf-dim) 100%);
   }

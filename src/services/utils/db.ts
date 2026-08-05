@@ -5,7 +5,7 @@ import {
   SqlTypes,
   SqlObject,
   SqlRow,
-  SqlColumns,
+  SqlColumn,
   TableShapeKey,
   TableShapeColumn,
   SqlColumnsShape,
@@ -66,7 +66,12 @@ export const tableColumnTypes = [
   {
     id: 'numeric',
     label: 'Numeric',
-    meta: { hasUnsigned: true, hasAutoIncrement: true },
+    meta: {
+      hasUnsigned: true,
+      hasAutoIncrement: true,
+      sortable: true,
+      filterable: true,
+    },
     options: [
       { value: 'INT' },
       { value: 'DECIMAL', params: ['Precision', 'Scale'] },
@@ -86,6 +91,7 @@ export const tableColumnTypes = [
   {
     id: 'text',
     label: 'Text',
+    meta: { sortable: true, filterable: true },
     options: [
       { value: 'VARCHAR', params: ['Length *'] },
       { value: 'TEXT' },
@@ -186,7 +192,7 @@ const isInteger = (type: string) =>
 const isBoolean = (type: string) => /bool|boolean/i.test(type);
 const isDate = (type: string) => /date|datetime|timestamp/i.test(type);
 
-export const buildRulesFromColumn = (col: SqlColumns) => {
+export const buildRulesFromColumn = (col: SqlColumn) => {
   const rules: any = {};
 
   if (col.nullable === 'NO') {
@@ -250,7 +256,7 @@ export const getComboOptions = (
 const isInitialObject = (type: string) =>
   hasit({ input: type, parts: objectTypes });
 
-const defaultValueForColumn = (column: SqlColumns): DataCell => {
+const defaultValueForColumn = (column: SqlColumn): DataCell => {
   const type = column.type.toLowerCase();
   if (type === 'json') {
     return {

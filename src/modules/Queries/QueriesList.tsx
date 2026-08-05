@@ -133,6 +133,7 @@ export const QueriesList = () => {
         title={`Queries: ${rows.length}`}
         tableRef={tableRef}
         actions={shellHandlers}
+        indicators={{ hasHiddenColumns: false }}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}

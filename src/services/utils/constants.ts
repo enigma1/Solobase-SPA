@@ -1,3 +1,5 @@
+import { ActionOptions } from '>/types';
+
 export const aStub: readonly unknown[] = [];
 export const oStub: Readonly<Record<string, unknown>> = {};
 export const fStub = (): void => {};
@@ -12,3 +14,10 @@ export const MAX_TABLE_KEYS = 64;
 export const MAX_COLUMNS_PER_KEY = 16;
 export const MAX_INSERT_DATA_ROWS = 16;
 export const MAX_COPIED_ROWS = 10;
+
+export const filterActionOptions: ActionOptions[] = [
+  { option: 'Strict Search', action: 'where' },
+  { option: 'Loose Search', action: 'like' },
+  { option: 'Unique Value', action: 'distinct' },
+  { option: 'Group Values', action: 'groupBy' },
+];

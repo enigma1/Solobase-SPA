@@ -60,6 +60,13 @@ const PageListingsSchema = z.enum(pListings);
 const PageSizeSchema = z.union(pageSizeValues.map((size) => z.literal(size)));
 
 export type PageListings = (typeof pListings)[number];
+
+const ColumnActionsSchema = z.object({
+  type: noTrim('type').min(1).max(128),
+  action: z.boolean().optional(),
+  sort: z.enum(['asc', 'desc', 'both']).optional(),
+});
+
 export const UserPrefsConfigSchema = z.object({
   backPort: z.number().int().min(1).max(65535),
   frontPort: z.number().int().min(1).max(65535),
@@ -71,6 +78,7 @@ export const UserPrefsConfigSchema = z.object({
   sidebarWidth: z.int().min(10).max(1024),
   sidebarVisibility: SidebarVisibilitySchema,
   pageSizes: z.record(PageListingsSchema, PageSizeSchema),
+  pastColumnsActions: z.record(z.string(), ColumnActionsSchema),
 });
 
 export const AppConfigSchema = z.object({

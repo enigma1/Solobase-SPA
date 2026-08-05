@@ -30,7 +30,7 @@ export const EmptyListing = ({
             <MapPlusIcon size={24} />
           </button>
         </div>
-        {children}
+        <div className='wrapper w-full'>{children}</div>
       </div>
     </div>
   );

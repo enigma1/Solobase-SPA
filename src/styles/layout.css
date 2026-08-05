@@ -61,6 +61,10 @@
     }
   }
 
+  .inline-wrapper {
+    @apply flex flex-[0_0_auto] flex-wrap gap-1 pr-3
+  }
+
   label.full {
     @apply w-full h-full;
   }

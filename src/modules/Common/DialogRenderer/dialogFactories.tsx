@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { dialogStoreActions, queriesStoreActions } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import {
@@ -19,6 +20,28 @@ import { dbApi } from '>/services/api';
 import { DialogPayload, WizardHandlers, CommonDialogHandlers } from '>/types';
 
 export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
+  confirmation: ({
+    caption,
+    note,
+    message,
+    onConfirm,
+  }: {
+    caption: string;
+    note: string;
+    message: ReactNode;
+    onConfirm: () => void;
+  }): DialogPayload => ({
+    caption,
+    variant: 'warn',
+    component: <DialogContent note={note}>{message}</DialogContent>,
+    actions: dialogActions.confirmCancel({
+      onConfirm: () => {
+        dialogStoreActions.closeDialog();
+        onConfirm();
+      },
+    }),
+  }),
+
   importData: () => {
     const handlers: CommonDialogHandlers = {
       confirm: async (): Promise<void> => {},

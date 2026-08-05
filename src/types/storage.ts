@@ -1,5 +1,12 @@
 import { PageListings } from '>/services/utils/appSettings';
-import { SqlRow, QueryItem, CopiedRow } from './db';
+import {
+  SortSelection,
+  FilterColumnParams,
+  ColumnActions,
+  SqlRow,
+  QueryItem,
+  SortByParams,
+} from './db';
 
 export type SidebarVisibilityTypes = {
   sideDatabases: boolean;
@@ -7,6 +14,12 @@ export type SidebarVisibilityTypes = {
   sideQueries: boolean;
 };
 export type SidebarOptions = keyof SidebarVisibilityTypes;
+
+export type StoredColumnActions = {
+  type: string;
+  filters?: FilterColumnParams[];
+  sort?: SortSelection;
+};
 
 export type StorageConfig = {
   frontPort: number;
@@ -19,6 +32,7 @@ export type StorageConfig = {
   theme: string;
   sidebarWidth: number;
   pageSizes: Record<PageListings, number>;
+  pastColumnsActions: Record<string, StoredColumnActions>;
 };
 
 export type UserPrefs = StorageConfig & {

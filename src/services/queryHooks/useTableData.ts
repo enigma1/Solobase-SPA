@@ -22,7 +22,7 @@ type TablesHookProps = {
 };
 
 export const useTableData = <TSelected = TablesHookProps>(
-  request?: BasicDataRequest,
+  request: BasicDataRequest,
   selector?: (args: TablesHookProps) => TSelected,
 ) => {
   const initialData: BasicResponse & BasicRowsShape = {
@@ -41,7 +41,7 @@ export const useTableData = <TSelected = TablesHookProps>(
 
   // React Query fetch
   const q = useQuery<FetchRowsResponse, Error>({
-    queryKey: queryKeys.rows(dbSelected, activeTable, request?.paging),
+    queryKey: queryKeys.rows(dbSelected, activeTable, request),
     queryFn: async () => {
       if (!dbSelected || !activeTable) return { ...initialData };
       const data = await dbApi.fetchRows({

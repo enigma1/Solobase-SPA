@@ -3,12 +3,26 @@ import { loadExternalTheme } from '>/services/customized';
 import { apiClient } from '>/services/api/client';
 import type { PageListings } from '>/services/utils/appSettings';
 import { fullBackendUrl } from '>/config';
-import { StorageConfig, SidebarVisibilityTypes } from '>/types';
+import { hasit } from '>/services/utils';
+import type {
+  StorageConfig,
+  SidebarVisibilityTypes,
+  SqlColumnsShape,
+  StoredColumnActions,
+  SortByParams,
+  FilterColumnParams,
+} from '>/types';
 
 export type ConfigActions = {
   setTheme: (value?: string) => Promise<void>;
   getHiddenColumns: () => Record<string, boolean>;
   setHiddenColumns: (cols: Record<string, boolean>) => void;
+  getPastColumnsActions: (
+    cols?: SqlColumnsShape,
+  ) => Record<string, StoredColumnActions>;
+  getSortBy: (cols?: SqlColumnsShape) => Record<string, SortByParams>;
+  getFilters: (cols?: SqlColumnsShape) => Record<string, FilterColumnParams[]>;
+
   setHeaderVisibility: (visible: boolean) => void;
   setSidebarVisibility: (visibility: SidebarVisibilityTypes) => void;
   getPreferences: () => StorageConfig;
@@ -53,6 +67,103 @@ export const configStoreActions: ConfigActions = {
     setAuto({ hiddenColumns: cols });
   },
   getHiddenColumns: () => get().hiddenColumns,
+  getPastColumnsActions: (cols) => {
+    const pastColumns = get().pastColumnsActions;
+    if (!cols) {
+      return pastColumns;
+    }
+    const hiddenColumns = get().hiddenColumns;
+    const filteredColumns = Object.keys(cols).filter((c) => !hiddenColumns[c]);
+
+    return filteredColumns.reduce(
+      (acc, cName) => {
+        const stored = pastColumns[cName];
+
+        if (
+          !stored ||
+          !hasit({
+            input: cols[cName].type,
+            parts: [stored.type],
+          })
+        ) {
+          return acc;
+        }
+
+        acc[cName] = stored;
+
+        return acc;
+      },
+      {} as Record<string, StoredColumnActions>,
+    );
+  },
+  getSortBy: (cols) => {
+    const pastColumns = get().pastColumnsActions;
+    const columns = cols
+      ? Object.keys(cols).filter((c) => !get().hiddenColumns[c])
+      : Object.keys(pastColumns);
+
+    return columns.reduce(
+      (acc, column) => {
+        const stored = pastColumns[column];
+
+        if (!stored) {
+          return acc;
+        }
+
+        if (
+          cols &&
+          !hasit({
+            input: cols[column].type,
+            parts: [stored.type],
+          })
+        ) {
+          return acc;
+        }
+
+        if (stored.sort === 'asc' || stored.sort === 'desc') {
+          acc[column] = {
+            direction: stored.sort,
+          };
+        }
+
+        return acc;
+      },
+      {} as Record<string, SortByParams>,
+    );
+  },
+  getFilters: (cols) => {
+    const pastColumns = get().pastColumnsActions;
+    const columns = cols
+      ? Object.keys(cols).filter((c) => !get().hiddenColumns[c])
+      : Object.keys(pastColumns);
+
+    return columns.reduce(
+      (acc, column) => {
+        const stored = pastColumns[column];
+
+        if (!stored) {
+          return acc;
+        }
+
+        if (
+          cols &&
+          !hasit({
+            input: cols[column].type,
+            parts: [stored.type],
+          })
+        ) {
+          return acc;
+        }
+
+        if (stored.filters?.length) {
+          acc[column] = stored.filters;
+        }
+
+        return acc;
+      },
+      {} as Record<string, FilterColumnParams[]>,
+    );
+  },
   getPageSizes: () => get().pageSizes,
 
   getBackport: () => get().backPort,

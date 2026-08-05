@@ -11,7 +11,7 @@
   }
 
   .menu-dropdown {
-    @apply relative inline-block;
+    @apply relative;
     color: var(--color-text);
     border-color: var(--color-border);
 
@@ -43,7 +43,7 @@
 
     & .menu-item,
     & a {
-      @apply block px-4 py-2 items-center border-t border-l border-r last:border-b rounded-t-none last:rounded-b-sm;
+      @apply block w-full px-4 py-2 items-center border-t border-l border-r last:border-b rounded-t-none last:rounded-b-sm;
       border-color: var(--color-border-separate);
       transition: background-color 0.15s ease;
 

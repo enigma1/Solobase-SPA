@@ -5,7 +5,7 @@ import {
   TokenRow,
   BasicRowsShape,
   PrimeObject,
-  SqlColumns,
+  SqlColumn,
   SqlColumnsShape,
   TableShapeKey,
   TableShapeColumn,
@@ -16,6 +16,9 @@ import {
   UserShape,
   UserPrefs,
   QueryLogEntry,
+  ColumnQueryMode,
+  FilterColumnParams,
+  SortByParams,
 } from '>/types';
 
 export type ApiOptions = {
@@ -84,13 +87,8 @@ type CommandResponse = BasicResponse & {
 
 export type RunRawQueryResponse = ResultSetResponse | CommandResponse;
 
-type SortBy = {
-  column: string;
-  direction: 'ASC' | 'DESC';
-};
-
-export type SortRequest = {
-  sortBy?: SortBy[];
+export type SortByRequest = {
+  sortBy?: Record<string, SortByParams>;
 };
 
 export type PagingRequest = {
@@ -100,6 +98,10 @@ export type PagingRequest = {
   };
 };
 
+export type FilterColumnsRequest = {
+  filters?: Record<string, FilterColumnParams[]>;
+};
+
 export type PagingResponse = {
   paging?: {
     hasNext: boolean;
@@ -107,7 +109,10 @@ export type PagingResponse = {
   };
 };
 
-export type BasicDataRequest = SortRequest & PagingRequest;
+export type BasicDataRequest = SortByRequest &
+  PagingRequest &
+  FilterColumnsRequest;
+
 export type BasicDataResponse = BasicResponse & BasicRowsShape & PagingResponse;
 
 export type FetchUsersRequest = BasicDataRequest;

@@ -344,6 +344,7 @@ export const DatabasesList = ({
   };
 
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
+  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
 
   const isBusy = isPending || isDatabaseSelectionPending;
   if (isBusy) return <ScreenLoader />;
@@ -360,6 +361,7 @@ export const DatabasesList = ({
         tableRef={tableRef}
         actions={shellHandlers}
         paging={pagingContext}
+        indicators={{ hasHiddenColumns }}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}

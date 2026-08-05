@@ -6,11 +6,11 @@ import {
   ArchiveRestoreIcon,
 } from 'lucide-react';
 import { emptyTableColumn, MAX_TABLE_COLUMNS } from '>/services/utils';
-import { SqlColumns } from '>/types';
+import { SqlColumn } from '>/types';
 import { TableColumnEntry } from './TableColumnEntry';
 import { TableFormShape } from './tableDefs';
 
-type ColumnBasics = Pick<SqlColumns, 'field' | 'type'>;
+type ColumnBasics = Pick<SqlColumn, 'field' | 'type'>;
 type TableColumnsFormProps = {
   form: UseFormReturn<TableFormShape>;
   onValidation: (valid: boolean) => void;

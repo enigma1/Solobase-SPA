@@ -1,3 +1,5 @@
+import { ColumnQueryMode } from './db';
+
 export type PageTableShellActions = {
   onDiscardEdits?: () => void;
   onSave?: () => void;
@@ -15,4 +17,9 @@ export type PagingContext = {
   onNextPage: () => void;
   onPreviousPage: () => void;
   currentSize: number;
+};
+
+export type ActionOptions = {
+  option: string;
+  action: ColumnQueryMode;
 };

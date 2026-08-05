@@ -1,23 +1,46 @@
 import { makeFactoryStore } from '>/services/utils/emitter';
-import { PagingParams } from '>/types';
 import { PageListings, defaultPaging } from '>/services/utils';
+import {
+  PagingParams,
+  FilterColumnParams,
+  SortByParams,
+  SortSelection,
+  StoredColumnActions,
+} from '>/types';
 import { configStoreActions } from './configStore';
 
 type WithUiKey = {
   uiKey: string;
 };
 
+type ChangeSortByProps = {
+  column: string;
+  direction: SortSelection;
+};
+
+type ChangeFilterProps = {
+  column: string;
+  filter: FilterColumnParams;
+};
+
 type FactoryTableState = {
   selectedRows: Set<string>;
   paging: PagingParams;
+  sortBy: Record<string, SortByParams>;
+  filters: Record<string, FilterColumnParams[]>;
 };
 
 export type FactoryTableActions = {
   initialize: () => void;
+  restorePreferences: (stored: Record<string, StoredColumnActions>) => void;
   clearSelected: () => void;
   setAllRows: (rows: WithUiKey[]) => void;
   setSelectedRow: (row: string, active: boolean) => void;
   setPaging: (paging: Partial<PagingParams>) => void;
+  clearFilters: () => void;
+  clearSorts: () => void;
+  changeSortBy: (sortParams: ChangeSortByProps) => void;
+  changeFilters: (filterParams: ChangeFilterProps) => void;
 };
 
 export type FactoryTableStore = {
@@ -39,7 +62,7 @@ export type FactoryTableStore = {
 type GetOptionsProps = {
   listingType?: PageListings;
 };
-const getOptions = ({ listingType }: GetOptionsProps) => {
+const getPageOptions = ({ listingType }: GetOptionsProps) => {
   const paging = configStoreActions.getPageSizes();
   return {
     ...(listingType && { limit: paging[listingType] }),
@@ -52,24 +75,50 @@ export const createFactoryTableStore = (options: GetOptionsProps) => {
     selectedRows: new Set<string>(),
     paging: {
       ...defaultPaging,
-      ...getOptions(options),
+      ...getPageOptions(options),
     },
+    sortBy: {},
+    filters: {},
   }))();
 
   const { get, set, setAuto } = baseStore;
 
   const api: FactoryTableActions = {
     initialize: () => {
-      configStoreActions.getPreferences();
       set(() => ({
         selectedRows: new Set<string>(),
         paging: {
           ...defaultPaging,
-          ...getOptions(options),
+          ...getPageOptions(options),
         },
+        sortBy: {},
+        filters: {},
       }));
     },
 
+    restorePreferences: (stored: Record<string, StoredColumnActions>) => {
+      setAuto(() => {
+        const filters: Record<string, FilterColumnParams[]> = {};
+        const sortBy: Record<string, SortByParams> = {};
+
+        for (const [column, pref] of Object.entries(stored)) {
+          if (pref.filters?.length) {
+            filters[column] = pref.filters;
+          }
+
+          if (pref.sort && pref.sort !== 'both') {
+            sortBy[column] = {
+              direction: pref.sort,
+            };
+          }
+        }
+
+        return {
+          filters,
+          sortBy,
+        };
+      });
+    },
     clearSelected: () => {
       setAuto({
         selectedRows: new Set(),
@@ -103,6 +152,58 @@ export const createFactoryTableStore = (options: GetOptionsProps) => {
           ...paging,
         },
       }));
+    },
+    changeSortBy: ({ column, direction }) => {
+      setAuto((prev) => {
+        const current = prev.sortBy ?? {};
+
+        const { [column]: _, ...rest } = current;
+
+        return {
+          sortBy:
+            direction === 'both'
+              ? rest
+              : {
+                  ...rest,
+                  [column]: {
+                    direction,
+                  },
+                },
+        };
+      });
+    },
+    changeFilters: ({ column, filter }) => {
+      setAuto((prev) => {
+        const current = prev.filters ?? {};
+        const columnFilters = current[column] ?? [];
+
+        const nextColumnFilters =
+          filter.value !== undefined
+            ? [...columnFilters.filter((f) => f.mode !== filter.mode), filter]
+            : columnFilters.filter((f) => f.mode !== filter.mode);
+        const { [column]: _, ...rest } = current;
+
+        return {
+          filters: nextColumnFilters.length
+            ? {
+                ...rest,
+                [column]: nextColumnFilters,
+              }
+            : rest,
+
+          paging: {
+            ...prev.paging,
+            offset: 0,
+          },
+        };
+      });
+    },
+
+    clearFilters: () => {
+      setAuto({ filters: {} });
+    },
+    clearSorts: () => {
+      setAuto({ sortBy: {} });
     },
   };
 

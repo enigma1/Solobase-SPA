@@ -1,5 +1,7 @@
 export * from './ThemeSelect';
 export * from './HiddenColumns';
+export * from './FilteredColumns';
+export * from './SortedColumns';
 export * from './LayoutVisibility';
 export * from './NetworkSelect';
 export * from './PageSizing';

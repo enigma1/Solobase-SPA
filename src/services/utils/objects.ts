@@ -5,6 +5,7 @@ import type {
   BasicResponse,
   PagingRequest,
   PagingResponse,
+  FilterColumnsRequest,
 } from '>/services/api';
 import type { BasicRowsShape, PagingParams } from '>/types';
 
@@ -21,6 +22,8 @@ export const defaultPageResponse: PagingResponse = {
     hasNext: false,
   },
 };
+
+export const defaultFilterColumnRequest: FilterColumnsRequest = {};
 
 export const defaultPaging: PagingParams = {
   limit: pageSizeValues[0],

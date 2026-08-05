@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash-es/cloneDeep';
 import { useState, useEffect } from 'react';
 import {
   ChevronLeftIcon,
@@ -19,6 +20,8 @@ import { ScreenLoader } from '>/modules';
 import {
   ThemeSelect,
   HiddenColumns,
+  SortedColumns,
+  FilteredColumns,
   HeaderVisibility,
   SidebarVisibility,
   NetworkSelect,
@@ -36,6 +39,8 @@ const sections = [
   'headerVisibility',
   'sidebarVisibility',
   'hiddenColumns',
+  'sortedColumns',
+  'filteredColumns',
   'copiedRows',
   'queries',
   'misc',
@@ -123,15 +128,13 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
     }));
   };
 
-  const [tempSettings, setTempSettings] = useState<UserPrefs>({
-    ...configStoreActions.getPreferences(),
-    queries: {
-      ...queriesStoreActions.getQueries(),
-    },
-    copiedRows: {
-      ...historyStoreActions.getCopiedRows(),
-    },
-  });
+  const [tempSettings, setTempSettings] = useState<UserPrefs>(() =>
+    cloneDeep({
+      ...configStoreActions.getPreferences(),
+      queries: queriesStoreActions.getQueries(),
+      copiedRows: historyStoreActions.getCopiedRows(),
+    }),
+  );
 
   const { setButtonStatus } = useModal();
 
@@ -250,6 +253,29 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
               triggerSave={currentTrigger}
             />
           </PreferenceSection>
+          <PreferenceSection
+            title='Columns Sorted'
+            collapsed={collapsedSections.sortedColumns}
+            onToggle={() => toggleSection('sortedColumns')}
+          >
+            <SortedColumns
+              modified={tempSettings}
+              onModify={handleModify}
+              triggerSave={currentTrigger}
+            />
+          </PreferenceSection>
+          <PreferenceSection
+            title='Columns Filtered'
+            collapsed={collapsedSections.filteredColumns}
+            onToggle={() => toggleSection('filteredColumns')}
+          >
+            <FilteredColumns
+              modified={tempSettings}
+              onModify={handleModify}
+              triggerSave={currentTrigger}
+            />
+          </PreferenceSection>
+
           <PreferenceSection
             title='Saved Data Rows'
             collapsed={collapsedSections.copiedRows}

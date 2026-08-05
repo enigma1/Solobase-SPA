@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-query';
 import { accountStoreActions } from '>/services/stores';
 import { createNetworkError } from '>/services/api/apiErrors';
+import { BasicDataRequest } from '>/services/api/dbApiTypes';
 import { PagingParams } from '>/types';
 
 export const STALE_TIME = 5 * 60 * 1000; // Set default to 5 minutes
@@ -120,29 +121,17 @@ export const queryKeys = {
   rows: (
     db: string | null,
     table: string | null,
-    paging?: Partial<PagingParams>,
-  ) =>
-    paging
-      ? [
-          'users',
-          'databases',
-          db,
-          'tables',
-          table,
-          'table-details',
-          'table-rows',
-          paging.offset,
-          paging.limit,
-        ]
-      : [
-          'users',
-          'databases',
-          db,
-          'tables',
-          table,
-          'table-details',
-          'table-rows',
-        ],
+    request: BasicDataRequest,
+  ) => [
+    'users',
+    'databases',
+    db,
+    'tables',
+    table,
+    'table-details',
+    'table-rows',
+    request,
+  ],
 };
 
 export const getMutationResult = <TData = any, TVariables = any>(

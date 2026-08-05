@@ -1,19 +1,32 @@
 import { useState, useRef, useEffect } from 'react';
 
 type DropDownMenuProps = {
-  label: React.ReactNode;
+  label?: React.ReactNode;
   children: React.ReactNode;
   disabled?: boolean;
   title?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 export const DropdownMenu = ({
   label,
   children,
   disabled,
   title,
+  open,
+  onOpenChange,
 }: DropDownMenuProps) => {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
   const ref = useRef<HTMLDivElement>(null);
+
+  const setOpen = (value: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(value);
+    }
+    onOpenChange?.(value);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -22,21 +35,23 @@ export const DropdownMenu = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   return (
     <div className='menu-dropdown' title={title} ref={ref}>
-      <button
-        data-disabled={disabled ? 'true' : undefined}
-        onClick={() => setOpen((v) => !v)}
-        className='menu-trigger'
-      >
-        {label}
-      </button>
+      {label && (
+        <button
+          data-disabled={disabled ? 'true' : undefined}
+          onClick={() => setOpen(!isOpen)}
+          className='menu-trigger'
+        >
+          {label}
+        </button>
+      )}
 
-      {open && <div className='menu-panel'>{children}</div>}
+      {isOpen && <div className='menu-panel'>{children}</div>}
     </div>
   );
 };

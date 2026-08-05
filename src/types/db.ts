@@ -1,4 +1,5 @@
 import { JSONTypes, JSONObject } from 'type-plus';
+
 export type SqlTypes = Date | bigint | JSONTypes;
 
 export type SqlObject = { [key in string]?: SqlTypes };
@@ -12,14 +13,12 @@ export type PrimeObject<
     ? Record<K, T>
     : never;
 
+export type SortDirection = 'asc' | 'desc';
+export type SortSelection = 'both' | SortDirection;
+export type ColumnQueryMode = 'like' | 'where' | 'groupBy' | 'distinct';
+
 export type DataEditorType =
-  | 'input'
-  | 'number'
-  | 'textarea'
-  | 'json'
-  | 'boolean'
-  | 'object'
-  | 'selection';
+  'input' | 'number' | 'textarea' | 'json' | 'boolean' | 'object' | 'selection';
 
 export type DataCell<TOptions = unknown> = {
   value: SqlTypes;
@@ -27,7 +26,7 @@ export type DataCell<TOptions = unknown> = {
   options?: TOptions;
 };
 
-export type SqlColumns = {
+export type SqlColumn = {
   field: string;
   type: string;
   nullable: 'YES' | 'NO';
@@ -37,7 +36,7 @@ export type SqlColumns = {
 };
 
 export type SqlRow = SqlTypes[];
-export type SqlColumnsShape = Record<string, SqlColumns>;
+export type SqlColumnsShape = Record<string, SqlColumn>;
 
 // export type SqlTableData = {
 //   rows: SqlRow[];
@@ -148,4 +147,42 @@ export type PagingParams = {
   offset: number;
   hasNext: boolean;
   hasPrevious: boolean;
+};
+
+export type SortByParams = {
+  direction: SortDirection;
+};
+
+// Use something like this for consuming these types on th of the tables
+// columnActions = {
+//   id: {
+//     action: true,
+//     sort: 'both',
+//   },
+//   geom: {
+//     action: true,
+//   },
+//   created_at: {
+//     sort: 'desc',
+//   },
+// };
+
+// export type FilterColumnParams = {
+//   value: SqlTypes;
+//   mode: ColumnQueryMode;
+// };
+
+export type FilterColumnParams = {
+  value?: SqlTypes;
+  mode: ColumnQueryMode;
+};
+export type ColumnActions = {
+  type: string;
+  filter?: FilterColumnParams;
+  sort?: SortSelection;
+};
+
+export type ActionColumnProps = {
+  colName: string;
+  actions: ColumnActions;
 };

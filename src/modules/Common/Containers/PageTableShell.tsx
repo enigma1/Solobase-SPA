@@ -17,12 +17,18 @@ import type { FactoryTableStore } from '>/services/stores';
 import { Pagination, PageSizeSelect } from '>/modules';
 import { PageTableShellActions, PagingContext } from '>/types';
 
+export type TableShellIndicators = {
+  hasHiddenColumns: boolean;
+};
+
 export type PageTableShellProps = {
   title: ReactNode;
   store: FactoryTableStore;
   actions?: PageTableShellActions;
   tableRef?: React.RefObject<HTMLTableElement | null>;
   paging?: PagingContext;
+  indicators: TableShellIndicators;
+  notice?: ReactNode;
 };
 
 export const PageTableShell = ({
@@ -31,6 +37,8 @@ export const PageTableShell = ({
   actions,
   title,
   paging,
+  indicators,
+  notice,
 }: PageTableShellProps) => {
   const { useFactoryTableStore } = store;
   const { hasSelects, clearSelected } = useFactoryTableStore(
@@ -51,7 +59,6 @@ export const PageTableShell = ({
     onBack,
   } = shellActions;
   const [isPacked, setIsPacked] = useState(false);
-  const [showNotice, setShowNotice] = useState(false);
   return (
     <>
       <div className='page-top-container'>
@@ -137,7 +144,7 @@ export const PageTableShell = ({
 
             {onFilterColumns && (
               <button
-                className='btn-secondary'
+                className={`btn-secondary ${indicators.hasHiddenColumns ? 'emphasize' : ''}`}
                 onClick={onFilterColumns}
                 title='Select columns'
               >
@@ -160,12 +167,8 @@ export const PageTableShell = ({
               </button>
             )}
           </div>
+          {notice && <div className='wrapper w-full page-notice'>{notice}</div>}
         </div>
-        {showNotice && (
-          <div className='page-notice'>
-            Notice around queries goes here if queries are present
-          </div>
-        )}
       </div>
     </>
   );

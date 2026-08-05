@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   useConfigStore,
@@ -13,7 +13,13 @@ import {
   useUpdateRowsMutation,
   useDeleteRowsMutation,
 } from '>/services/queryHooks';
-import { dialogActions, makeColumnsActive } from '>/services/utils';
+import {
+  dialogActions,
+  makeColumnsActive,
+  tableColumnTypes,
+  hasit,
+  filterActionOptions,
+} from '>/services/utils';
 import {
   SqlTableContainer,
   EffectiveTableWrapper,
@@ -22,6 +28,7 @@ import {
   DialogContent,
   EditDataCellRaw,
   dialogFactories,
+  FiltersAndSortsNotice,
 } from '>/modules';
 import { routes } from '>/config';
 import {
@@ -38,6 +45,8 @@ import {
   ViewRow,
   TokenRow,
   PagingContext,
+  ColumnActions,
+  ActionColumnProps,
 } from '>/types';
 import { updateRowsSqlTransformer, deleteRowsSqlTransformer } from './helpers';
 import { DataRowsDeletePreview } from './DataRowsPreview';
@@ -73,17 +82,74 @@ export const DataRowsList = ({
     [rows],
   );
 
-  const { paging } = store.useFactoryTableStore(({ state }) => ({
-    paging: state.paging,
+  const { paging, filters, sortBy, changeFilters, changeSortBy } =
+    store.useFactoryTableStore(({ state, api }) => ({
+      paging: state.paging,
+      filters: state.filters,
+      sortBy: state.sortBy,
+      changeFilters: api.changeFilters,
+      changeSortBy: api.changeSortBy,
+    }));
+
+  const columnsActions = useMemo<Record<string, ColumnActions>>(() => {
+    const result: Record<string, ColumnActions> = {};
+
+    for (const colName of columnsOrder) {
+      const colData = cols[colName];
+      const storedSort = sortBy[colName];
+
+      const typeGroup = tableColumnTypes.find((group) =>
+        hasit({
+          input: colData.type,
+          parts: group.options.map((option) => option.value),
+        }),
+      );
+
+      if (!typeGroup) continue;
+
+      const actions: ColumnActions = {
+        type: colData.type,
+      };
+
+      if (storedSort) {
+        actions.sort = storedSort.direction;
+      } else if (typeGroup.meta?.sortable) {
+        actions.sort = 'both';
+      }
+
+      const storedFilters = filters[colName];
+
+      if (storedFilters?.length) {
+        actions.filter = storedFilters[storedFilters.length - 1];
+      }
+
+      result[colName] = actions;
+    }
+
+    return result;
+  }, [columnsOrder, cols, sortBy, filters]);
+
+  const {
+    pastColumnsActions,
+    hiddenColumns,
+    savePreferences,
+    getPageSizes,
+    getPastColumnsActions,
+    getSortBy,
+  } = useConfigStore(({ state, api }) => ({
+    pastColumnsActions: state.pastColumnsActions,
+    hiddenColumns: state.hiddenColumns,
+    savePreferences: api.savePreferences,
+    getPageSizes: api.getPageSizes,
+    getPastColumnsActions: api.getPastColumnsActions,
+    getSortBy: api.getSortBy,
   }));
 
-  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
-    ({ state, api }) => ({
-      hiddenColumns: state.hiddenColumns,
-      savePreferences: api.savePreferences,
-      getPageSizes: api.getPageSizes,
-    }),
-  );
+  useEffect(() => {
+    // store.api.initialize();
+    const prefs = getPastColumnsActions(cols);
+    store.api.restorePreferences(prefs);
+  }, [pastColumnsActions, activeTable, cols]);
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
   const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
@@ -198,10 +264,10 @@ export const DataRowsList = ({
     });
   };
 
-  const discardRow = (rowId: number) => {
-    const { [rowId]: _, ...prevState } = editedRow;
-    markEditedRow(prevState);
-  };
+  // const discardRow = (rowId: number) => {
+  //   const { [rowId]: _, ...prevState } = editedRow;
+  //   markEditedRow(prevState);
+  // };
 
   const discardEditedRows = () => {
     dialogStoreActions.openDialog({
@@ -291,6 +357,75 @@ export const DataRowsList = ({
     });
   };
 
+  const handleColumnAction = (action: ActionColumnProps) => {
+    const { colName, actions } = action;
+    const pastColumns = getPastColumnsActions();
+    if (actions.sort) {
+      changeSortBy({ column: colName, direction: actions.sort });
+      // savePreferences({
+      //   pastColumnsActions: {
+      //     ...pastColumns,
+      //     [colName]: {
+      //       ...pastColumns[colName],
+      //       type: cols[colName].type,
+      //       ...(actions.sort === 'asc' || actions.sort === 'desc'
+      //         ? { sort: actions.sort }
+      //         : { sort: undefined }),
+      //     },
+      //   },
+      // });
+    }
+
+    if (!actions.filter) return;
+    if (actions.filter.mode === 'distinct') {
+      changeFilters({
+        column: colName,
+        filter: { value: actions.filter.value, mode: 'distinct' },
+      });
+    } else if (actions.filter.mode === 'groupBy') {
+      changeFilters({
+        column: colName,
+        filter: { value: actions.filter.value, mode: 'groupBy' },
+      });
+    } else {
+      if (actions.filter.value === undefined) {
+        changeFilters({
+          column: colName,
+          filter: { value: actions.filter.value, mode: actions.filter.mode },
+        });
+        return;
+      }
+      const valueRef = { current: actions.filter.value };
+      const modeRef = { current: actions.filter.mode };
+      dialogStoreActions.openDialog({
+        payload: {
+          caption: `SQL Edits`,
+          variant: 'warn',
+          component: (
+            <DialogContent note={`${colName} @${cols[colName].type}`}>
+              <EditDataCellRaw
+                type={cols[colName].type}
+                value={valueRef.current!}
+                onChange={(v) => {
+                  valueRef.current = v;
+                }}
+              />
+            </DialogContent>
+          ),
+          actions: dialogActions.enabledConfirmCancel({
+            onConfirm: () => {
+              dialogStoreActions.closeDialog();
+              changeFilters({
+                column: colName,
+                filter: { value: valueRef.current, mode: modeRef.current },
+              });
+            },
+          }),
+        },
+      });
+    }
+  };
+
   const handleBack = () => {
     navigate(routes.front.listTables, {
       replace: true,
@@ -344,10 +479,25 @@ export const DataRowsList = ({
     };
   };
 
+  const hasSorts = Object.keys(sortBy).length > 0;
+  const hasFilters = Object.keys(filters).length > 0;
+
+  let notice;
+  if (hasFilters || hasSorts) {
+    notice = (
+      <FiltersAndSortsNotice
+        store={store}
+        clearSorts={hasSorts}
+        clearFilters={hasFilters}
+      />
+    );
+  }
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
+  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
+
   const isBusy = isPending || isDeletePending;
 
-  if (isBusy) return <ScreenLoader />;
+  // if (isBusy) return <ScreenLoader />;
 
   const pagingContext = getPagingContext();
   const start = paging.offset + 1;
@@ -355,12 +505,15 @@ export const DataRowsList = ({
 
   return (
     <>
+      {isBusy && <ScreenLoader />}
       <PageTableShell
         store={store}
         tableRef={tableRef}
         title={`${activeTable}: ${start}–${end}`}
         actions={shellHandlers}
         paging={pagingContext}
+        indicators={{ hasHiddenColumns }}
+        notice={notice}
       />
       <EffectiveTableWrapper
         outerRef={outerRef}
@@ -376,9 +529,13 @@ export const DataRowsList = ({
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
+          filters={filters}
+          columnActions={columnsActions}
+          onActionCol={handleColumnAction}
           onEditCell={handleEditClick}
           onCopyRow={handleCopyRow}
           editedRow={editedRow}
+          actionOptions={filterActionOptions}
         />
       </EffectiveTableWrapper>
     </>
