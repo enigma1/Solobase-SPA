@@ -23,7 +23,7 @@ export const MiniTable = ({
           <th className='w-8' />
           {columnsOrder.map((colName, cidx) => (
             <th key={`mini-th-${colName}-${cidx}`}>
-              <div className='truncate'>{colName}</div>
+              <div className='truncate px-2 py-0.5'>{colName}</div>
             </th>
           ))}
         </tr>

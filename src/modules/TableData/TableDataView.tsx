@@ -1,4 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTableData } from '>/services/queryHooks';
 import {
@@ -23,6 +24,7 @@ export const TableDataView = () => {
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
   }));
+
   const tableStore = useMemo(
     () => createFactoryTableStore({ listingType: 'dataRows' }),
     [dbSelected, activeTable],
@@ -128,8 +130,9 @@ export const TableDataView = () => {
   const isBusy = isFetching;
 
   if (!dbSelected || !activeTable) {
-    return null;
+    return <Navigate to={routes.front.home} replace />;
   }
+
   if (isBusy) {
     return <ScreenLoader />;
   }
