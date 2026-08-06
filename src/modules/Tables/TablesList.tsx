@@ -145,7 +145,7 @@ export const TablesList = ({
     });
   };
 
-  const onSelectRow = (uid: string) => {
+  const onSelectRow = async (uid: string) => {
     const row = rowMap.get(uid);
     if (!row) return;
     const fields = getColumnsFromRow({
@@ -157,7 +157,8 @@ export const TablesList = ({
     const tableName = fields[databaseFields.table];
     if (typeof tableName !== 'string') return;
 
-    accountStoreActions.setActiveTable(tableName);
+    const hasChanged = await accountStoreActions.setActiveTable(tableName);
+    if (!hasChanged) return;
 
     if (location.pathname !== routes.front.listData) {
       navigate(routes.front.listData);

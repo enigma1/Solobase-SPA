@@ -8,7 +8,7 @@ import {
   configStoreActions,
   columnsStoreActions,
 } from '>/services/stores';
-import { dialogFactories } from '>/modules';
+import { dialogFactories } from '>/modules/Common/DialogRenderer/dialogFactories';
 import { SqlRow } from '>/types';
 
 const changeColumnsActivePrefs = (col: string, hidden: boolean) => {
@@ -32,6 +32,25 @@ export const makeColumnsActive = (columnsOrder: string[]) => {
     }),
   });
 };
+
+export const openUnsavedChangesConfirmation = () =>
+  new Promise<boolean>((resolve) => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.confirmation({
+        caption: 'Unsaved Changes',
+        note: 'Data Row Edits',
+        message: 'You have unsaved changes. Leave this page?',
+        onConfirm: () => {
+          dialogStoreActions.closeDialog();
+          resolve(true);
+        },
+        onCancel: () => {
+          dialogStoreActions.closeDialog();
+          resolve(false);
+        },
+      }),
+    });
+  });
 
 // type ProcessDownloads = {
 //   rows: SqlRow[];

@@ -1,5 +1,4 @@
 export * from './tablesStore';
-export * from './tablesDataStore';
 export * from './messageStore';
 export * from './dialogStore';
 export * from './historyStore';

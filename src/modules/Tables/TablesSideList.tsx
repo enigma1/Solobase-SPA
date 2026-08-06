@@ -1,11 +1,8 @@
 import { useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTables } from '>/services/queryHooks';
-import { isObjectEmpty, dialogActions } from '>/services/utils';
 import {
   useAccountStore,
-  useTablesDataStore,
-  dialogStoreActions,
   createFactoryTableStore,
   useConfigStore,
 } from '>/services/stores';
@@ -36,11 +33,6 @@ export const TablesSideList = () => {
       setActiveTable: api.setActiveTable,
     }),
   );
-
-  const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
-    editedRow: state.editedRow,
-    markEditedRow: api.markEditedRow,
-  }));
 
   const { tables, responsePaging, isFetching, isSuccess } = useTables(
     {
@@ -80,39 +72,17 @@ export const TablesSideList = () => {
     });
   }, [pageSizes.tableRows]);
 
-  const handleSwitchTable = (name: string) => {
+  const handleSwitchTable = async (name: string) => {
     if (name === activeTable) {
       if (location.pathname !== routes.front.listData) {
         navigate(routes.front.listData);
       }
       return;
     }
-    if (!isObjectEmpty(editedRow)) {
-      dialogStoreActions.openDialog({
-        payload: {
-          caption: 'Unsaved Changes',
-          component: (
-            <DialogContent note='Data Row Edits'>
-              {
-                'You have unsaved changes. Switching tables will discard them. Continue?'
-              }
-            </DialogContent>
-          ),
-          actions: dialogActions.confirmCancel({
-            onConfirm: () => {
-              dialogStoreActions.closeDialog();
-              markEditedRow({});
-              setActiveTable(name);
-              if (location.pathname !== routes.front.listData) {
-                navigate(routes.front.listData);
-              }
-            },
-          }),
-        },
-      });
-      return;
-    }
-    setActiveTable(name);
+
+    const hasChanged = await setActiveTable(name);
+    if (!hasChanged) return;
+
     if (location.pathname !== routes.front.listData) {
       navigate(routes.front.listData);
     }

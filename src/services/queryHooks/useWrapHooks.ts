@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   accountStoreActions,
   messageStoreActions,
-  tablesDataStoreActions,
   configStoreActions,
 } from '>/services/stores';
 import { routes } from '>/config';
@@ -24,7 +23,6 @@ export const useSelectDatabaseWrap = () => {
   const callbacks = {
     onSuccess: (data: SelectDatabaseResponse) => {
       const pageSizes = configStoreActions.getPageSizes();
-      tablesDataStoreActions.initialize();
       navigate(routes.front.listTables, { replace: true });
     },
 

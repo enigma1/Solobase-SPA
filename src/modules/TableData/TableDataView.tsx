@@ -1,14 +1,13 @@
 import { useRef, useEffect, useMemo } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useBlocker, Navigate } from 'react-router-dom';
 import { useTableData, useTableColumnsInfoHook } from '>/services/queryHooks';
 import {
   useAccountStore,
-  tablesDataStoreActions,
   dialogStoreActions,
   createFactoryTableStore,
   useColumnsStore,
 } from '>/services/stores';
+import { openUnsavedChangesConfirmation } from '>/services/utils';
 import { routes } from '>/config';
 import {
   DataRowsList,
@@ -20,10 +19,14 @@ import {
 import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
-  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
-    activeTable: state.activeTable,
-    dbSelected: state.dbSelected,
-  }));
+  const navigate = useNavigate();
+  const { dbSelected, activeTable, registerActiveTableGuard } = useAccountStore(
+    ({ state, api }) => ({
+      activeTable: state.activeTable,
+      dbSelected: state.dbSelected,
+      registerActiveTableGuard: api.registerActiveTableGuard,
+    }),
+  );
 
   const columnInfoRequest = {
     database: dbSelected ?? '',
@@ -50,15 +53,46 @@ export const TableDataView = () => {
     }),
   );
 
-  // const restoredPrefs = useRef(false);
-  const navigate = useNavigate();
-  const { cPaging } = tableStore.useFactoryTableStore(({ state }) => ({
-    cPaging: state.paging,
-  }));
+  const { cPaging, hasEdits, clearEdits } = tableStore.useFactoryTableStore(
+    ({ state, api }) => ({
+      cPaging: state.paging,
+      hasEdits: api.hasEdits,
+      clearEdits: api.clearEdits,
+    }),
+  );
 
   useEffect(() => {
-    tablesDataStoreActions.initialize();
-  }, [dbSelected, activeTable]);
+    return registerActiveTableGuard(async () => {
+      if (!hasEdits()) {
+        return true;
+      }
+
+      return await openUnsavedChangesConfirmation();
+    });
+  }, []);
+
+  // const blocker = useBlocker(() => hasEdits());
+
+  // useEffect(() => {
+  //   if (blocker.state !== 'blocked' || !hasEdits()) return;
+
+  //   dialogStoreActions.openDialog({
+  //     payload: dialogFactories.confirmation({
+  //       caption: 'Unsaved Changes',
+  //       note: 'Data Row Edits',
+  //       message: 'You have unsaved changes. Leave this page?',
+  //       onConfirm: () => {
+  //         dialogStoreActions.closeDialog();
+  //         clearEdits();
+  //         blocker.proceed();
+  //       },
+  //       onCancel: () => {
+  //         dialogStoreActions.closeDialog();
+  //         blocker.reset();
+  //       },
+  //     }),
+  //   });
+  // }, [blocker]);
 
   const { cSortBy, cFilters, request } = useMemo(() => {
     const cSortBy = getSortBy(colsInfo);

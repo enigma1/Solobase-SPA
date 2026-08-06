@@ -4,7 +4,6 @@ import { useDatabases, useSelectDatabaseWrap } from '>/services/queryHooks';
 import {
   useConfigStore,
   useAccountStore,
-  useTablesDataStore,
   createFactoryTableStore,
 } from '>/services/stores';
 import { routes } from '>/config';
@@ -25,10 +24,6 @@ export const DatabasesSideList = () => {
 
   const { paging } = store.useFactoryTableStore(({ state }) => ({
     paging: state.paging,
-  }));
-
-  const { initialize } = useTablesDataStore(({ api }) => ({
-    initialize: api.initialize,
   }));
 
   const { dbSelected } = useAccountStore(({ state }) => ({
@@ -53,12 +48,6 @@ export const DatabasesSideList = () => {
     );
 
   const { mutate, isPending } = useSelectDatabaseWrap();
-
-  useEffect(() => {
-    if (!dbSelected && dbList.length > 0) {
-      initialize();
-    }
-  }, [dbSelected]);
 
   useEffect(() => {
     if (!isSuccess) return;

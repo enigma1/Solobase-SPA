@@ -1,8 +1,10 @@
 import { makeFactoryStore } from '>/services/utils/emitter';
 import { defaultPaging } from '>/services/utils';
 import type { PageListings } from '>/contracts';
-import type { PagingParams } from '>/types';
+import type { PagingParams, SqlObject } from '>/types';
 import { configStoreActions } from './configStore';
+
+type EditedRow = Record<number, SqlObject> | Record<string, SqlObject>;
 
 type WithUiKey = {
   uiKey: string;
@@ -11,6 +13,7 @@ type WithUiKey = {
 type FactoryTableState = {
   selectedRows: Set<string>;
   paging: PagingParams;
+  editedRow: EditedRow;
 };
 
 export type FactoryTableActions = {
@@ -19,6 +22,11 @@ export type FactoryTableActions = {
   setAllRows: (rows: WithUiKey[]) => void;
   setSelectedRow: (row: string, active: boolean) => void;
   setPaging: (paging: Partial<PagingParams>) => void;
+  markEditedRow: (
+    row: EditedRow | ((prevState: EditedRow) => EditedRow),
+  ) => void;
+  hasEdits: () => boolean;
+  clearEdits: () => void;
 };
 
 export type FactoryTableStore = {
@@ -55,8 +63,7 @@ export const createFactoryTableStore = (options: GetOptionsProps) => {
       ...defaultPaging,
       ...getPageOptions(options),
     },
-    sortBy: {},
-    filters: {},
+    editedRow: {},
   }))();
 
   const { get, set, setAuto } = baseStore;
@@ -69,8 +76,7 @@ export const createFactoryTableStore = (options: GetOptionsProps) => {
           ...defaultPaging,
           ...getPageOptions(options),
         },
-        sortBy: {},
-        filters: {},
+        editedRow: {},
       }));
     },
 
@@ -107,6 +113,22 @@ export const createFactoryTableStore = (options: GetOptionsProps) => {
       setAuto({
         selectedRows: new Set(),
       });
+    },
+    markEditedRow: (objOrFn) => {
+      setAuto((state) => {
+        const nextEditedRow =
+          typeof objOrFn === 'function' ? objOrFn(state.editedRow) : objOrFn;
+
+        return { editedRow: nextEditedRow };
+      });
+    },
+    clearEdits: () => {
+      setAuto({
+        editedRow: {},
+      });
+    },
+    hasEdits: () => {
+      return Object.keys(get().editedRow).length > 0;
     },
   };
 

@@ -7,6 +7,8 @@ import {
 import { SessionRestoreResponse } from '>/services/api';
 import { UserCapabilities } from '>/types';
 
+type ActiveTableGuard = () => Promise<boolean>;
+
 export type AccountStoreState = {
   username: string;
   dbSelected: string | null;
@@ -14,6 +16,7 @@ export type AccountStoreState = {
   isAuthenticated: boolean;
   online: boolean;
   capabilities: string[];
+  activeTableGuard?: ActiveTableGuard;
 };
 
 export type AccountStoreActions = {
@@ -23,7 +26,7 @@ export type AccountStoreActions = {
   getActiveDatabase: () => string | null;
   setActiveDatabase: (db: string | null) => void;
   getActiveTable: () => string | null;
-  setActiveTable: (table: string | null) => void;
+  setActiveTable: (table: string | null) => Promise<boolean>;
   getAuthenticated: () => boolean;
   setAuthenticated: (value: boolean) => void;
   getAppStatus: () => boolean;
@@ -31,6 +34,7 @@ export type AccountStoreActions = {
   setCapabilities: (capabilities: string[]) => void;
   getUsername: () => string;
   setUsername: (username: string) => void;
+  registerActiveTableGuard: (guard: ActiveTableGuard) => () => void;
 };
 
 export type AccountStore = AccountStoreState & AccountStoreActions;
@@ -78,8 +82,22 @@ export const accountStoreActions: AccountStoreActions = {
     setAuto({ dbSelected: database, activeTable: null });
   },
   getActiveTable: () => get().activeTable,
-  setActiveTable: (table) => {
-    setAuto({ activeTable: table });
+  setActiveTable: async (table) => {
+    const guard = get().activeTableGuard;
+
+    if (guard) {
+      const allowed = await guard();
+
+      if (!allowed) {
+        return false;
+      }
+    }
+
+    setAuto({
+      activeTable: table,
+    });
+
+    return true;
   },
   setCapabilities: (capabilities: string[]) => {
     setAuto({ capabilities });
@@ -89,6 +107,17 @@ export const accountStoreActions: AccountStoreActions = {
   setAuthenticated: (value) => setAuto({ isAuthenticated: value }),
   getAppStatus: () => get().online,
   setAppStatus: (value) => setAuto({ online: value }),
+  registerActiveTableGuard: (guard) => {
+    setAuto({
+      activeTableGuard: guard,
+    });
+
+    return () => {
+      setAuto({
+        activeTableGuard: undefined,
+      });
+    };
+  },
 };
 
 type SelectorArgsType = {

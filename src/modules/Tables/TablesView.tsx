@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import {
   useAccountStore,
-  tablesDataStoreActions,
   dialogStoreActions,
   createFactoryTableStore,
 } from '>/services/stores';
@@ -83,9 +82,6 @@ export const TablesMainView = () => {
   }, [dbSelected, viewRows, columnsOrder]);
 
   useEffect(() => {
-    if (!dbSelected || !activeTable) {
-      tablesDataStoreActions.initialize();
-    }
     clearSelected();
   }, [dbSelected, activeTable]);
 

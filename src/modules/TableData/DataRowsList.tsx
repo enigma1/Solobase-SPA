@@ -2,7 +2,6 @@ import { useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   useConfigStore,
-  useTablesDataStore,
   useMessageStore,
   dialogStoreActions,
   FactoryTableStore,
@@ -114,18 +113,13 @@ export const DataRowsList = ({
     [cols, hiddenColumns, pastColumnsActions],
   );
 
-  // const { paging, filters, sortBy, changeFilters, changeSortBy } =
-  //   store.useFactoryTableStore(({ state, api }) => ({
-  //     paging: state.paging,
-  //     filters: state.filters,
-  //     sortBy: state.sortBy,
-  //     changeFilters: api.changeFilters,
-  //     changeSortBy: api.changeSortBy,
-  //   }));
-
-  const { paging } = store.useFactoryTableStore(({ state }) => ({
-    paging: state.paging,
-  }));
+  const { paging, editedRow, markEditedRow } = store.useFactoryTableStore(
+    ({ state, api }) => ({
+      paging: state.paging,
+      editedRow: state.editedRow,
+      markEditedRow: api.markEditedRow,
+    }),
+  );
 
   const columnsActions = useMemo<Record<string, ColumnActions>>(() => {
     const result: Record<string, ColumnActions> = {};
@@ -166,10 +160,6 @@ export const DataRowsList = ({
   }, [columnsOrder, cols, sortBy, filters]);
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
-  const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, SqlObject>,
-    markEditedRow: api.markEditedRow,
-  }));
 
   const callbacks = {
     onSuccess: () => {
