@@ -16,6 +16,10 @@ import { PagingParams } from '>/types';
 
 export const STALE_TIME = 5 * 60 * 1000; // Set default to 5 minutes
 
+export type DataQueryHookOptions = {
+  enabled?: boolean;
+};
+
 export type MutationRequestMeta = {
   ctrl?: RefObject<AbortController | null>;
   timeout?: number;
@@ -81,7 +85,11 @@ export type DataHookProps<
   query: ReturnType<typeof useQuery>;
 };
 
-export type HookStore<TState = unknown, TApi = unknown, TQuery = unknown> = {
+export type HookStore<
+  TState = unknown,
+  TApi = Record<string, (...args: any[]) => any>,
+  TQuery = unknown,
+> = {
   state: TState;
   api: TApi;
   query: TQuery;

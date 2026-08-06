@@ -2,7 +2,13 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FetchDatabasesResponseSchema } from '>/contracts';
 import { useAccountStore } from '>/services/stores';
-import { queryKeys, STALE_TIME, DataHookProps, HookStore } from './defs';
+import {
+  queryKeys,
+  STALE_TIME,
+  DataHookProps,
+  HookStore,
+  DataQueryHookOptions,
+} from './defs';
 import {
   dbApi,
   FetchDatabasesRequest,
@@ -23,7 +29,7 @@ import {
   defaultPageRequest,
   defaultPageResponse,
 } from '>/services/utils';
-import { BasicRowsShape, StorageConfig } from '>/types';
+import { TableBasicsUndefined, BasicRowsShape, StorageConfig } from '>/types';
 // import { createDataQueryHook } from './dataQueryBuilder';
 
 const loadPreferencesInitialData: LoadPreferencesResponse = {
@@ -105,12 +111,6 @@ export const useSessionRestore = <TSelected = RestoreHookProps>(
   return selector ? selector(args) : (args as TSelected);
 };
 
-// const initialData = {
-//   ...defaultResponse,
-//   rows: [],
-//   cols: {},
-//   columnsOrder: [],
-// };
 // export const useDatabases2 = createDataQueryHook({
 //   queryKey: queryKeys.databases,
 //   queryFn: dbApi.fetchDatabases,
@@ -148,8 +148,6 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
     enabled: isAuthenticated,
     retry: 1,
     refetchOnWindowFocus: false,
-    // placeholderData: keepPreviousData,
-    // initialData,
   });
   const data = q.data ?? fetchDatabasesInitialData;
 
@@ -254,26 +252,39 @@ export const useTableDetailsHook = <TSelected = TableDetailsHookProps>(
 
 type TableColumnsInfoHookProps = DataHookProps<GetTableColumnsInfoResponse>;
 export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
-  request: { database: string; table: string },
+  request: TableBasicsUndefined,
   selector?: (args: TableColumnsInfoHookProps) => TSelected,
+  options?: DataQueryHookOptions,
 ) => {
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
+
+  const enabled =
+    !!request.database &&
+    !!request.table &&
+    isAuthenticated &&
+    (options?.enabled ?? true);
 
   const initialData: GetTableColumnsInfoResponse = {
     ...defaultResponse,
     ...defaultListResponse,
-    database: request.database,
-    table: request.table,
+    database: request.database ?? '',
+    table: request.table ?? '',
   };
 
   const q = useQuery<GetTableColumnsInfoResponse, Error>({
-    queryKey: queryKeys.tableColumnsInfo(request.database, request.table),
+    queryKey: queryKeys.tableColumnsInfo(
+      request.database ?? '',
+      request.table ?? '',
+    ),
     queryFn: async () => {
-      const data = await dbApi.getTableColumnsInfo(request);
+      const data = await dbApi.getTableColumnsInfo({
+        database: request.database!,
+        table: request.table!,
+      });
       return data;
     },
     staleTime: STALE_TIME,
-    enabled: isAuthenticated && !!request.database && !!request.table,
+    enabled,
     retry: 1,
     refetchOnWindowFocus: false,
   });

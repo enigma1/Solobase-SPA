@@ -38,21 +38,23 @@ export type SqlColumn = {
 export type SqlRow = SqlTypes[];
 export type SqlColumnsShape = Record<string, SqlColumn>;
 
-// export type SqlTableData = {
-//   rows: SqlRow[];
-//   cols: SqlColumnsShape;
-//   columnsOrder: string[];
-// };
+export type SqlTableData = {
+  rows: SqlRow[];
+  cols: SqlColumnsShape;
+  columnsOrder: string[];
+};
 
 export type TokenRow = {
   rowIndex: number;
   fingerprint: string;
 };
-export type BasicRowsShape = {
-  rows: SqlRow[];
-  cols: SqlColumnsShape;
-  columnsOrder: string[];
+export type BasicRowsShape = SqlTableData & {
   rowTokens?: TokenRow[];
+};
+
+export type TableBasicsUndefined = {
+  database?: string;
+  table?: string;
 };
 
 export type DatabaseShape = {
@@ -165,11 +167,6 @@ export type SortByParams = {
 //   created_at: {
 //     sort: 'desc',
 //   },
-// };
-
-// export type FilterColumnParams = {
-//   value: SqlTypes;
-//   mode: ColumnQueryMode;
 // };
 
 export type FilterColumnParams = {

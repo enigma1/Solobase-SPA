@@ -13,8 +13,8 @@ import {
   defaultListResponse,
   defaultPageResponse,
 } from '>/services/utils';
-import { BasicRowsShape, TableBasics } from '>/types';
-import { queryKeys, STALE_TIME } from './defs';
+import { BasicRowsShape, TableBasicsUndefined } from '>/types';
+import { queryKeys, STALE_TIME, DataQueryHookOptions } from './defs';
 
 type TablesHookProps = {
   state: BasicDataResponse;
@@ -22,8 +22,9 @@ type TablesHookProps = {
 };
 
 export const useTableData = <TSelected = TablesHookProps>(
-  request: BasicDataRequest,
+  request: TableBasicsUndefined & BasicDataRequest,
   selector?: (args: TablesHookProps) => TSelected,
+  options?: DataQueryHookOptions,
 ) => {
   const initialData: BasicResponse & BasicRowsShape = {
     ...defaultResponse,
@@ -31,31 +32,33 @@ export const useTableData = <TSelected = TablesHookProps>(
     ...defaultPageResponse,
   };
 
-  const { dbSelected, isAuthenticated, activeTable } = useAccountStore(
-    ({ state }) => ({
-      activeTable: state.activeTable,
-      dbSelected: state.dbSelected,
-      isAuthenticated: state.isAuthenticated,
-    }),
-  );
+  const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
+
+  const enabled =
+    !!request.database &&
+    !!request.table &&
+    isAuthenticated &&
+    (options?.enabled ?? true);
 
   // React Query fetch
   const q = useQuery<FetchRowsResponse, Error>({
-    queryKey: queryKeys.rows(dbSelected, activeTable, request),
+    queryKey: queryKeys.rows(
+      request.database ?? '',
+      request.table ?? '',
+      request,
+    ),
     queryFn: async () => {
-      if (!dbSelected || !activeTable) return { ...initialData };
       const data = await dbApi.fetchRows({
         ...request,
-        database: dbSelected,
-        table: activeTable,
+        database: request.database!,
+        table: request.table!,
       });
       return data;
     },
     staleTime: STALE_TIME,
-    enabled: !!dbSelected && !!activeTable && isAuthenticated,
+    enabled,
     retry: 1,
     refetchOnWindowFocus: false,
-    // initialData,
   });
 
   const data = q.data ?? initialData;

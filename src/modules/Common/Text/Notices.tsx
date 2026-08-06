@@ -1,12 +1,12 @@
-import { FactoryTableStore, dialogStoreActions } from '>/services/stores';
-import { DialogContent } from '>/modules';
+import { dialogStoreActions, configStoreActions } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import { dialogFactories } from '>/modules';
+import { SqlColumnsShape } from '>/types';
 
 type NoticeProps = {
-  store: FactoryTableStore;
+  cols: SqlColumnsShape;
 };
-const FiltersNotice = ({ store }: NoticeProps) => {
+const FiltersNotice = ({ cols }: NoticeProps) => {
   const handleClear = () =>
     dialogStoreActions.openDialog({
       payload: dialogFactories.confirmation({
@@ -14,7 +14,9 @@ const FiltersNotice = ({ store }: NoticeProps) => {
         note: 'Remove Filters',
         message:
           "All filters will be removed from the table's columns. Are you sure?",
-        onConfirm: () => store.api.clearFilters(),
+        onConfirm: () => {
+          configStoreActions.updatePastColumnsActions({ cols, filters: {} });
+        },
       }),
     });
 
@@ -29,14 +31,16 @@ const FiltersNotice = ({ store }: NoticeProps) => {
   );
 };
 
-const SortsNotice = ({ store }: NoticeProps) => {
+const SortsNotice = ({ cols }: NoticeProps) => {
   const handleClear = () =>
     dialogStoreActions.openDialog({
       payload: dialogFactories.confirmation({
         caption: 'Query Sort',
         note: 'Remove Sorting',
         message: 'Sorting will be removed from all columns. Are you sure?',
-        onConfirm: () => store.api.clearSorts(),
+        onConfirm: () => {
+          configStoreActions.updatePastColumnsActions({ cols, sorts: {} });
+        },
       }),
     });
 
@@ -56,14 +60,14 @@ type FiltersAndSortsNotice = NoticeProps & {
   clearSorts?: boolean;
 };
 export const FiltersAndSortsNotice = ({
-  store,
+  cols,
   clearFilters,
   clearSorts,
 }: FiltersAndSortsNotice) => {
   return (
     <div className='inline-wrapper'>
-      {clearFilters && <FiltersNotice store={store} />}
-      {clearSorts && <SortsNotice store={store} />}
+      {clearFilters && <FiltersNotice cols={cols} />}
+      {clearSorts && <SortsNotice cols={cols} />}
     </div>
   );
 };

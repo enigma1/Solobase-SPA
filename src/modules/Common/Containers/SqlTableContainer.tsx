@@ -42,9 +42,9 @@ type SqlTableContainerProps = {
   resizeLineRef: RefObject<HTMLDivElement | null>;
   editedRow?: Record<string, SqlObject>;
   filters?: Record<string, FilterColumnParams[]>;
+  columnActions?: Record<string, ColumnActions>;
   selectedRow?: string;
   actionOptions?: ActionOptions[];
-  columnActions?: Record<string, ColumnActions>;
   onActionCol?: (actionsColumn: ActionColumnProps) => void;
   onEditCell?: (props: EditHandlerProps) => void;
   onEditRow?: (uid: string) => void;

@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   useConfigStore,
@@ -82,14 +82,46 @@ export const DataRowsList = ({
     [rows],
   );
 
-  const { paging, filters, sortBy, changeFilters, changeSortBy } =
-    store.useFactoryTableStore(({ state, api }) => ({
-      paging: state.paging,
-      filters: state.filters,
-      sortBy: state.sortBy,
-      changeFilters: api.changeFilters,
-      changeSortBy: api.changeSortBy,
-    }));
+  const {
+    pastColumnsActions,
+    hiddenColumns,
+    savePreferences,
+    getPageSizes,
+    getSortBy,
+    getFilters,
+    changeSortBy,
+    changeFilter,
+  } = useConfigStore(({ state, api }) => ({
+    pastColumnsActions: state.pastColumnsActions,
+    hiddenColumns: state.hiddenColumns,
+    savePreferences: api.savePreferences,
+    getPageSizes: api.getPageSizes,
+    getSortBy: api.getSortBy,
+    changeSortBy: api.changeSortBy,
+    changeFilter: api.changeFilter,
+    getFilters: api.getFilters,
+  }));
+
+  const { filters, sortBy } = useMemo(
+    () => ({
+      filters: getFilters(cols),
+      sortBy: getSortBy(cols),
+    }),
+    [cols, hiddenColumns, pastColumnsActions],
+  );
+
+  // const { paging, filters, sortBy, changeFilters, changeSortBy } =
+  //   store.useFactoryTableStore(({ state, api }) => ({
+  //     paging: state.paging,
+  //     filters: state.filters,
+  //     sortBy: state.sortBy,
+  //     changeFilters: api.changeFilters,
+  //     changeSortBy: api.changeSortBy,
+  //   }));
+
+  const { paging } = store.useFactoryTableStore(({ state }) => ({
+    paging: state.paging,
+  }));
 
   const columnsActions = useMemo<Record<string, ColumnActions>>(() => {
     const result: Record<string, ColumnActions> = {};
@@ -128,28 +160,6 @@ export const DataRowsList = ({
 
     return result;
   }, [columnsOrder, cols, sortBy, filters]);
-
-  const {
-    pastColumnsActions,
-    hiddenColumns,
-    savePreferences,
-    getPageSizes,
-    getPastColumnsActions,
-    getSortBy,
-  } = useConfigStore(({ state, api }) => ({
-    pastColumnsActions: state.pastColumnsActions,
-    hiddenColumns: state.hiddenColumns,
-    savePreferences: api.savePreferences,
-    getPageSizes: api.getPageSizes,
-    getPastColumnsActions: api.getPastColumnsActions,
-    getSortBy: api.getSortBy,
-  }));
-
-  useEffect(() => {
-    // store.api.initialize();
-    const prefs = getPastColumnsActions(cols);
-    store.api.restorePreferences(prefs);
-  }, [pastColumnsActions, activeTable, cols]);
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
   const { editedRow, markEditedRow } = useTablesDataStore(({ state, api }) => ({
@@ -264,11 +274,6 @@ export const DataRowsList = ({
     });
   };
 
-  // const discardRow = (rowId: number) => {
-  //   const { [rowId]: _, ...prevState } = editedRow;
-  //   markEditedRow(prevState);
-  // };
-
   const discardEditedRows = () => {
     dialogStoreActions.openDialog({
       payload: {
@@ -359,42 +364,26 @@ export const DataRowsList = ({
 
   const handleColumnAction = (action: ActionColumnProps) => {
     const { colName, actions } = action;
-    const pastColumns = getPastColumnsActions();
     if (actions.sort) {
-      changeSortBy({ column: colName, direction: actions.sort });
-      // savePreferences({
-      //   pastColumnsActions: {
-      //     ...pastColumns,
-      //     [colName]: {
-      //       ...pastColumns[colName],
-      //       type: cols[colName].type,
-      //       ...(actions.sort === 'asc' || actions.sort === 'desc'
-      //         ? { sort: actions.sort }
-      //         : { sort: undefined }),
-      //     },
-      //   },
-      // });
+      changeSortBy({
+        cols,
+        colName,
+        direction: actions.sort === 'both' ? undefined : actions.sort,
+      });
     }
 
     if (!actions.filter) return;
-    if (actions.filter.mode === 'distinct') {
-      changeFilters({
-        column: colName,
-        filter: { value: actions.filter.value, mode: 'distinct' },
-      });
-    } else if (actions.filter.mode === 'groupBy') {
-      changeFilters({
-        column: colName,
-        filter: { value: actions.filter.value, mode: 'groupBy' },
+    if (
+      actions.filter.mode === 'distinct' ||
+      actions.filter.mode === 'groupBy' ||
+      actions.filter.value === undefined
+    ) {
+      changeFilter({
+        cols,
+        colName,
+        filter: { value: actions.filter.value, mode: actions.filter.mode },
       });
     } else {
-      if (actions.filter.value === undefined) {
-        changeFilters({
-          column: colName,
-          filter: { value: actions.filter.value, mode: actions.filter.mode },
-        });
-        return;
-      }
       const valueRef = { current: actions.filter.value };
       const modeRef = { current: actions.filter.mode };
       dialogStoreActions.openDialog({
@@ -415,8 +404,9 @@ export const DataRowsList = ({
           actions: dialogActions.enabledConfirmCancel({
             onConfirm: () => {
               dialogStoreActions.closeDialog();
-              changeFilters({
-                column: colName,
+              changeFilter({
+                cols,
+                colName,
                 filter: { value: valueRef.current, mode: modeRef.current },
               });
             },
@@ -486,7 +476,7 @@ export const DataRowsList = ({
   if (hasFilters || hasSorts) {
     notice = (
       <FiltersAndSortsNotice
-        store={store}
+        cols={cols}
         clearSorts={hasSorts}
         clearFilters={hasFilters}
       />

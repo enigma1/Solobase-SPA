@@ -1,13 +1,13 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { useTableData } from '>/services/queryHooks';
+import { useTableData, useTableColumnsInfoHook } from '>/services/queryHooks';
 import {
   useAccountStore,
   tablesDataStoreActions,
   dialogStoreActions,
   createFactoryTableStore,
-  configStoreActions,
+  useConfigStore,
 } from '>/services/stores';
 import { routes } from '>/config';
 import {
@@ -20,42 +20,74 @@ import {
 import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
-  const { dbSelected, activeTable } = useAccountStore(({ state, api }) => ({
+  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
     activeTable: state.activeTable,
     dbSelected: state.dbSelected,
   }));
+
+  const columnInfoRequest = {
+    database: dbSelected ?? '',
+    table: activeTable ?? '',
+  };
+  const { cols: colsInfo, isSuccess: isSuccessInfo } = useTableColumnsInfoHook(
+    columnInfoRequest,
+    ({ state, query }) => ({
+      cols: state.cols,
+      isSuccess: query.isSuccess,
+    }),
+  );
 
   const tableStore = useMemo(
     () => createFactoryTableStore({ listingType: 'dataRows' }),
     [dbSelected, activeTable],
   );
 
-  const restoredPrefs = useRef(false);
-  const navigate = useNavigate();
-  const { cPaging, cSortBy, cFilters } = tableStore.useFactoryTableStore(
-    ({ state }) => ({
-      cPaging: state.paging,
-      cFilters: state.filters,
-      cSortBy: state.sortBy,
+  const { pastColumnsActions, getSortBy, getFilters } = useConfigStore(
+    ({ state, api }) => ({
+      pastColumnsActions: state.pastColumnsActions,
+      getSortBy: api.getSortBy,
+      getFilters: api.getFilters,
     }),
   );
+
+  // const restoredPrefs = useRef(false);
+  const navigate = useNavigate();
+  const { cPaging } = tableStore.useFactoryTableStore(({ state }) => ({
+    cPaging: state.paging,
+  }));
+
   useEffect(() => {
     tablesDataStoreActions.initialize();
-    // const prefs = configStoreActions.getPastColumnsActions(cols);
-    // tableStore.api.restorePreferences(prefs);
   }, [dbSelected, activeTable]);
 
-  const request = useMemo(
-    () => ({
+  const { cSortBy, cFilters, request } = useMemo(() => {
+    const cSortBy = getSortBy(colsInfo);
+    const cFilters = getFilters(colsInfo);
+
+    const request = {
+      database: dbSelected ?? '',
+      table: activeTable ?? '',
       paging: {
         limit: cPaging.limit,
         offset: cPaging.offset,
       },
       ...(Object.keys(cSortBy).length && { sortBy: cSortBy }),
       ...(Object.keys(cFilters).length && { filters: cFilters }),
-    }),
-    [cPaging.limit, cPaging.offset, cSortBy, cFilters],
-  );
+    };
+
+    return {
+      cSortBy,
+      cFilters,
+      request,
+    };
+  }, [
+    dbSelected,
+    activeTable,
+    cPaging.limit,
+    cPaging.offset,
+    colsInfo,
+    pastColumnsActions,
+  ]);
 
   const {
     rows,
@@ -65,18 +97,24 @@ export const TableDataView = () => {
     responsePaging,
     isSuccess,
     isFetching,
-  } = useTableData(request, ({ state, query }) => {
-    return {
-      rows: state.rows,
-      cols: state.cols,
-      columnsOrder: state.columnsOrder,
-      rowTokens: state.rowTokens,
-      responsePaging: state.paging,
-      isSuccess: query.isSuccess,
-      isError: query.isError,
-      isFetching: query.isFetching,
-    };
-  });
+  } = useTableData(
+    request,
+    ({ state, query }) => {
+      return {
+        rows: state.rows,
+        cols: state.cols,
+        columnsOrder: state.columnsOrder,
+        rowTokens: state.rowTokens,
+        responsePaging: state.paging,
+        isSuccess: query.isSuccess,
+        isError: query.isError,
+        isFetching: query.isFetching,
+      };
+    },
+    {
+      enabled: isSuccessInfo,
+    },
+  );
 
   const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
@@ -91,41 +129,7 @@ export const TableDataView = () => {
       hasNext: responsePaging?.hasNext ?? false,
       hasPrevious: responsePaging?.hasPrevious ?? false,
     });
-
-    if (!restoredPrefs.current) {
-      restoredPrefs.current = true;
-
-      const prefs = configStoreActions.getPastColumnsActions(cols);
-      tableStore.api.restorePreferences(prefs);
-      return;
-    }
-
-    // Persist current filters and ssorts
-    const pastColumns = configStoreActions.getPastColumnsActions();
-    const nextPastColumns = {
-      ...pastColumns,
-    };
-
-    for (const [column, sort] of Object.entries(cSortBy)) {
-      nextPastColumns[column] = {
-        ...nextPastColumns[column],
-        type: cols[column].type,
-        sort: sort.direction,
-      };
-    }
-
-    for (const [column, filters] of Object.entries(cFilters)) {
-      nextPastColumns[column] = {
-        ...nextPastColumns[column],
-        type: cols[column].type,
-        filters,
-      };
-    }
-
-    configStoreActions.savePreferences({
-      pastColumnsActions: nextPastColumns,
-    });
-  }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious, cols]);
+  }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
 
   const isBusy = isFetching;
 
@@ -160,7 +164,7 @@ export const TableDataView = () => {
     if (hasFilters || hasSorts) {
       notice = (
         <FiltersAndSortsNotice
-          store={tableStore}
+          cols={cols}
           clearSorts={hasSorts}
           clearFilters={hasFilters}
         />

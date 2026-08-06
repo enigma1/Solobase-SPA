@@ -1,6 +1,6 @@
 import { PageListings } from '>/services/utils/appSettings';
 import {
-  SortSelection,
+  SortDirection,
   FilterColumnParams,
   ColumnActions,
   SqlRow,
@@ -18,7 +18,7 @@ export type SidebarOptions = keyof SidebarVisibilityTypes;
 export type StoredColumnActions = {
   type: string;
   filters?: FilterColumnParams[];
-  sort?: SortSelection;
+  sort?: SortDirection;
 };
 
 export type StorageConfig = {
