@@ -65,14 +65,11 @@ export const DatabasesSideList = () => {
     });
   }, [pageSizes.dbRows]);
 
-  const handleChange = async (dbName: string) => {
+  const handleChange = (dbName: string) => {
     if (!dbName) {
       return;
     }
     mutate({ database: dbName });
-    if (location.pathname !== routes.front.listTables) {
-      navigate(routes.front.listTables, { replace: true });
-    }
   };
 
   const start = paging.offset + 1;

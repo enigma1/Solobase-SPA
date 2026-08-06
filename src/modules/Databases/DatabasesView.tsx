@@ -10,7 +10,7 @@ export const DatabasesMainView = () => {
   const dbSelected = useAccountStore(({ state }) => state.dbSelected);
   const tableStore = useMemo(
     () => createFactoryTableStore({ listingType: 'dbRows' }),
-    [dbSelected],
+    [],
   );
   const { cPaging } = tableStore.useFactoryTableStore(({ state }) => ({
     cPaging: state.paging,

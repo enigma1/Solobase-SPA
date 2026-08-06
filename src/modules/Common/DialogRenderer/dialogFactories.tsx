@@ -25,11 +25,13 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
     note,
     message,
     onConfirm,
+    onCancel,
   }: {
     caption: string;
     note: string;
     message: ReactNode;
     onConfirm: () => void;
+    onCancel?: () => void;
   }): DialogPayload => ({
     caption,
     variant: 'warn',
@@ -38,6 +40,10 @@ export const dialogFactories: Record<string, (args?: any) => DialogPayload> = {
       onConfirm: () => {
         dialogStoreActions.closeDialog();
         onConfirm();
+      },
+      onCancel: () => {
+        dialogStoreActions.closeDialog();
+        onCancel?.();
       },
     }),
   }),

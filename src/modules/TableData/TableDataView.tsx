@@ -1,5 +1,5 @@
-import { useRef, useEffect, useMemo } from 'react';
-import { useNavigate, useBlocker, Navigate } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useTableData, useTableColumnsInfoHook } from '>/services/queryHooks';
 import {
   useAccountStore,
@@ -7,6 +7,7 @@ import {
   createFactoryTableStore,
   useColumnsStore,
 } from '>/services/stores';
+import { useUnsavedChangesBlocker } from '>/services/hooks';
 import { openUnsavedChangesConfirmation } from '>/services/utils';
 import { routes } from '>/config';
 import {
@@ -42,7 +43,7 @@ export const TableDataView = () => {
 
   const tableStore = useMemo(
     () => createFactoryTableStore({ listingType: 'dataRows' }),
-    [dbSelected, activeTable],
+    [],
   );
 
   const { pastColumnsActions, getSortBy, getFilters } = useColumnsStore(
@@ -71,28 +72,10 @@ export const TableDataView = () => {
     });
   }, []);
 
-  // const blocker = useBlocker(() => hasEdits());
-
-  // useEffect(() => {
-  //   if (blocker.state !== 'blocked' || !hasEdits()) return;
-
-  //   dialogStoreActions.openDialog({
-  //     payload: dialogFactories.confirmation({
-  //       caption: 'Unsaved Changes',
-  //       note: 'Data Row Edits',
-  //       message: 'You have unsaved changes. Leave this page?',
-  //       onConfirm: () => {
-  //         dialogStoreActions.closeDialog();
-  //         clearEdits();
-  //         blocker.proceed();
-  //       },
-  //       onCancel: () => {
-  //         dialogStoreActions.closeDialog();
-  //         blocker.reset();
-  //       },
-  //     }),
-  //   });
-  // }, [blocker]);
+  useUnsavedChangesBlocker({
+    hasEdits,
+    clearEdits,
+  });
 
   const { cSortBy, cFilters, request } = useMemo(() => {
     const cSortBy = getSortBy(colsInfo);

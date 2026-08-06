@@ -18,7 +18,7 @@ export const TablesMainView = () => {
 
   const tableStore = useMemo(
     () => createFactoryTableStore({ listingType: 'tableRows' }),
-    [dbSelected],
+    [],
   );
   const { cPaging, clearSelected } = tableStore.useFactoryTableStore(
     ({ state, api }) => ({
