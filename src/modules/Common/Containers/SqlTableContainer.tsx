@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, type RefObject } from 'react';
+import { useState, useMemo, type RefObject } from 'react';
 import {
   SquarePenIcon,
   PencilLineIcon,
@@ -17,7 +17,6 @@ import {
   SqlRow,
   ColumnActions,
   ActionColumnProps,
-  ColumnQueryMode,
   FilterColumnParams,
   ActionOptions,
 } from '>/types';

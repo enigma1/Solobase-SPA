@@ -10,11 +10,11 @@ import { getAppConfig, getPrefs } from '>/config';
 import { useModal } from '>/services/hooks';
 import { useSavePreferencesWrap } from '>/services/queryHooks';
 import {
-  messageStoreActions,
   configStoreActions,
   accountStoreActions,
   queriesStoreActions,
   historyStoreActions,
+  columnsStoreActions,
 } from '>/services/stores';
 import { ScreenLoader } from '>/modules';
 import {
@@ -131,6 +131,7 @@ export const Preferences = ({ formHandlers }: PreferencesProps) => {
   const [tempSettings, setTempSettings] = useState<UserPrefs>(() =>
     cloneDeep({
       ...configStoreActions.getPreferences(),
+      ...columnsStoreActions.getColumnsPreferences(),
       queries: queriesStoreActions.getQueries(),
       copiedRows: historyStoreActions.getCopiedRows(),
     }),

@@ -1,5 +1,5 @@
+import { pListings, type PageListings } from '>/contracts';
 import { PageSizeSelect } from '>/modules';
-import { pListings, type PageListings } from '>/services/utils/appSettings';
 import { ItemPreferenceProps } from '>/types';
 
 export const PageSizing = ({ modified, onModify }: ItemPreferenceProps) => {

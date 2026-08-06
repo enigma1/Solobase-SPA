@@ -1,12 +1,5 @@
-import { PageListings } from '>/services/utils/appSettings';
-import {
-  SortDirection,
-  FilterColumnParams,
-  ColumnActions,
-  SqlRow,
-  QueryItem,
-  SortByParams,
-} from './db';
+import type { PageListings, SortDirection } from '>/contracts';
+import { FilterColumnParams, SqlRow, QueryItem } from './db';
 
 export type SidebarVisibilityTypes = {
   sideDatabases: boolean;

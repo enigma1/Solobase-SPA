@@ -1,22 +1,14 @@
-import {
-  SqlTypes,
+import type { SqlQueryModes } from '>/contracts';
+import type {
   SqlObject,
   SqlRow,
   TokenRow,
   BasicRowsShape,
-  PrimeObject,
-  SqlColumn,
-  SqlColumnsShape,
-  TableShapeKey,
-  TableShapeColumn,
   TableShape,
   TableBasics,
-  SqlQueryModes,
-  UserCapabilities,
   UserShape,
   UserPrefs,
   QueryLogEntry,
-  ColumnQueryMode,
   FilterColumnParams,
   SortByParams,
 } from '>/types';

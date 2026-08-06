@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isEqual, cloneDeep, merge } from 'lodash-es';
-import { pageSizeValues } from './appSettings';
+import { pageSizeValues } from '>/contracts';
 import type {
   BasicResponse,
   PagingRequest,

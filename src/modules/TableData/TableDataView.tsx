@@ -7,7 +7,7 @@ import {
   tablesDataStoreActions,
   dialogStoreActions,
   createFactoryTableStore,
-  useConfigStore,
+  useColumnsStore,
 } from '>/services/stores';
 import { routes } from '>/config';
 import {
@@ -42,7 +42,7 @@ export const TableDataView = () => {
     [dbSelected, activeTable],
   );
 
-  const { pastColumnsActions, getSortBy, getFilters } = useConfigStore(
+  const { pastColumnsActions, getSortBy, getFilters } = useColumnsStore(
     ({ state, api }) => ({
       pastColumnsActions: state.pastColumnsActions,
       getSortBy: api.getSortBy,

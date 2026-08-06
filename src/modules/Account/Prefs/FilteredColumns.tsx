@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash-es/cloneDeep';
-import { useState, useEffect } from 'react';
-import { useConfigStore } from '>/services/stores';
+import { useEffect } from 'react';
+import { useConfigStore, useColumnsStore } from '>/services/stores';
 import { MiniTable, CheckboxField } from '>/modules';
 import { ItemPreferenceProps, FilterColumnParams } from '>/types';
 import { filterActionOptions } from '>/services/utils';
@@ -10,13 +10,17 @@ export const FilteredColumns = ({
   onModify,
   triggerSave,
 }: ItemPreferenceProps) => {
-  const { pastColumnsActions, getFilters, savePreferences } = useConfigStore(
-    ({ api, state }) => ({
+  const { pastColumnsActions, getFilters, restorePastColumnsActions } =
+    useColumnsStore(({ api, state }) => ({
       pastColumnsActions: state.pastColumnsActions,
       getFilters: api.getFilters,
-      savePreferences: api.savePreferences,
-    }),
-  );
+      updatePastColumnsActions: api.updatePastColumnsActions,
+      restorePastColumnsActions: api.restorePastColumnsActions,
+    }));
+
+  const { savePreferences } = useConfigStore(({ api }) => ({
+    savePreferences: api.savePreferences,
+  }));
   const filters = getFilters();
 
   useEffect(() => {
@@ -24,6 +28,7 @@ export const FilteredColumns = ({
       savePreferences({
         pastColumnsActions: modified.pastColumnsActions,
       });
+      restorePastColumnsActions(modified.pastColumnsActions);
     }
   }, [triggerSave]);
 

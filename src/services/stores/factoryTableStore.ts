@@ -1,6 +1,7 @@
 import { makeFactoryStore } from '>/services/utils/emitter';
-import { PageListings, defaultPaging } from '>/services/utils';
-import { PagingParams } from '>/types';
+import { defaultPaging } from '>/services/utils';
+import type { PageListings } from '>/contracts';
+import type { PagingParams } from '>/types';
 import { configStoreActions } from './configStore';
 
 type WithUiKey = {

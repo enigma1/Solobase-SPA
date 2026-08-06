@@ -14,7 +14,8 @@ import {
   QueryErrorDetails,
 } from '>/modules';
 import { routes } from '>/config';
-import { QueryItem, SqlQueryModes, CommonDialogHandlers } from '>/types';
+import { SqlQueryModes } from '>/contracts';
+import { QueryItem, CommonDialogHandlers } from '>/types';
 
 type QueryRequestAreaProps = {
   formHandlers: CommonDialogHandlers;

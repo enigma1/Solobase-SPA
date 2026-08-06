@@ -25,7 +25,8 @@ import {
 import { dbApi } from '>/services/api';
 import type { ImportDataResponse } from '>/services/api/dbApiTypes';
 import { routes } from '>/config';
-import { SqlQueryModes, CommonDialogHandlers } from '>/types';
+import { SqlQueryModes } from '>/contracts';
+import { CommonDialogHandlers } from '>/types';
 import { DatabaseCombo } from './DatabaseCombo';
 
 type ImportDataAreaProps = {

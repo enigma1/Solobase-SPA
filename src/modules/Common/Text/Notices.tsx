@@ -1,4 +1,4 @@
-import { dialogStoreActions, configStoreActions } from '>/services/stores';
+import { dialogStoreActions, columnsStoreActions } from '>/services/stores';
 import { dialogActions } from '>/services/utils';
 import { dialogFactories } from '>/modules';
 import { SqlColumnsShape } from '>/types';
@@ -15,7 +15,7 @@ const FiltersNotice = ({ cols }: NoticeProps) => {
         message:
           "All filters will be removed from the table's columns. Are you sure?",
         onConfirm: () => {
-          configStoreActions.updatePastColumnsActions({ cols, filters: {} });
+          columnsStoreActions.clearFilters(cols);
         },
       }),
     });
@@ -39,7 +39,7 @@ const SortsNotice = ({ cols }: NoticeProps) => {
         note: 'Remove Sorting',
         message: 'Sorting will be removed from all columns. Are you sure?',
         onConfirm: () => {
-          configStoreActions.updatePastColumnsActions({ cols, sorts: {} });
+          columnsStoreActions.clearSorts(cols);
         },
       }),
     });

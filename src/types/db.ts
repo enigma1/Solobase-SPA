@@ -1,7 +1,11 @@
+import type {
+  SqlQueryModes,
+  SortDirection,
+  ColumnQueryMode,
+} from '>/contracts';
 import { JSONTypes, JSONObject } from 'type-plus';
 
 export type SqlTypes = Date | bigint | JSONTypes;
-
 export type SqlObject = { [key in string]?: SqlTypes };
 
 export type PrimeObject<
@@ -13,9 +17,7 @@ export type PrimeObject<
     ? Record<K, T>
     : never;
 
-export type SortDirection = 'asc' | 'desc';
 export type SortSelection = 'both' | SortDirection;
-export type ColumnQueryMode = 'like' | 'where' | 'groupBy' | 'distinct';
 
 export type DataEditorType =
   'input' | 'number' | 'textarea' | 'json' | 'boolean' | 'object' | 'selection';
@@ -104,7 +106,6 @@ export type TableShape = TableShapeBasics & {
   cols: TableShapeColumn[];
 };
 
-export type SqlQueryModes = 'default' | 'legacy' | 'strict';
 export type ViewRow<T> = {
   row: T;
   uiKey: string;

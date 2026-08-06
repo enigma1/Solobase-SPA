@@ -8,3 +8,4 @@ export * from './databasesStore';
 export * from './factoryTableStore';
 export * from './configStore';
 export * from './queriesStore';
+export * from './columnsStore';

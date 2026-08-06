@@ -268,7 +268,7 @@ export const useCreateDataRowsMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.rows(data.database, data.table),
+        queryKey: queryKeys.rows(data.database, data.table, {}),
       });
     },
   },
@@ -285,7 +285,7 @@ export const useDeleteRowsMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.rows(data.database, data.table),
+        queryKey: queryKeys.rows(data.database, data.table, {}),
       });
     },
   },
@@ -302,7 +302,7 @@ export const useUpdateRowsMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.rows(data.database, data.table),
+        queryKey: queryKeys.rows(data.database, data.table, {}),
       });
     },
   },

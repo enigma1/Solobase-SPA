@@ -3,12 +3,16 @@ import {
   getSingleColumnFromResult,
   createFileSaveUrl,
 } from '>/services/utils/result';
-import { dialogStoreActions, configStoreActions } from '>/services/stores';
+import {
+  dialogStoreActions,
+  configStoreActions,
+  columnsStoreActions,
+} from '>/services/stores';
 import { dialogFactories } from '>/modules';
 import { SqlRow } from '>/types';
 
 const changeColumnsActivePrefs = (col: string, hidden: boolean) => {
-  const { [col]: removed, ...rest } = configStoreActions.getHiddenColumns();
+  const { [col]: removed, ...rest } = columnsStoreActions.getHiddenColumns();
   configStoreActions.savePreferences({
     hiddenColumns: {
       ...rest,
@@ -21,7 +25,7 @@ export const makeColumnsActive = (columnsOrder: string[]) => {
   dialogStoreActions.openDialog({
     payload: dialogFactories.filterColumns({
       filterProps: {
-        hiddenColumns: configStoreActions.getHiddenColumns(),
+        hiddenColumns: columnsStoreActions.getHiddenColumns(),
         columnsOrder,
         onChange: changeColumnsActivePrefs,
       },

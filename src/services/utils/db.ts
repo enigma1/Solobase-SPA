@@ -1,5 +1,6 @@
 // All MySQL specifics
 import { v4 as uuidv4 } from 'uuid';
+import type { SqlQueryModes } from '>/contracts';
 import { hasit } from './strings';
 import {
   SqlTypes,
@@ -10,7 +11,6 @@ import {
   TableShapeColumn,
   SqlColumnsShape,
   DataCell,
-  SqlQueryModes,
 } from '>/types';
 
 export const databaseFields = {

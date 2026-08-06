@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash-es/cloneDeep';
 import { useEffect } from 'react';
-import { useConfigStore } from '>/services/stores';
+import { configStoreActions, columnsStoreActions } from '>/services/stores';
 import { ComboField } from '>/modules';
 import { ItemPreferenceProps, SortSelection } from '>/types';
 
@@ -13,21 +13,18 @@ export const SortedColumns = ({
   onModify,
   triggerSave,
 }: ItemPreferenceProps) => {
-  const { getSortBy, savePreferences } = useConfigStore(({ api }) => ({
-    savePreferences: api.savePreferences,
-    getSortBy: api.getSortBy,
-  }));
-
   useEffect(() => {
     if (triggerSave > 0) {
-      savePreferences({
+      configStoreActions.savePreferences({
         pastColumnsActions: modified.pastColumnsActions,
       });
+      columnsStoreActions.restorePastColumnsActions(
+        modified.pastColumnsActions,
+      );
     }
   }, [triggerSave]);
 
-  // console.log('past-actions', pastColumnActions);
-  const sortBy = getSortBy();
+  const sortBy = columnsStoreActions.getSortBy();
   const sortOptions: SortByOption[] = [
     { label: 'Ascending', value: 'asc' },
     { label: 'Descending', value: 'desc' },

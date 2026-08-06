@@ -4,6 +4,7 @@ import {
   queriesStoreActions,
   historyStoreActions,
   messageStoreActions,
+  columnsStoreActions,
   useAccountStore,
 } from '>/services/stores';
 import { useLoadPreferences } from '>/services/queryHooks';
@@ -35,11 +36,22 @@ export const AppBootstrap = ({ children }: { children: React.ReactNode }) => {
       setBootstrap(true);
       return;
     }
-    const { queries, copiedRows, ...mainPrefs } = userPrefs;
+
+    const {
+      queries,
+      copiedRows,
+      pastColumnsActions,
+      hiddenColumns,
+      ...mainPrefs
+    } = userPrefs;
     configStoreActions.savePreferences(mainPrefs);
     configStoreActions.setTheme(mainPrefs.theme);
     queriesStoreActions.setQueries(queries);
     historyStoreActions.setCopiedRows(copiedRows);
+    columnsStoreActions.setColumnsPreferences({
+      pastColumnsActions,
+      hiddenColumns,
+    });
     setBootstrap(true);
     messageStoreActions.addMessage({
       type: 'success',

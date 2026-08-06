@@ -7,6 +7,7 @@ import {
   dialogStoreActions,
   FactoryTableStore,
   historyStoreActions,
+  useColumnsStore,
 } from '>/services/stores';
 import {
   MutationCallbacks,
@@ -85,22 +86,25 @@ export const DataRowsList = ({
   const {
     pastColumnsActions,
     hiddenColumns,
-    savePreferences,
-    getPageSizes,
     getSortBy,
     getFilters,
     changeSortBy,
     changeFilter,
-  } = useConfigStore(({ state, api }) => ({
+  } = useColumnsStore(({ state, api }) => ({
     pastColumnsActions: state.pastColumnsActions,
     hiddenColumns: state.hiddenColumns,
-    savePreferences: api.savePreferences,
-    getPageSizes: api.getPageSizes,
     getSortBy: api.getSortBy,
     changeSortBy: api.changeSortBy,
     changeFilter: api.changeFilter,
     getFilters: api.getFilters,
   }));
+
+  const { savePreferences, getPageSizes } = useConfigStore(
+    ({ state, api }) => ({
+      savePreferences: api.savePreferences,
+      getPageSizes: api.getPageSizes,
+    }),
+  );
 
   const { filters, sortBy } = useMemo(
     () => ({

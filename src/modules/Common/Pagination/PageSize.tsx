@@ -1,5 +1,5 @@
 import { ComboField } from '>/modules';
-import { pageSizeValues } from '>/services/utils/appSettings';
+import { pageSizeValues } from '>/contracts';
 import { WrapLayout } from '>/types';
 
 type PageSizeSelectProps = {

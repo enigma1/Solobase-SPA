@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { UserPrefsConfigSchema } from '>/contracts';
 import { messageStoreActions } from '>/services/stores';
-import { UserPrefsConfigSchema, userPrefs } from './appSettings';
+import { userPrefs } from './appSettings';
 import type { StorageConfig } from '>/types';
 
 export const loadStoredPreferences = (): StorageConfig => {

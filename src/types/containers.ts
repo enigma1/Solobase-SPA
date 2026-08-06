@@ -1,4 +1,4 @@
-import { ColumnQueryMode } from './db';
+import type { ColumnQueryMode } from '>/contracts';
 
 export type PageTableShellActions = {
   onDiscardEdits?: () => void;

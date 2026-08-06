@@ -152,6 +152,7 @@ export const QueryView = () => {
         title={`${title} ${db}`}
         tableRef={tableRef}
         actions={shellHandlers}
+        indicators={{ hasHiddenColumns: false }}
       />
       <div className='page-section liner'>
         <button className='btn' onClick={onEditSql} title='Edit Query'>
