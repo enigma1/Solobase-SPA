@@ -25,7 +25,6 @@ export const buildColumnActions = ({
   for (const colName of columnsOrder) {
     const colData = cols[colName];
     const storedSort = sortBy[colName];
-
     const typeGroup = tableColumnTypes.find((group) =>
       hasit({
         input: colData.type,

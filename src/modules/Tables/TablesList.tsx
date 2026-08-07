@@ -461,13 +461,13 @@ export const TablesList = ({
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
           filters={filters}
+          actionOptions={filterTableActionOptions}
           columnActions={columnsActions}
           onActionCol={handleColumnAction}
           selectedRow={uidSelected}
           editedRow={editedRow}
           onEditRow={onEditRow}
           onSelectRow={onSelectRow}
-          actionOptions={filterTableActionOptions}
         />
       </EffectiveTableWrapper>
     </>

@@ -76,7 +76,7 @@ export type MutationCallbacks<
   TContext = unknown,
 > = Partial<MutationOptions<TData, TError, TVariables, TContext>>;
 
-export type DataHookProps<
+export type DataQueryHookProps<
   TState,
   TApi = Record<string, (...args: any[]) => any>,
 > = {
@@ -106,10 +106,7 @@ export const queryKeys = {
   // Hierarchical Invalidations
   users: (paging?: Partial<PagingParams>) =>
     paging ? ['users', , paging.offset, paging.limit] : ['users'],
-  databases: (paging?: Partial<PagingParams>) =>
-    paging
-      ? ['users', 'databases', paging.offset, paging.limit]
-      : ['users', 'databases'],
+  databases: (request: BasicDataRequest) => ['users', 'databases', request],
   tables: (db: string | null, request: BasicDataRequest) => [
     'users',
     'databases',
@@ -195,13 +192,13 @@ export const invalidateOptions = <
   cache: async (qc, data) => {
     accountStoreActions.setActiveDatabase(null);
     await qc.invalidateQueries({
-      queryKey: queryKeys.databases(),
+      queryKey: queryKeys.databases({}),
     });
   },
   cacheError: async (qc, error) => {
     accountStoreActions.setActiveDatabase(null);
     await qc.invalidateQueries({
-      queryKey: queryKeys.databases(),
+      queryKey: queryKeys.databases({}),
     });
   },
 });

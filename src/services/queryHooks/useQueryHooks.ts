@@ -5,13 +5,12 @@ import { useAccountStore } from '>/services/stores';
 import {
   queryKeys,
   STALE_TIME,
-  DataHookProps,
+  DataQueryHookProps,
   HookStore,
   DataQueryHookOptions,
 } from './defs';
 import {
   dbApi,
-  FetchDatabasesRequest,
   FetchDatabasesResponse,
   SessionRestoreResponse,
   GetTableDetailsResponse,
@@ -20,6 +19,7 @@ import {
   FetchUsersResponse,
   FetchDatabaseInfoResponse,
   LoadPreferencesResponse,
+  BasicDataRequest,
 } from '>/services/api';
 import {
   databaseFields,
@@ -41,7 +41,7 @@ const loadPreferencesInitialData: LoadPreferencesResponse = {
   },
 };
 
-type PreferencesHookProps = DataHookProps<LoadPreferencesResponse>;
+type PreferencesHookProps = DataQueryHookProps<LoadPreferencesResponse>;
 export const useLoadPreferences = <TSelected = PreferencesHookProps>(
   selector?: (args: PreferencesHookProps) => TSelected,
 ) => {
@@ -76,7 +76,7 @@ const sessionRestoreInitialData: SessionRestoreResponse = {
   preferences: {},
 };
 
-type RestoreHookProps = DataHookProps<SessionRestoreResponse>;
+type RestoreHookProps = DataQueryHookProps<SessionRestoreResponse>;
 export const useSessionRestore = <TSelected = RestoreHookProps>(
   selector?: (args: RestoreHookProps) => TSelected,
 ) => {
@@ -127,15 +127,17 @@ const fetchDatabasesInitialData: FetchDatabasesResponse = {
   ...defaultPageResponse,
 };
 
-type DatabaseHookProps = DataHookProps<FetchDatabasesResponse>;
+type DatabaseHookProps = DataQueryHookProps<FetchDatabasesResponse>;
 export const useDatabases = <TSelected = DatabaseHookProps>(
-  request?: FetchDatabasesRequest,
+  request: BasicDataRequest,
   selector?: (args: DatabaseHookProps) => TSelected,
+  options?: DataQueryHookOptions,
 ) => {
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
-  // const q = useQuery<FetchDatabasesResponse, Error, string[]>({
+  const enabled = isAuthenticated && (options?.enabled ?? true);
+
   const q = useQuery<FetchDatabasesResponse, Error>({
-    queryKey: queryKeys.databases(request?.paging),
+    queryKey: queryKeys.databases(request),
     // select: (data) => data.databases, // transform to string[] for easier usage
     queryFn: async () => {
       const response = await dbApi.fetchDatabases(
@@ -145,7 +147,7 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
       return response;
     },
     staleTime: STALE_TIME,
-    enabled: isAuthenticated,
+    enabled,
     retry: 1,
     refetchOnWindowFocus: false,
   });
@@ -166,12 +168,13 @@ export const useDatabases = <TSelected = DatabaseHookProps>(
     api,
     state: data,
     query: q,
-  } satisfies DataHookProps<FetchDatabasesResponse, typeof api>;
+  } satisfies DataQueryHookProps<FetchDatabasesResponse, typeof api>;
 
   return selector ? selector(args) : (args as TSelected);
 };
 
-type DatabaseServerInfoHookProps = DataHookProps<FetchDatabaseInfoResponse>;
+type DatabaseServerInfoHookProps =
+  DataQueryHookProps<FetchDatabaseInfoResponse>;
 export const useDatabaseServerInfo = <TSelected = DatabaseServerInfoHookProps>(
   selector?: (args: DatabaseServerInfoHookProps) => TSelected,
 ) => {
@@ -210,7 +213,7 @@ export const useDatabaseServerInfo = <TSelected = DatabaseServerInfoHookProps>(
   return selector ? selector(args) : (args as TSelected);
 };
 
-type TableDetailsHookProps = DataHookProps<GetTableDetailsResponse>;
+type TableDetailsHookProps = DataQueryHookProps<GetTableDetailsResponse>;
 export const useTableDetailsHook = <TSelected = TableDetailsHookProps>(
   request: { database: string; table: string },
   selector?: (args: TableDetailsHookProps) => TSelected,
@@ -250,7 +253,8 @@ export const useTableDetailsHook = <TSelected = TableDetailsHookProps>(
   return selector ? selector(args) : (args as TSelected);
 };
 
-type TableColumnsInfoHookProps = DataHookProps<GetTableColumnsInfoResponse>;
+type TableColumnsInfoHookProps =
+  DataQueryHookProps<GetTableColumnsInfoResponse>;
 export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
   request: TableBasicsUndefined,
   selector?: (args: TableColumnsInfoHookProps) => TSelected,
@@ -298,7 +302,7 @@ export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
   return selector ? selector(args) : (args as TSelected);
 };
 
-type UsersHookProps = DataHookProps<FetchUsersResponse>;
+type UsersHookProps = DataQueryHookProps<FetchUsersResponse>;
 export const useUsers = <TSelected = UsersHookProps>(
   request?: FetchUsersRequest,
   selector?: (args: UsersHookProps) => TSelected,
@@ -338,7 +342,7 @@ export const useUsers = <TSelected = UsersHookProps>(
     api,
     state: data,
     query: q,
-  } satisfies DataHookProps<FetchDatabasesResponse, typeof api>;
+  } satisfies DataQueryHookProps<FetchDatabasesResponse, typeof api>;
 
   return selector ? selector(args) : (args as TSelected);
 };

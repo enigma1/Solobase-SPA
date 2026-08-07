@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAccountStore } from '>/services/stores';
-import { DataHookProps, STALE_TIME, QueryHookOptions } from './defs';
+import { DataQueryHookProps, STALE_TIME, QueryHookOptions } from './defs';
 
 // export const createDataQueryHook =
 //   <TData, TVariables = void, TApi extends object = {}>(

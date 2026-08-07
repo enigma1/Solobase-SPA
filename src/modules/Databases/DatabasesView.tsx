@@ -1,8 +1,22 @@
 import { useMemo, useEffect } from 'react';
-import { useDatabases } from '>/services/queryHooks';
-import { getColumnsFromRow, databaseFields } from '>/services/utils';
-import { ScreenLoader, EmptyPage } from '>/modules';
-import { createFactoryTableStore, useAccountStore } from '>/services/stores';
+import { useDatabases, useTableColumnsInfoHook } from '>/services/queryHooks';
+import {
+  getColumnsFromRow,
+  databaseFields,
+  databaseBasics,
+} from '>/services/utils';
+import {
+  FiltersAndSortsNotice,
+  EmptyListing,
+  ScreenLoader,
+  dialogFactories,
+} from '>/modules';
+import {
+  useColumnsStore,
+  createFactoryTableStore,
+  useAccountStore,
+  dialogStoreActions,
+} from '>/services/stores';
 import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 import { DatabasesList } from './DatabasesList';
 
@@ -12,9 +26,48 @@ export const DatabasesMainView = () => {
     () => createFactoryTableStore({ listingType: 'dbRows' }),
     [],
   );
-  const { cPaging } = tableStore.useFactoryTableStore(({ state }) => ({
-    cPaging: state.paging,
-  }));
+  const { cols: colsInfo, isSuccess: isSuccessInfo } = useTableColumnsInfoHook(
+    databaseBasics,
+    ({ state, query }) => ({
+      cols: state.cols,
+      isSuccess: query.isSuccess,
+    }),
+  );
+
+  const { pastColumnsActions, getSortBy, getFilters } = useColumnsStore(
+    ({ state, api }) => ({
+      pastColumnsActions: state.pastColumnsActions,
+      getSortBy: api.getSortBy,
+      getFilters: api.getFilters,
+    }),
+  );
+
+  const { cPaging, clearSelected } = tableStore.useFactoryTableStore(
+    ({ state, api }) => ({
+      cPaging: state.paging,
+      clearSelected: api.clearSelected,
+    }),
+  );
+
+  const { cSortBy, cFilters, request } = useMemo(() => {
+    const cSortBy = getSortBy(colsInfo);
+    const cFilters = getFilters(colsInfo);
+
+    const request = {
+      paging: {
+        limit: cPaging.limit,
+        offset: cPaging.offset,
+      },
+      ...(Object.keys(cSortBy).length && { sortBy: cSortBy }),
+      ...(Object.keys(cFilters).length && { filters: cFilters }),
+    };
+
+    return {
+      cSortBy,
+      cFilters,
+      request,
+    };
+  }, [cPaging.limit, cPaging.offset, colsInfo, pastColumnsActions]);
 
   const {
     rows,
@@ -26,12 +79,7 @@ export const DatabasesMainView = () => {
     isLoading,
     isFetching,
   } = useDatabases(
-    {
-      paging: {
-        limit: cPaging.limit,
-        offset: cPaging.offset,
-      },
-    },
+    request,
     ({ state, query }) => {
       return {
         rows: state.rows,
@@ -43,6 +91,9 @@ export const DatabasesMainView = () => {
         isLoading: query.isLoading,
         isFetching: query.isFetching,
       };
+    },
+    {
+      enabled: isSuccessInfo,
     },
   );
 
@@ -57,13 +108,12 @@ export const DatabasesMainView = () => {
     if (!dbSelected) return undefined;
 
     for (const row of viewRows) {
-      const { SCHEMA_NAME } = getColumnsFromRow({
+      const colNames = getColumnsFromRow({
         row: row.row,
         columnsOrder,
         fields: [databaseFields.name],
       });
-
-      if (SCHEMA_NAME === dbSelected) {
+      if (colNames[databaseFields.name] === dbSelected) {
         return row.uiKey;
       }
     }
@@ -81,22 +131,52 @@ export const DatabasesMainView = () => {
   }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
 
   const isBusy = isFetching;
-
   if (isBusy) return <ScreenLoader />;
 
-  return (
-    <>
-      {rows.length > 0 ? (
-        <DatabasesList
-          rows={viewRows}
-          cols={cols as SqlColumnsShape}
-          columnsOrder={columnsOrder as string[]}
-          store={tableStore}
-          uidSelected={uidSelected}
+  const onCreate = () => {
+    dialogStoreActions.openDialog({
+      payload: dialogFactories.createTable(dbSelected),
+    });
+  };
+
+  if (rows.length === 0) {
+    const hasSorts = Object.keys(cSortBy).length > 0;
+    const hasFilters = Object.keys(cFilters).length > 0;
+
+    let notice;
+    if (hasFilters || hasSorts) {
+      notice = (
+        <FiltersAndSortsNotice
+          cols={cols}
+          clearSorts={hasSorts}
+          clearFilters={hasFilters}
         />
-      ) : (
-        <EmptyPage note='No Databases found' />
-      )}
-    </>
+      );
+    }
+    notice = (
+      <div className='wrapper'>
+        <button type='button' className='btn' onClick={onCreate}>
+          New Database
+        </button>
+      </div>
+    );
+    return (
+      <EmptyListing
+        onCreate={onCreate}
+        note={`${dbSelected ? 'No Tables in database [' + dbSelected + ']' : 'No databases available'}`}
+      >
+        {notice}
+      </EmptyListing>
+    );
+  }
+
+  return (
+    <DatabasesList
+      rows={viewRows}
+      cols={cols as SqlColumnsShape}
+      columnsOrder={columnsOrder as string[]}
+      store={tableStore}
+      uidSelected={uidSelected}
+    />
   );
 };

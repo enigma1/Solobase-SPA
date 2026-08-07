@@ -138,16 +138,6 @@ export const TablesMainView = () => {
     return undefined;
   }, [dbSelected, viewRows, columnsOrder]);
 
-  // useEffect(() => {
-  //   clearSelected();
-  // }, [dbSelected, activeTable]);
-
-  // useEffect(() => {
-  //   tableStore.api.setPaging({
-  //     offset: 0,
-  //   });
-  // }, [dbSelected]);
-
   useEffect(() => {
     if (!isSuccess) return;
 

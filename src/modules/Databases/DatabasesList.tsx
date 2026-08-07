@@ -8,10 +8,10 @@ import {
 import {
   useAccountStore,
   useConfigStore,
-  useDatabasesStore,
   messageStoreActions,
   dialogStoreActions,
   FactoryTableStore,
+  useColumnsStore,
 } from '>/services/stores';
 import {
   getColumnsFromRow,
@@ -20,6 +20,8 @@ import {
   dialogActions,
   makeColumnsActive,
   databaseFields,
+  buildColumnActions,
+  filterDatabaseActionOptions,
 } from '>/services/utils';
 import {
   ScreenLoader,
@@ -29,15 +31,17 @@ import {
   DatabaseEdit,
   DialogContent,
   dialogFactories,
+  EditDataCellRaw,
 } from '>/modules';
 import { routes } from '>/config/routes';
 import type {
   ViewRow,
   SqlColumnsShape,
   SqlRow,
-  SqlObject,
   CommonDialogHandlers,
   PagingContext,
+  ColumnActions,
+  ActionColumnProps,
 } from '>/types';
 import type { DeleteDatabasesResponse } from '>/services/api/dbApiTypes';
 import {
@@ -60,10 +64,11 @@ export const DatabasesList = ({
   store,
   uidSelected,
 }: DatabasesListProps) => {
+  const navigate = useNavigate();
+
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   const dbSelected = useAccountStore(({ state }) => state.dbSelected);
   const rowMap = useMemo(
@@ -71,22 +76,55 @@ export const DatabasesList = ({
     [rows],
   );
 
-  const { paging } = store.useFactoryTableStore(({ state }) => ({
-    paging: state.paging,
+  const {
+    pastColumnsActions,
+    hiddenColumns,
+    getSortBy,
+    getFilters,
+    changeSortBy,
+    changeFilter,
+  } = useColumnsStore(({ state, api }) => ({
+    pastColumnsActions: state.pastColumnsActions,
+    hiddenColumns: state.hiddenColumns,
+    getSortBy: api.getSortBy,
+    changeSortBy: api.changeSortBy,
+    changeFilter: api.changeFilter,
+    getFilters: api.getFilters,
   }));
 
-  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
+  const { filters, sortBy } = useMemo(
+    () => ({
+      filters: getFilters(cols),
+      sortBy: getSortBy(cols),
+    }),
+    [cols, hiddenColumns, pastColumnsActions],
+  );
+
+  const { savePreferences, getPageSizes } = useConfigStore(
     ({ state, api }) => ({
-      hiddenColumns: state.hiddenColumns,
       savePreferences: api.savePreferences,
       getPageSizes: api.getPageSizes,
     }),
   );
 
-  const { editedRow, markEditedRow } = useDatabasesStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, SqlObject>,
-    markEditedRow: api.markEditedRow,
-  }));
+  const { paging, editedRow, markEditedRow } = store.useFactoryTableStore(
+    ({ state, api }) => ({
+      paging: state.paging,
+      editedRow: state.editedRow,
+      markEditedRow: api.markEditedRow,
+    }),
+  );
+
+  const columnsActions = useMemo<Record<string, ColumnActions>>(
+    () =>
+      buildColumnActions({
+        columnsOrder,
+        cols,
+        sortBy,
+        filters,
+      }),
+    [columnsOrder, cols, sortBy, filters],
+  );
 
   const deleteDatabasesCallbacks = {
     onSuccess: (data: DeleteDatabasesResponse) => {
@@ -127,14 +165,17 @@ export const DatabasesList = ({
     deleteDatabasesCallbacks,
   );
 
-  const discardEditedRows = () => {
+  // ----------------
+  // No-Hooks Section
+  // ----------------
+  const discardSelectedRows = () => {
     dialogStoreActions.openDialog({
       payload: {
         caption: 'SQL Edits',
         variant: 'warn',
         component: (
           <DialogContent note='Discard Changes'>
-            {'About to discard all changes made. Are you sure?'}
+            {'About to discard all selectied rows. Are you sure?'}
           </DialogContent>
         ),
         actions: dialogActions.confirmCancel({
@@ -295,10 +336,60 @@ export const DatabasesList = ({
     });
   };
 
+  const handleColumnAction = (action: ActionColumnProps) => {
+    const { colName, actions } = action;
+    if (actions.sort) {
+      changeSortBy({
+        cols,
+        colName,
+        direction: actions.sort === 'both' ? undefined : actions.sort,
+      });
+    }
+
+    if (!actions.filter) return;
+    if (actions.filter.value === undefined) {
+      changeFilter({
+        cols,
+        colName,
+        filter: { value: actions.filter.value, mode: actions.filter.mode },
+      });
+    } else {
+      const valueRef = { current: actions.filter.value };
+      const modeRef = { current: actions.filter.mode };
+      dialogStoreActions.openDialog({
+        payload: {
+          caption: `SQL Edits`,
+          variant: 'warn',
+          component: (
+            <DialogContent note={`${colName} @${cols[colName].type}`}>
+              <EditDataCellRaw
+                type={cols[colName].type}
+                value={valueRef.current!}
+                onChange={(v) => {
+                  valueRef.current = v;
+                }}
+              />
+            </DialogContent>
+          ),
+          actions: dialogActions.enabledConfirmCancel({
+            onConfirm: () => {
+              dialogStoreActions.closeDialog();
+              changeFilter({
+                cols,
+                colName,
+                filter: { value: valueRef.current, mode: modeRef.current },
+              });
+            },
+          }),
+        },
+      });
+    }
+  };
+
   const shellHandlers = {
     onCreate: handleCreateDatabase,
     onDiscardEdits:
-      Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
+      Object.entries(editedRow).length > 0 ? discardSelectedRows : undefined,
     onDelete: handleDeleteDatabases,
     onDownload: handleConfirmSelectedExports,
     onFilterColumns: () => {
@@ -343,12 +434,11 @@ export const DatabasesList = ({
     };
   };
 
-  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
-  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
-
   const isBusy = isPending || isDatabaseSelectionPending;
   if (isBusy) return <ScreenLoader />;
 
+  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
+  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
   const pagingContext = getPagingContext();
   const start = paging.offset + 1;
   const end = paging.offset + rows.length;
@@ -377,6 +467,10 @@ export const DatabasesList = ({
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
+          filters={filters}
+          actionOptions={filterDatabaseActionOptions}
+          columnActions={columnsActions}
+          onActionCol={handleColumnAction}
           selectedRow={uidSelected}
           editedRow={editedRow}
           onEditRow={onEditRow}

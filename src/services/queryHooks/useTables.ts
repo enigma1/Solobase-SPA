@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   dbApi,
-  FetchTablesRequest,
   FetchTablesResponse,
   BasicResponse,
   BasicDataRequest,
@@ -19,11 +18,11 @@ import { BasicRowsShape, TableBasicsUndefined } from '>/types';
 import {
   queryKeys,
   STALE_TIME,
-  DataHookProps,
+  DataQueryHookProps,
   DataQueryHookOptions,
 } from './defs';
 
-type TablesHookProps = DataHookProps<FetchTablesResponse>;
+type TablesHookProps = DataQueryHookProps<FetchTablesResponse>;
 export const useTables = <TSelected = TablesHookProps>(
   request: TableBasicsUndefined & BasicDataRequest,
   selector?: (args: TablesHookProps) => TSelected,
