@@ -360,6 +360,7 @@ export const TablesList = ({
           actions: dialogActions.enabledConfirmCancel({
             onConfirm: () => {
               closeDialog();
+              store.api.setPaging({ offset: 0 });
               changeFilter({
                 cols,
                 colName,

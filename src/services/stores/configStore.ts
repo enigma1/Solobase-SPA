@@ -21,7 +21,7 @@ export type ConfigActions = {
   showObjectEditorForJson: (show: boolean) => void;
 };
 
-export type ConfigStore = StorageConfig & ConfigActions;
+type ConfigStore = StorageConfig & ConfigActions;
 
 const initialState: StorageConfig = userPrefs;
 

@@ -372,6 +372,7 @@ export const DataRowsList = ({
           actions: dialogActions.enabledConfirmCancel({
             onConfirm: () => {
               dialogStoreActions.closeDialog();
+              store.api.setPaging({ offset: 0 });
               changeFilter({
                 cols,
                 colName,
