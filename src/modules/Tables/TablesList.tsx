@@ -3,12 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDeleteTablesMutation } from '>/services/queryHooks';
 import {
   useConfigStore,
-  useTablesStore,
   useDialogStore,
   messageStoreActions,
   dialogStoreActions,
   accountStoreActions,
   FactoryTableStore,
+  useColumnsStore,
 } from '>/services/stores';
 import { dbApi } from '>/services/api/dbApi';
 import {
@@ -18,6 +18,8 @@ import {
   makeColumnsActive,
   createFileSaveUrl,
   databaseFields,
+  filterTableActionOptions,
+  buildColumnActions,
 } from '>/services/utils';
 import {
   PageTableShell,
@@ -27,6 +29,7 @@ import {
   DialogContent,
   dialogFactories,
   TablesExportPreview,
+  EditDataCellRaw,
 } from '>/modules';
 import { routes } from '>/config';
 import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
@@ -36,6 +39,8 @@ import type {
   SqlObject,
   ViewRow,
   PagingContext,
+  ActionColumnProps,
+  ColumnActions,
 } from '>/types';
 
 import { TablesDeletePreview } from './TablesPreviews';
@@ -68,22 +73,53 @@ export const TablesList = ({
     [rows],
   );
 
-  const { paging } = store.useFactoryTableStore(({ state }) => ({
-    paging: state.paging,
+  const {
+    pastColumnsActions,
+    hiddenColumns,
+    getSortBy,
+    getFilters,
+    changeSortBy,
+    changeFilter,
+  } = useColumnsStore(({ state, api }) => ({
+    pastColumnsActions: state.pastColumnsActions,
+    hiddenColumns: state.hiddenColumns,
+    getSortBy: api.getSortBy,
+    changeSortBy: api.changeSortBy,
+    changeFilter: api.changeFilter,
+    getFilters: api.getFilters,
   }));
 
-  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
+  const { filters, sortBy } = useMemo(
+    () => ({
+      filters: getFilters(cols),
+      sortBy: getSortBy(cols),
+    }),
+    [cols, hiddenColumns, pastColumnsActions],
+  );
+
+  const { savePreferences, getPageSizes } = useConfigStore(({ api }) => ({
+    savePreferences: api.savePreferences,
+    getPageSizes: api.getPageSizes,
+  }));
+
+  const { paging, editedRow, markEditedRow } = store.useFactoryTableStore(
     ({ state, api }) => ({
-      hiddenColumns: state.hiddenColumns,
-      savePreferences: api.savePreferences,
-      getPageSizes: api.getPageSizes,
+      paging: state.paging,
+      editedRow: state.editedRow,
+      markEditedRow: api.markEditedRow,
     }),
   );
 
-  const { editedRow, markEditedRow } = useTablesStore(({ state, api }) => ({
-    editedRow: state.editedRow as Record<number, SqlObject>,
-    markEditedRow: api.markEditedRow,
-  }));
+  const columnsActions = useMemo<Record<string, ColumnActions>>(
+    () =>
+      buildColumnActions({
+        columnsOrder,
+        cols,
+        sortBy,
+        filters,
+      }),
+    [columnsOrder, cols, sortBy, filters],
+  );
 
   const { dialog, openDialog, closeDialog } = useDialogStore(
     ({ api, state }) => ({
@@ -126,13 +162,16 @@ export const TablesList = ({
     callbacks,
   );
 
-  const discardEditedRows = () => {
+  // ----------------
+  // No-Hooks Section
+  // ----------------
+  const discardSelectedRows = () => {
     openDialog({
       payload: {
         caption: 'SQL Edits',
         component: (
-          <DialogContent note='Discard Changes'>
-            {'About to discard all changes made in the tables. Are you sure?'}
+          <DialogContent note='Clear Selected Rows'>
+            {'About to clear selected tables in this database. Are you sure?'}
           </DialogContent>
         ),
         actions: dialogActions.confirmCancel({
@@ -286,6 +325,56 @@ export const TablesList = ({
     });
   };
 
+  const handleColumnAction = (action: ActionColumnProps) => {
+    const { colName, actions } = action;
+    if (actions.sort) {
+      changeSortBy({
+        cols,
+        colName,
+        direction: actions.sort === 'both' ? undefined : actions.sort,
+      });
+    }
+
+    if (!actions.filter) return;
+    if (actions.filter.value === undefined) {
+      changeFilter({
+        cols,
+        colName,
+        filter: { value: actions.filter.value, mode: actions.filter.mode },
+      });
+    } else {
+      const valueRef = { current: actions.filter.value };
+      const modeRef = { current: actions.filter.mode };
+      dialogStoreActions.openDialog({
+        payload: {
+          caption: `SQL Edits`,
+          variant: 'warn',
+          component: (
+            <DialogContent note={`${colName} @${cols[colName].type}`}>
+              <EditDataCellRaw
+                type={cols[colName].type}
+                value={valueRef.current!}
+                onChange={(v) => {
+                  valueRef.current = v;
+                }}
+              />
+            </DialogContent>
+          ),
+          actions: dialogActions.enabledConfirmCancel({
+            onConfirm: () => {
+              dialogStoreActions.closeDialog();
+              changeFilter({
+                cols,
+                colName,
+                filter: { value: valueRef.current, mode: modeRef.current },
+              });
+            },
+          }),
+        },
+      });
+    }
+  };
+
   const handleBack = () => {
     navigate(routes.front.listDatabases, {
       replace: true,
@@ -294,7 +383,7 @@ export const TablesList = ({
 
   const shellHandlers = {
     onDiscardEdits:
-      Object.entries(editedRow).length > 0 ? discardEditedRows : undefined,
+      Object.entries(editedRow).length > 0 ? discardSelectedRows : undefined,
     onCreate: handleCreateTable,
     onDelete: handleDeleteTables,
     onDownload: handleSelectedDownloads,
@@ -338,12 +427,11 @@ export const TablesList = ({
     };
   };
 
-  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
-  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
-
   const isBusy = isPending;
   if (isBusy) return <ScreenLoader />;
 
+  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
+  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
   const pagingContext = getPagingContext();
   const start = paging.offset + 1;
   const end = paging.offset + rows.length;
@@ -372,10 +460,14 @@ export const TablesList = ({
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
+          filters={filters}
+          columnActions={columnsActions}
+          onActionCol={handleColumnAction}
           selectedRow={uidSelected}
           editedRow={editedRow}
           onEditRow={onEditRow}
           onSelectRow={onSelectRow}
+          actionOptions={filterTableActionOptions}
         />
       </EffectiveTableWrapper>
     </>

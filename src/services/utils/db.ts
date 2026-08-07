@@ -13,6 +13,16 @@ import {
   DataCell,
 } from '>/types';
 
+export const databaseBasics = {
+  database: 'information_schema',
+  table: 'SCHEMATA',
+} as const;
+
+export const databaseTablesBasics = {
+  database: 'information_schema',
+  table: 'TABLES',
+} as const;
+
 export const databaseFields = {
   name: 'SCHEMA_NAME',
   table: 'TABLE_NAME',
@@ -30,7 +40,7 @@ export const tableColumnKeyList = [
   { value: 'UNIQUE', label: 'Unique' },
   { value: 'INDEX', label: 'Index' },
   { value: 'FOREIGN', label: 'Foreign Key' },
-];
+] as const;
 
 export const numberTypes = [
   'TINYINT',
@@ -43,7 +53,7 @@ export const numberTypes = [
   'NUMERIC',
   'FLOAT',
   'DOUBLE',
-];
+] as const;
 
 export const objectTypes = [
   'BINARY',
@@ -60,7 +70,7 @@ export const objectTypes = [
   'MULTIPOLYGON',
   'GEOMETRY',
   'GEOMCOLLECTION',
-];
+] as const;
 
 export const tableColumnTypes = [
   {
@@ -119,6 +129,7 @@ export const tableColumnTypes = [
   {
     id: 'datetime',
     label: 'Date & Time',
+    meta: { sortable: true, filterable: true },
     options: [
       { value: 'DATE' },
       { value: 'TIME' },

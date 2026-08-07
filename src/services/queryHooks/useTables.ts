@@ -5,6 +5,7 @@ import {
   FetchTablesRequest,
   FetchTablesResponse,
   BasicResponse,
+  BasicDataRequest,
 } from '>/services/api';
 import { useAccountStore } from '>/services/stores';
 import {
@@ -14,13 +15,19 @@ import {
   getSingleColumnFromResult,
   databaseFields,
 } from '>/services/utils';
-import { BasicRowsShape } from '>/types';
-import { queryKeys, STALE_TIME, DataHookProps } from './defs';
+import { BasicRowsShape, TableBasicsUndefined } from '>/types';
+import {
+  queryKeys,
+  STALE_TIME,
+  DataHookProps,
+  DataQueryHookOptions,
+} from './defs';
 
 type TablesHookProps = DataHookProps<FetchTablesResponse>;
 export const useTables = <TSelected = TablesHookProps>(
-  request?: FetchTablesRequest,
+  request: TableBasicsUndefined & BasicDataRequest,
   selector?: (args: TablesHookProps) => TSelected,
+  options?: DataQueryHookOptions,
 ) => {
   const initialData: BasicResponse & BasicRowsShape = {
     ...defaultResponse,
@@ -28,29 +35,28 @@ export const useTables = <TSelected = TablesHookProps>(
     ...defaultPageResponse,
   };
 
-  const { dbSelected, isAuthenticated } = useAccountStore(({ state }) => ({
-    dbSelected: state.dbSelected,
-    isAuthenticated: state.isAuthenticated,
-  }));
+  const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
 
-  const database = request?.database ?? dbSelected ?? null;
+  const enabled =
+    !!request.database && isAuthenticated && (options?.enabled ?? true);
 
   // React Query data fetch
   const q = useQuery<FetchTablesResponse, Error>({
-    queryKey: queryKeys.tables(database, request?.paging),
+    queryKey: queryKeys.tables(request?.database ?? '', request),
     queryFn: async () => {
       // const delay = (ms: number) =>
       //   new Promise((resolve) => setTimeout(resolve, ms));
       // await delay(5000);
-      if (!database) return { ...initialData };
-      const data = await dbApi.fetchTables({ ...request, database });
+      const data = await dbApi.fetchTables({
+        ...request,
+        database: request.database!,
+      });
       return data;
     },
     staleTime: STALE_TIME,
-    enabled: !!database && isAuthenticated,
+    enabled,
     retry: 1,
     refetchOnWindowFocus: false,
-    // placeholderData: keepPreviousData,
   });
 
   const data = q.data ?? initialData;

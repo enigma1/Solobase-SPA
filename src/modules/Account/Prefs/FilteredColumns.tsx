@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useConfigStore, useColumnsStore } from '>/services/stores';
 import { MiniTable, CheckboxField } from '>/modules';
 import { ItemPreferenceProps, FilterColumnParams } from '>/types';
-import { filterActionOptions } from '>/services/utils';
+import { filterDataActionOptions } from '>/services/utils';
 
 export const FilteredColumns = ({
   modified,
@@ -64,7 +64,7 @@ export const FilteredColumns = ({
   const actionRows = filteredColumnsList.map((colName) => {
     const columnFilters = filters[colName];
 
-    const row = filterActionOptions.map(({ action }) => {
+    const row = filterDataActionOptions.map(({ action }) => {
       const filter = columnFilters.find((f) => f.mode === action);
 
       return getActionValue(filter);
@@ -83,7 +83,7 @@ export const FilteredColumns = ({
     ]),
   );
 
-  const columnsOrder = filterActionOptions.map((c) => c.option);
+  const columnsOrder = filterDataActionOptions.map((c) => c.option);
 
   const modFilteredColumns = modified.pastColumnsActions;
   const hasModedFilters = Object.values(modFilteredColumns).some(

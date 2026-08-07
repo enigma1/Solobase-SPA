@@ -16,7 +16,7 @@ export const isNonEmptyString = (s: unknown): s is string =>
 
 type HasitProps = {
   input: string;
-  parts: string[];
+  parts: readonly string[];
   at?: number;
 };
 

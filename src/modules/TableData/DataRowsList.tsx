@@ -16,9 +16,8 @@ import {
 import {
   dialogActions,
   makeColumnsActive,
-  tableColumnTypes,
-  hasit,
-  filterActionOptions,
+  filterDataActionOptions,
+  buildColumnActions,
 } from '>/services/utils';
 import {
   SqlTableContainer,
@@ -98,13 +97,6 @@ export const DataRowsList = ({
     getFilters: api.getFilters,
   }));
 
-  const { savePreferences, getPageSizes } = useConfigStore(
-    ({ state, api }) => ({
-      savePreferences: api.savePreferences,
-      getPageSizes: api.getPageSizes,
-    }),
-  );
-
   const { filters, sortBy } = useMemo(
     () => ({
       filters: getFilters(cols),
@@ -112,6 +104,11 @@ export const DataRowsList = ({
     }),
     [cols, hiddenColumns, pastColumnsActions],
   );
+
+  const { savePreferences, getPageSizes } = useConfigStore(({ api }) => ({
+    savePreferences: api.savePreferences,
+    getPageSizes: api.getPageSizes,
+  }));
 
   const { paging, editedRow, markEditedRow } = store.useFactoryTableStore(
     ({ state, api }) => ({
@@ -121,43 +118,16 @@ export const DataRowsList = ({
     }),
   );
 
-  const columnsActions = useMemo<Record<string, ColumnActions>>(() => {
-    const result: Record<string, ColumnActions> = {};
-
-    for (const colName of columnsOrder) {
-      const colData = cols[colName];
-      const storedSort = sortBy[colName];
-
-      const typeGroup = tableColumnTypes.find((group) =>
-        hasit({
-          input: colData.type,
-          parts: group.options.map((option) => option.value),
-        }),
-      );
-
-      if (!typeGroup) continue;
-
-      const actions: ColumnActions = {
-        type: colData.type,
-      };
-
-      if (storedSort) {
-        actions.sort = storedSort.direction;
-      } else if (typeGroup.meta?.sortable) {
-        actions.sort = 'both';
-      }
-
-      const storedFilters = filters[colName];
-
-      if (storedFilters?.length) {
-        actions.filter = storedFilters[storedFilters.length - 1];
-      }
-
-      result[colName] = actions;
-    }
-
-    return result;
-  }, [columnsOrder, cols, sortBy, filters]);
+  const columnsActions = useMemo<Record<string, ColumnActions>>(
+    () =>
+      buildColumnActions({
+        columnsOrder,
+        cols,
+        sortBy,
+        filters,
+      }),
+    [columnsOrder, cols, sortBy, filters],
+  );
 
   const addMessage = useMessageStore(({ api }) => api.addMessage);
 
@@ -219,6 +189,10 @@ export const DataRowsList = ({
     }),
     deleteCallbacks,
   );
+
+  // ----------------
+  // No-Hooks Section
+  // ----------------
 
   const handleEditClick = ({
     row,
@@ -463,6 +437,9 @@ export const DataRowsList = ({
     };
   };
 
+  const isBusy = isPending || isDeletePending;
+  if (isBusy) return <ScreenLoader />;
+
   const hasSorts = Object.keys(sortBy).length > 0;
   const hasFilters = Object.keys(filters).length > 0;
 
@@ -478,18 +455,12 @@ export const DataRowsList = ({
   }
   const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
   const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
-
-  const isBusy = isPending || isDeletePending;
-
-  // if (isBusy) return <ScreenLoader />;
-
   const pagingContext = getPagingContext();
   const start = paging.offset + 1;
   const end = paging.offset + rows.length;
 
   return (
     <>
-      {isBusy && <ScreenLoader />}
       <PageTableShell
         store={store}
         tableRef={tableRef}
@@ -519,7 +490,7 @@ export const DataRowsList = ({
           onEditCell={handleEditClick}
           onCopyRow={handleCopyRow}
           editedRow={editedRow}
-          actionOptions={filterActionOptions}
+          actionOptions={filterDataActionOptions}
         />
       </EffectiveTableWrapper>
     </>

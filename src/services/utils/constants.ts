@@ -15,9 +15,19 @@ export const MAX_COLUMNS_PER_KEY = 16;
 export const MAX_INSERT_DATA_ROWS = 16;
 export const MAX_COPIED_ROWS = 10;
 
-export const filterActionOptions: ActionOptions[] = [
+export const filterDataActionOptions: ActionOptions[] = [
   { option: 'Strict Search', action: 'where' },
   { option: 'Loose Search', action: 'like' },
   { option: 'Unique Value', action: 'distinct' },
   { option: 'Group Values', action: 'groupBy' },
+];
+
+export const filterTableActionOptions: ActionOptions[] = [
+  { option: 'Strict Search', action: 'where' },
+  { option: 'Loose Search', action: 'like' },
+];
+
+export const filterDatabaseActionOptions: ActionOptions[] = [
+  { option: 'Strict Search', action: 'where' },
+  { option: 'Loose Search', action: 'like' },
 ];

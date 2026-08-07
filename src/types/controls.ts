@@ -48,7 +48,7 @@ export type Option = {
 
 export type OptionGroup = {
   label: string;
-  options: Option[];
+  options: readonly Option[];
 };
 
 export type ListScrollInfo = {

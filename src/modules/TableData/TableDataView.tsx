@@ -21,6 +21,11 @@ import { SqlColumnsShape, SqlRow, ViewRow } from '>/types';
 
 export const TableDataView = () => {
   const navigate = useNavigate();
+  const tableStore = useMemo(
+    () => createFactoryTableStore({ listingType: 'dataRows' }),
+    [],
+  );
+
   const { dbSelected, activeTable, registerActiveTableGuard } = useAccountStore(
     ({ state, api }) => ({
       activeTable: state.activeTable,
@@ -39,11 +44,6 @@ export const TableDataView = () => {
       cols: state.cols,
       isSuccess: query.isSuccess,
     }),
-  );
-
-  const tableStore = useMemo(
-    () => createFactoryTableStore({ listingType: 'dataRows' }),
-    [],
   );
 
   const { pastColumnsActions, getSortBy, getFilters } = useColumnsStore(

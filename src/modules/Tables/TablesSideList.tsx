@@ -6,8 +6,8 @@ import {
   createFactoryTableStore,
   useConfigStore,
 } from '>/services/stores';
-import { ScreenLoader, DialogContent, SidePagination } from '>/modules';
 import { routes } from '>/config';
+import { ScreenLoader, SidePagination } from '>/modules';
 import { PagingContext } from '>/types';
 
 export const TablesSideList = () => {
@@ -40,6 +40,7 @@ export const TablesSideList = () => {
         limit: paging.limit,
         offset: paging.offset,
       },
+      database: dbSelected ?? '',
     },
     ({ api, state, query }) => ({
       tables: api.getTablesNames(),

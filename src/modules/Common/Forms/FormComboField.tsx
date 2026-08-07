@@ -15,7 +15,7 @@ import {
 
 type ComboValue = string | string[];
 type ComboCommonFields = {
-  $options?: Option[];
+  $options?: readonly Option[];
   $groups?: OptionGroup[];
   $editable?: boolean;
   $multiple?: boolean;

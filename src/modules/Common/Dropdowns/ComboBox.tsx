@@ -25,7 +25,7 @@ type ComboBoxProps = {
   $status?: StatusType;
   onChange: (value: string | string[]) => void;
   onListScroll?: (info: ListScrollInfo) => void;
-  $options?: Option[];
+  $options?: readonly Option[];
   $groups?: OptionGroup[];
   // $open?: boolean;
   // $onOpenChange?: (open: boolean) => void;
@@ -135,7 +135,7 @@ export const ComboBox = (props: ComboBoxProps) => {
     whileElementsMounted: autoUpdate,
   });
 
-  const getFlatList = (flatList: Option[]) => {
+  const getFlatList = (flatList: readonly Option[]) => {
     return flatList.map((o, idx) => {
       const bg = idx % 2 ? 'odd' : 'even';
       const isSelected = $multiple

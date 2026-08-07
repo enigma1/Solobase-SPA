@@ -110,10 +110,13 @@ export const queryKeys = {
     paging
       ? ['users', 'databases', paging.offset, paging.limit]
       : ['users', 'databases'],
-  tables: (db: string | null, paging?: Partial<PagingParams>) =>
-    paging
-      ? ['users', 'databases', db, 'tables', paging.offset, paging.limit]
-      : ['users', 'databases', db, 'tables'],
+  tables: (db: string | null, request: BasicDataRequest) => [
+    'users',
+    'databases',
+    db,
+    'tables',
+    request,
+  ],
   tableDetails: (db: string | null, table: string | null) =>
     ['users', 'databases', db, 'tables', table, 'table-details'] as const,
   tableColumnsInfo: (db: string | null, table: string | null) =>

@@ -12,3 +12,4 @@ export * from './dialog';
 export * from './dialogHelpers';
 export * from './validators';
 export * from './tables';
+export * from './builders';

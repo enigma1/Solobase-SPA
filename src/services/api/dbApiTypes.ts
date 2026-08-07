@@ -86,7 +86,7 @@ export type SortByRequest = {
 export type PagingRequest = {
   paging?: {
     offset: number;
-    limit: number;
+    limit?: number;
   };
 };
 
@@ -114,7 +114,7 @@ export type FetchDatabasesRequest = BasicDataRequest;
 export type FetchDatabasesResponse = BasicDataResponse;
 
 export type FetchTablesRequest = BasicDataRequest & {
-  database?: string;
+  database: string;
 };
 export type FetchTablesResponse = BasicDataResponse;
 

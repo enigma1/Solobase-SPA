@@ -111,7 +111,9 @@ export const useSelectDatabaseMutation = createMutationHook<
     cache: async (qc, data, vars) => {
       accountStoreActions.setActiveDatabase(data.database ?? null);
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database ?? null, { offset: 0 }),
+        queryKey: queryKeys.tables(data.database ?? null, {
+          paging: { offset: 0 },
+        }),
       });
     },
   },
@@ -164,7 +166,7 @@ export const useDeleteTablesMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database),
+        queryKey: queryKeys.tables(data.database, { paging: { offset: 0 } }),
       });
     },
   },
@@ -184,7 +186,7 @@ export const useCreateTableMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database),
+        queryKey: queryKeys.tables(data.database, { paging: { offset: 0 } }),
       });
     },
   },
