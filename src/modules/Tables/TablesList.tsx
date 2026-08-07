@@ -192,8 +192,9 @@ export const TablesList = ({
     const tableName = fields[databaseFields.table];
     if (typeof tableName !== 'string') return;
 
-    const hasChanged = await accountStoreActions.setActiveTable(tableName);
-    if (!hasChanged) return;
+    const allowed = await accountStoreActions.triggerGuard();
+    if (!allowed) return;
+    accountStoreActions.setActiveTable(tableName);
 
     if (location.pathname !== routes.front.listData) {
       navigate(routes.front.listData);

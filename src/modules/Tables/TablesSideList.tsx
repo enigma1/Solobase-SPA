@@ -26,13 +26,13 @@ export const TablesSideList = () => {
     paging: state.paging,
   }));
 
-  const { activeTable, setActiveTable, dbSelected } = useAccountStore(
-    ({ state, api }) => ({
+  const { activeTable, setActiveTable, triggerGuard, dbSelected } =
+    useAccountStore(({ state, api }) => ({
       dbSelected: state.dbSelected,
       activeTable: state.activeTable,
       setActiveTable: api.setActiveTable,
-    }),
-  );
+      triggerGuard: api.triggerGuard,
+    }));
 
   const { tables, responsePaging, isFetching, isSuccess } = useTables(
     {
@@ -81,8 +81,9 @@ export const TablesSideList = () => {
       return;
     }
 
-    const hasChanged = await setActiveTable(name);
-    if (!hasChanged) return;
+    const allowed = await triggerGuard();
+    if (!allowed) return;
+    setActiveTable(name);
 
     if (location.pathname !== routes.front.listData) {
       navigate(routes.front.listData);

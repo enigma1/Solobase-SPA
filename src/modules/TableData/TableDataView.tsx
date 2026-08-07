@@ -7,7 +7,6 @@ import {
   createFactoryTableStore,
   useColumnsStore,
 } from '>/services/stores';
-import { useUnsavedChangesBlocker } from '>/services/hooks';
 import { openUnsavedChangesConfirmation } from '>/services/utils';
 import { routes } from '>/config';
 import {
@@ -71,11 +70,6 @@ export const TableDataView = () => {
       return await openUnsavedChangesConfirmation();
     });
   }, [hasEdits]);
-
-  useUnsavedChangesBlocker({
-    hasEdits,
-    clearEdits,
-  });
 
   const { cSortBy, cFilters, request } = useMemo(() => {
     const cSortBy = getSortBy(colsInfo);
@@ -149,7 +143,6 @@ export const TableDataView = () => {
   }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
 
   const isBusy = isFetching;
-
   if (!dbSelected || !activeTable) {
     return <Navigate to={routes.front.home} replace />;
   }

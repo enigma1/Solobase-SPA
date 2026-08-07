@@ -18,9 +18,7 @@ import {
   useAccountStore,
   useConfigStore,
   dialogStoreActions,
-  queriesStoreActions,
 } from '>/services/stores';
-import { useTables } from '>/services/queryHooks';
 import { SidebarOptions } from '>/types';
 
 export const Sidebar = () => {
@@ -35,10 +33,13 @@ export const Sidebar = () => {
     pageSizes: state.pageSizes,
   }));
 
-  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
-    activeTable: state.activeTable,
-    dbSelected: state.dbSelected,
-  }));
+  const { dbSelected, activeTable, triggerGuard } = useAccountStore(
+    ({ state, api }) => ({
+      activeTable: state.activeTable,
+      dbSelected: state.dbSelected,
+      triggerGuard: api.triggerGuard,
+    }),
+  );
 
   type SidebarItem = {
     id: SidebarOptions;
@@ -116,8 +117,11 @@ export const Sidebar = () => {
     (section) => sidebarVisibility[section.id],
   );
 
-  const toggleSection = (section: SidebarItem) => {
+  const toggleSection = async (section: SidebarItem) => {
     setExpandedSection(section.id);
+    const allowed = await triggerGuard();
+    if (!allowed) return;
+
     const route = section.getRoute();
     if (route && location.pathname !== route) {
       navigate(route);

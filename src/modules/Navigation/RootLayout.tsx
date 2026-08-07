@@ -30,6 +30,8 @@ import {
 } from '>/modules/Account';
 import { useDebouncer } from '</src/services/hooks/misc';
 import { AuthNavigationLinks } from './NavigationLinks';
+import { GuardedLink } from './Guards';
+
 import Logo from '>/assets/images/solo-base-xp.svg?react';
 
 const GuestNavigationLinks = () => null;
@@ -94,7 +96,9 @@ const AuthMenu = () => {
           >
             New Database
           </a>
-          <Link to={routes.front.listDatabases}>List Databases</Link>
+          <GuardedLink to={routes.front.listDatabases}>
+            List Databases
+          </GuardedLink>
           <a
             href='#'
             onClick={() =>
@@ -105,7 +109,9 @@ const AuthMenu = () => {
           >
             Import / Run Script
           </a>
-          <Link to={routes.front.importView}>Last SQL Processed</Link>
+          <GuardedLink to={routes.front.importView}>
+            Last SQL Processed
+          </GuardedLink>
         </DropdownMenu>
         <div className='menu-separator'>|</div>
         <DropdownMenu
@@ -123,7 +129,7 @@ const AuthMenu = () => {
           >
             New Table
           </a>
-          <Link to={routes.front.listTables}>Show Tables</Link>
+          <GuardedLink to={routes.front.listTables}>Show Tables</GuardedLink>
         </DropdownMenu>
         <div className='menu-separator'>|</div>
         <DropdownMenu label='Queries'>
@@ -137,7 +143,7 @@ const AuthMenu = () => {
           >
             New Query
           </a>
-          <Link to={routes.front.listQueries}>List Queries</Link>
+          <GuardedLink to={routes.front.listQueries}>List Queries</GuardedLink>
           <a
             href='#'
             onClick={() => {
@@ -155,7 +161,7 @@ const AuthMenu = () => {
             <a href='#' onClick={handleCreateUser}>
               Create User
             </a>
-            <Link to={routes.front.usersView}>List Users</Link>
+            <GuardedLink to={routes.front.usersView}>List Users</GuardedLink>
           </DropdownMenu>
         </>
       </div>
@@ -234,9 +240,9 @@ export const RootLayout = () => {
             {headerVisibility && (
               <header className='app-header'>
                 <div className='app-logo'>
-                  <Link to={routes.front.home} className='font-semibold'>
+                  <GuardedLink to={routes.front.home} className='font-semibold'>
                     <Logo className='text-logo' />
-                  </Link>
+                  </GuardedLink>
                 </div>
                 <nav className='w-full flex items-center gap-4'>
                   <AuthNavigationLinks />

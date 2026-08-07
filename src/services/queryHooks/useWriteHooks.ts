@@ -40,7 +40,7 @@ import { MutationRequestMeta, queryKeys, invalidateOptions } from './defs';
 import {
   defaultResponse,
   defaultCapabilities,
-  defaultListResponse,
+  zeroPageOffset,
 } from '>/services/utils';
 import { accountStoreActions } from '>/services/stores';
 import { createMutationHook } from './mutationBuilder';
@@ -56,7 +56,7 @@ export const useCreateUserMutation = createMutationHook<
   options: {
     cache: async (qc) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.users(),
+        queryKey: queryKeys.users(zeroPageOffset),
       });
     },
   },
@@ -78,7 +78,7 @@ export const useDeleteUsersMutation = createMutationHook<
   options: {
     cache: async (qc) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.users(),
+        queryKey: queryKeys.users(zeroPageOffset),
       });
     },
   },
@@ -96,7 +96,7 @@ export const useEditDatabaseMutation = createMutationHook<
   options: {
     cache: async (qc) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.databases(),
+        queryKey: queryKeys.databases(zeroPageOffset),
       });
     },
   },
@@ -111,9 +111,7 @@ export const useSelectDatabaseMutation = createMutationHook<
     cache: async (qc, data, vars) => {
       accountStoreActions.setActiveDatabase(data.database ?? null);
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database ?? null, {
-          paging: { offset: 0 },
-        }),
+        queryKey: queryKeys.tables(data.database ?? null, zeroPageOffset),
       });
     },
   },
@@ -127,7 +125,7 @@ export const useCreateDatabaseMutation = createMutationHook<
   options: {
     cache: async (qc) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.databases(),
+        queryKey: queryKeys.databases(zeroPageOffset),
       });
     },
   },
@@ -148,7 +146,7 @@ export const useDeleteDatabasesMutation = createMutationHook<
         accountStoreActions.setActiveDatabase(null);
       }
       await qc.invalidateQueries({
-        queryKey: queryKeys.databases(),
+        queryKey: queryKeys.databases(zeroPageOffset),
       });
     },
   },
@@ -166,7 +164,7 @@ export const useDeleteTablesMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database, { paging: { offset: 0 } }),
+        queryKey: queryKeys.tables(data.database, zeroPageOffset),
       });
     },
   },
@@ -186,7 +184,7 @@ export const useCreateTableMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.tables(data.database, { paging: { offset: 0 } }),
+        queryKey: queryKeys.tables(data.database, zeroPageOffset),
       });
     },
   },
@@ -270,7 +268,7 @@ export const useCreateDataRowsMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.rows(data.database, data.table, {}),
+        queryKey: queryKeys.rows(data.database, data.table, zeroPageOffset),
       });
     },
   },
@@ -287,7 +285,7 @@ export const useDeleteRowsMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.rows(data.database, data.table, {}),
+        queryKey: queryKeys.rows(data.database, data.table, zeroPageOffset),
       });
     },
   },
@@ -304,7 +302,7 @@ export const useUpdateRowsMutation = createMutationHook<
   options: {
     cache: async (qc, data) => {
       await qc.invalidateQueries({
-        queryKey: queryKeys.rows(data.database, data.table, {}),
+        queryKey: queryKeys.rows(data.database, data.table, zeroPageOffset),
       });
     },
   },
@@ -323,7 +321,7 @@ export const useSavePreferencesMutation = createMutationHook<
         queryKey: queryKeys.preferences(),
       });
       await qc.invalidateQueries({
-        queryKey: queryKeys.databases(),
+        queryKey: queryKeys.databases(zeroPageOffset),
       });
     },
   },

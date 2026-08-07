@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useQueriesStore } from '>/services/stores';
+import { useQueriesStore, accountStoreActions } from '>/services/stores';
 import { routes } from '>/config';
 
 export const QueriesSideList = () => {
@@ -15,6 +15,9 @@ export const QueriesSideList = () => {
     }));
 
   const handleQueryChange = async (title: string) => {
+    const allowed = await accountStoreActions.triggerGuard();
+    if (!allowed) return;
+
     selectQuery(title);
     if (location.pathname !== routes.front.queryView) {
       navigate(routes.front.queryView);

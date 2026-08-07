@@ -26,7 +26,7 @@ export type AccountStoreActions = {
   getActiveDatabase: () => string | null;
   setActiveDatabase: (db: string | null) => void;
   getActiveTable: () => string | null;
-  setActiveTable: (table: string | null) => Promise<boolean>;
+  setActiveTable: (table: string | null) => void;
   getAuthenticated: () => boolean;
   setAuthenticated: (value: boolean) => void;
   getAppStatus: () => boolean;
@@ -34,6 +34,7 @@ export type AccountStoreActions = {
   setCapabilities: (capabilities: string[]) => void;
   getUsername: () => string;
   setUsername: (username: string) => void;
+  triggerGuard: () => Promise<boolean>;
   registerActiveTableGuard: (guard: ActiveTableGuard) => () => void;
 };
 
@@ -82,22 +83,10 @@ export const accountStoreActions: AccountStoreActions = {
     setAuto({ dbSelected: database, activeTable: null });
   },
   getActiveTable: () => get().activeTable,
-  setActiveTable: async (table) => {
-    const guard = get().activeTableGuard;
-
-    if (guard) {
-      const allowed = await guard();
-
-      if (!allowed) {
-        return false;
-      }
-    }
-
+  setActiveTable: (table) => {
     setAuto({
       activeTable: table,
     });
-
-    return true;
   },
   setCapabilities: (capabilities: string[]) => {
     setAuto({ capabilities });
@@ -107,6 +96,18 @@ export const accountStoreActions: AccountStoreActions = {
   setAuthenticated: (value) => setAuto({ isAuthenticated: value }),
   getAppStatus: () => get().online,
   setAppStatus: (value) => setAuto({ online: value }),
+  triggerGuard: async () => {
+    const guard = get().activeTableGuard;
+
+    if (guard) {
+      const allowed = await guard();
+
+      if (!allowed) {
+        return false;
+      }
+    }
+    return true;
+  },
   registerActiveTableGuard: (guard) => {
     setAuto({
       activeTableGuard: guard,

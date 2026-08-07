@@ -9,6 +9,10 @@ import type {
 } from '>/services/api';
 import type { BasicRowsShape, PagingParams } from '>/types';
 
+export const zeroPageOffset = {
+  paging: { offset: 0 },
+};
+
 export const defaultPageRequest: PagingRequest = {
   paging: {
     limit: pageSizeValues[0],

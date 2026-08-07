@@ -1,19 +1,14 @@
 import { useMemo, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useDatabases, useSelectDatabaseWrap } from '>/services/queryHooks';
 import {
   useConfigStore,
   useAccountStore,
   createFactoryTableStore,
 } from '>/services/stores';
-import { routes } from '>/config';
 import { SidePagination, ScreenLoader } from '>/modules';
 import { PagingContext } from '>/types';
 
 export const DatabasesSideList = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   const store = useMemo(
     () => createFactoryTableStore({ listingType: 'dbRows' }),
     [],
@@ -26,8 +21,9 @@ export const DatabasesSideList = () => {
     paging: state.paging,
   }));
 
-  const { dbSelected } = useAccountStore(({ state }) => ({
+  const { dbSelected, triggerGuard } = useAccountStore(({ state, api }) => ({
     dbSelected: state.dbSelected,
+    triggerGuard: api.triggerGuard,
   }));
 
   const { dbList, responsePaging, isError, isFetching, isSuccess } =
@@ -65,10 +61,13 @@ export const DatabasesSideList = () => {
     });
   }, [pageSizes.dbRows]);
 
-  const handleChange = (dbName: string) => {
+  const handleChange = async (dbName: string) => {
     if (!dbName) {
       return;
     }
+    const allowed = await triggerGuard();
+    if (!allowed) return;
+
     mutate({ database: dbName });
   };
 
