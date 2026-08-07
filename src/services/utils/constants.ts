@@ -31,3 +31,8 @@ export const filterDatabaseActionOptions: ActionOptions[] = [
   { option: 'Strict Search', action: 'where' },
   { option: 'Loose Search', action: 'like' },
 ];
+
+export const filterUserActionOptions: ActionOptions[] = [
+  { option: 'Strict Search', action: 'where' },
+  { option: 'Loose Search', action: 'like' },
+];

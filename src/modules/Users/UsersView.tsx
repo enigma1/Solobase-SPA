@@ -1,41 +1,31 @@
-import { useEffect, useMemo } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useEffect, useRef, useMemo } from 'react';
+import { useTableColumnsInfoHook, useUsers } from '>/services/queryHooks';
 import {
   useAccountStore,
-  dialogStoreActions,
-  createFactoryTableStore,
   useColumnsStore,
+  createFactoryTableStore,
+  dialogStoreActions,
 } from '>/services/stores';
-import { useTables, useTableColumnsInfoHook } from '>/services/queryHooks';
+import { getColumnsFromRow, userBasics, userFields } from '>/services/utils';
 import {
-  databaseTablesBasics,
-  getColumnsFromRow,
-  databaseFields,
-} from '>/services/utils';
-import { routes } from '>/config';
-import {
-  FiltersAndSortsNotice,
-  EmptyListing,
   ScreenLoader,
   dialogFactories,
+  EmptyListing,
+  FiltersAndSortsNotice,
 } from '>/modules';
-import type { ViewRow, SqlRow } from '>/types';
-import { TablesList } from './TablesList';
+import { ViewRow, SqlRow } from '>/types';
+import { UsersList } from './UsersList';
 
-export const TablesMainView = () => {
-  const navigate = useNavigate();
+export const UsersView = () => {
   const tableStore = useMemo(
-    () => createFactoryTableStore({ listingType: 'tableRows' }),
+    () => createFactoryTableStore({ listingType: 'userRows' }),
     [],
   );
 
-  const { dbSelected, activeTable } = useAccountStore(({ state }) => ({
-    activeTable: state.activeTable,
-    dbSelected: state.dbSelected,
-  }));
+  const username = useAccountStore(({ state }) => state.username);
 
   const { cols: colsInfo, isSuccess: isSuccessInfo } = useTableColumnsInfoHook(
-    databaseTablesBasics,
+    userBasics,
     ({ state, query }) => ({
       cols: state.cols,
       isSuccess: query.isSuccess,
@@ -62,8 +52,6 @@ export const TablesMainView = () => {
     const cFilters = getFilters(colsInfo);
 
     const request = {
-      database: dbSelected ?? '',
-      table: activeTable ?? '',
       paging: {
         limit: cPaging.limit,
         offset: cPaging.offset,
@@ -77,41 +65,23 @@ export const TablesMainView = () => {
       cFilters,
       request,
     };
-  }, [
-    dbSelected,
-    activeTable,
-    cPaging.limit,
-    cPaging.offset,
-    colsInfo,
-    pastColumnsActions,
-  ]);
+  }, [cPaging.limit, cPaging.offset, colsInfo, pastColumnsActions]);
 
-  const {
-    rows,
-    cols,
-    columnsOrder,
-    responsePaging,
-    isSuccess,
-    isError,
-    isFetching,
-  } = useTables(
-    request,
-    ({ state, query }) => {
-      return {
+  const { rows, cols, columnsOrder, responsePaging, isSuccess, isFetching } =
+    useUsers(
+      request,
+      ({ state, query }) => ({
+        isSuccess: query.isSuccess,
+        isFetching: query.isFetching,
         rows: state.rows,
         cols: state.cols,
         columnsOrder: state.columnsOrder,
         responsePaging: state.paging,
-        isSuccess: query.isSuccess,
-        isError: query.isError,
-        isFetching: query.isFetching,
-        isFetched: query.isFetched,
-      };
-    },
-    {
-      enabled: isSuccessInfo,
-    },
-  );
+      }),
+      {
+        enabled: isSuccessInfo,
+      },
+    );
 
   const viewRows: ViewRow<SqlRow>[] = useMemo(() => {
     return rows.map((row, idx) => ({
@@ -121,22 +91,20 @@ export const TablesMainView = () => {
   }, [rows]);
 
   const uidSelected = useMemo(() => {
-    if (!dbSelected) return undefined;
-
     for (const row of viewRows) {
       const colNames = getColumnsFromRow({
         row: row.row,
         columnsOrder,
-        fields: [databaseFields.table],
+        fields: [userFields.name],
       });
 
-      if (colNames[databaseFields.name] === activeTable) {
+      if (colNames[userFields.name] === username) {
         return row.uiKey;
       }
     }
 
     return undefined;
-  }, [dbSelected, viewRows, columnsOrder]);
+  }, [username, viewRows, columnsOrder]);
 
   useEffect(() => {
     if (!isSuccess) return;
@@ -147,22 +115,12 @@ export const TablesMainView = () => {
     });
   }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
 
-  if (!dbSelected) {
-    return <Navigate to={routes.front.home} replace />;
-  }
-
-  const isBusy = !isSuccess && isFetching;
+  const isBusy = !isSuccessInfo || (!isSuccess && isFetching);
   if (isBusy) return <ScreenLoader />;
 
   const onCreate = () => {
     dialogStoreActions.openDialog({
-      payload: dialogFactories.createTable(dbSelected),
-    });
-  };
-
-  const onBack = () => {
-    navigate(routes.front.listDatabases, {
-      replace: true,
+      payload: dialogFactories.createUser(),
     });
   };
 
@@ -183,25 +141,21 @@ export const TablesMainView = () => {
       notice = (
         <div className='wrapper'>
           <button type='button' className='btn' onClick={onCreate}>
-            Create New Table
+            Create New User
           </button>
         </div>
       );
     }
     return (
-      <EmptyListing
-        onCreate={onCreate}
-        onBack={onBack}
-        note={`${dbSelected ? 'No Tables in database [' + dbSelected + ']' : 'No database selected'}`}
-      >
+      <EmptyListing onCreate={onCreate} note='There are no users to list'>
         {notice}
       </EmptyListing>
     );
   }
 
   return (
-    <TablesList
-      dbSelected={dbSelected}
+    <UsersList
+      username={username}
       rows={viewRows}
       cols={cols}
       columnsOrder={columnsOrder}

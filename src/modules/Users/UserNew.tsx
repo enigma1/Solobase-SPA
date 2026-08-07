@@ -32,8 +32,8 @@ export const UserNew = ({ wizardHandlers }: UserNewProps) => {
           },
         });
       }
-      if (location.pathname !== routes.front.listUsers) {
-        navigate(routes.front.listUsers);
+      if (location.pathname !== routes.front.usersView) {
+        navigate(routes.front.usersView);
         return;
       }
     },

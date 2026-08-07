@@ -152,14 +152,15 @@ export const DatabasesMainView = () => {
           clearFilters={hasFilters}
         />
       );
+    } else {
+      notice = (
+        <div className='wrapper'>
+          <button type='button' className='btn' onClick={onCreate}>
+            Create New Database
+          </button>
+        </div>
+      );
     }
-    notice = (
-      <div className='wrapper'>
-        <button type='button' className='btn' onClick={onCreate}>
-          New Database
-        </button>
-      </div>
-    );
     return (
       <EmptyListing
         onCreate={onCreate}

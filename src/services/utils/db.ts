@@ -13,6 +13,16 @@ import {
   DataCell,
 } from '>/types';
 
+export const userBasics = {
+  database: 'mysql',
+  table: 'user',
+} as const;
+
+export const userFields = {
+  name: 'User',
+  host: 'Host',
+} as const;
+
 export const databaseBasics = {
   database: 'information_schema',
   table: 'SCHEMATA',

@@ -104,8 +104,7 @@ export const queryKeys = {
   query: (db: string | null, id: string | null) => ['query', db, id],
 
   // Hierarchical Invalidations
-  users: (paging?: Partial<PagingParams>) =>
-    paging ? ['users', , paging.offset, paging.limit] : ['users'],
+  users: (request: BasicDataRequest) => ['users', request],
   databases: (request: BasicDataRequest) => ['users', 'databases', request],
   tables: (db: string | null, request: BasicDataRequest) => [
     'users',

@@ -10,7 +10,7 @@ import {
   GuestGuard,
   HomeRedirect,
   NetworkDown,
-  UsersList,
+  UsersView,
   ImportView,
 } from '>/modules';
 import { routes } from '>/config';
@@ -68,8 +68,8 @@ export const browserRouter = createBrowserRouter([
             element: <QueryView />,
           },
           {
-            path: routes.front.listUsers,
-            element: <UsersList />,
+            path: routes.front.usersView,
+            element: <UsersView />,
           },
         ],
       },

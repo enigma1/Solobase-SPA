@@ -16,9 +16,9 @@ type UnsavedChangesBlockerProps = {
 export const useUnsavedChangesBlocker = ({
   hasEdits,
   clearEdits,
-  caption = 'Unsaved Changes',
-  note = 'Existing Edits',
-  message = 'You have unsaved changes. Leave this page?',
+  caption = 'Switching Views',
+  note = 'Existing Edits will be lost',
+  message = 'You have unsaved changes. Leave this view?',
 }: UnsavedChangesBlockerProps) => {
   const blocker = useBlocker(hasEdits);
 

@@ -38,8 +38,8 @@ export const openUnsavedChangesConfirmation = () =>
     dialogStoreActions.openDialog({
       payload: dialogFactories.confirmation({
         caption: 'Unsaved Changes',
-        note: 'Data Row Edits',
-        message: 'You have unsaved changes. Leave this page?',
+        note: 'Edits in data-rows will be lost',
+        message: 'You have unsaved changes. Switch Tables?',
         onConfirm: () => {
           dialogStoreActions.closeDialog();
           resolve(true);

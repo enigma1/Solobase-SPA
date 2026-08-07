@@ -304,8 +304,9 @@ export const useTableColumnsInfoHook = <TSelected = TableColumnsInfoHookProps>(
 
 type UsersHookProps = DataQueryHookProps<FetchUsersResponse>;
 export const useUsers = <TSelected = UsersHookProps>(
-  request?: FetchUsersRequest,
+  request: BasicDataRequest,
   selector?: (args: UsersHookProps) => TSelected,
+  options?: DataQueryHookOptions,
 ) => {
   const initialData = {
     ...defaultResponse,
@@ -313,15 +314,16 @@ export const useUsers = <TSelected = UsersHookProps>(
   } satisfies BasicRowsShape;
 
   const isAuthenticated = useAccountStore(({ state }) => state.isAuthenticated);
+  const enabled = isAuthenticated && (options?.enabled ?? true);
 
   const q = useQuery<FetchDatabasesResponse, Error>({
-    queryKey: queryKeys.users(request?.paging),
+    queryKey: queryKeys.users(request),
     queryFn: async () => {
       const data = await dbApi.fetchUsers({ ...request });
       return data;
     },
     staleTime: STALE_TIME,
-    enabled: isAuthenticated,
+    enabled,
     retry: 1,
     refetchOnWindowFocus: false,
   });

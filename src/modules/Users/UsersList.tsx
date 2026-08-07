@@ -1,10 +1,11 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { useDeleteUsersMutation, useUsers } from '>/services/queryHooks';
+import { useDeleteUsersMutation } from '>/services/queryHooks';
 import {
+  useColumnsStore,
   useConfigStore,
+  useDialogStore,
   messageStoreActions,
-  createFactoryTableStore,
-  dialogStoreActions,
+  FactoryTableStore,
 } from '>/services/stores';
 import {
   getColumnsFromRow,
@@ -12,6 +13,8 @@ import {
   getOnlyColumnsFromResult,
   dialogActions,
   makeColumnsActive,
+  buildColumnActions,
+  filterUserActionOptions,
 } from '>/services/utils';
 import {
   ScreenLoader,
@@ -19,6 +22,8 @@ import {
   SqlTableContainer,
   PageTableShell,
   dialogFactories,
+  DialogContent,
+  EditDataCellRaw,
 } from '>/modules';
 import {
   ViewRow,
@@ -26,75 +31,90 @@ import {
   SqlRow,
   WizardHandlers,
   PagingContext,
+  ColumnActions,
+  ActionColumnProps,
 } from '>/types';
 import { UsersDeletePreview } from './UsersPreviews';
 import { UserEdit } from './UserEdit';
 
-export const UsersList = () => {
+type UsersListProps = {
+  username: string;
+  rows: ViewRow<SqlRow>[];
+  cols: SqlColumnsShape;
+  columnsOrder: string[];
+  store: FactoryTableStore;
+  uidSelected?: string;
+};
+
+export const UsersList = ({
+  username,
+  rows,
+  cols,
+  columnsOrder,
+  store,
+  uidSelected,
+}: UsersListProps) => {
   const resizeLineRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
-  const store = useMemo(
-    () => createFactoryTableStore({ listingType: 'userRows' }),
-    [],
-  );
-
-  const { paging } = store.useFactoryTableStore(({ state }) => ({
-    paging: state.paging,
-  }));
-
-  const { hiddenColumns, savePreferences, getPageSizes } = useConfigStore(
-    ({ state, api }) => ({
-      hiddenColumns: state.hiddenColumns,
-      savePreferences: api.savePreferences,
-      getPageSizes: api.getPageSizes,
-    }),
-  );
-
-  const {
-    rows: tRows,
-    cols,
-    columnsOrder,
-    responsePaging,
-    isSuccess,
-    isFetching,
-  } = useUsers(
-    {
-      paging: {
-        limit: paging.limit,
-        offset: paging.offset,
-      },
-    },
-    ({ state, query }) => ({
-      isSuccess: query.isSuccess,
-      isFetching: query.isFetching,
-      rows: state.rows,
-      cols: state.cols,
-      columnsOrder: state.columnsOrder,
-      responsePaging: state.paging,
-    }),
-  );
-
-  const rows: ViewRow<SqlRow>[] = useMemo(() => {
-    return tRows.map((row, idx) => ({
-      row,
-      uiKey: idx.toString(),
-    }));
-  }, [tRows]);
 
   const rowMap = useMemo(
     () => new Map(rows.map((r) => [r.uiKey, r.row])),
     [rows],
   );
 
-  useEffect(() => {
-    if (!isSuccess) return;
+  const {
+    pastColumnsActions,
+    hiddenColumns,
+    getSortBy,
+    getFilters,
+    changeSortBy,
+    changeFilter,
+  } = useColumnsStore(({ state, api }) => ({
+    pastColumnsActions: state.pastColumnsActions,
+    hiddenColumns: state.hiddenColumns,
+    getSortBy: api.getSortBy,
+    changeSortBy: api.changeSortBy,
+    changeFilter: api.changeFilter,
+    getFilters: api.getFilters,
+  }));
 
-    store.api.setPaging({
-      hasNext: responsePaging?.hasNext ?? false,
-      hasPrevious: responsePaging?.hasPrevious ?? false,
-    });
-  }, [isSuccess, responsePaging?.hasNext, responsePaging?.hasPrevious]);
+  const { filters, sortBy } = useMemo(
+    () => ({
+      filters: getFilters(cols),
+      sortBy: getSortBy(cols),
+    }),
+    [cols, hiddenColumns, pastColumnsActions],
+  );
+
+  const { savePreferences, getPageSizes } = useConfigStore(({ api }) => ({
+    savePreferences: api.savePreferences,
+    getPageSizes: api.getPageSizes,
+  }));
+
+  const { paging, editedRow, markEditedRow } = store.useFactoryTableStore(
+    ({ state, api }) => ({
+      paging: state.paging,
+      editedRow: state.editedRow,
+      markEditedRow: api.markEditedRow,
+    }),
+  );
+
+  const columnsActions = useMemo<Record<string, ColumnActions>>(
+    () =>
+      buildColumnActions({
+        columnsOrder,
+        cols,
+        sortBy,
+        filters,
+      }),
+    [columnsOrder, cols, sortBy, filters],
+  );
+
+  const { openDialog, closeDialog } = useDialogStore(({ api }) => ({
+    openDialog: api.openDialog,
+    closeDialog: api.closeDialog,
+  }));
 
   const deleteUsersCallbacks = {
     onSuccess: (data: any) => {
@@ -129,8 +149,12 @@ export const UsersList = () => {
     deleteUsersCallbacks,
   );
 
+  // ----------------
+  // No-Hooks Section
+  // ----------------
+
   const handleCreateUser = () => {
-    dialogStoreActions.openDialog({
+    openDialog({
       payload: dialogFactories.createUser(),
     });
   };
@@ -161,7 +185,7 @@ export const UsersList = () => {
       fields,
     });
 
-    dialogStoreActions.openDialog({
+    openDialog({
       payload: {
         caption: 'Removal of Databases',
         variant: 'error',
@@ -173,7 +197,7 @@ export const UsersList = () => {
         ),
         actions: dialogActions.confirmCancel({
           onConfirm: () => {
-            dialogStoreActions.closeDialog();
+            closeDialog();
             mutate({ columnsOrder, rows: hostsUsers });
           },
         }),
@@ -191,7 +215,7 @@ export const UsersList = () => {
     });
     const handlers: WizardHandlers = {};
     const labels = [undefined, undefined, 'Update'];
-    dialogStoreActions.openDialog({
+    openDialog({
       payload: {
         initialSize: 'lg',
         caption: 'Database Forms',
@@ -213,7 +237,7 @@ export const UsersList = () => {
             },
             onFinish: () => {
               handlers.finish?.();
-              dialogStoreActions.closeDialog();
+              closeDialog();
             },
           })
           .map((control, idx) => ({
@@ -222,6 +246,56 @@ export const UsersList = () => {
           })),
       },
     });
+  };
+
+  const handleColumnAction = (action: ActionColumnProps) => {
+    const { colName, actions } = action;
+    if (actions.sort) {
+      changeSortBy({
+        cols,
+        colName,
+        direction: actions.sort === 'both' ? undefined : actions.sort,
+      });
+    }
+
+    if (!actions.filter) return;
+    if (actions.filter.value === undefined) {
+      changeFilter({
+        cols,
+        colName,
+        filter: { value: actions.filter.value, mode: actions.filter.mode },
+      });
+    } else {
+      const valueRef = { current: actions.filter.value };
+      const modeRef = { current: actions.filter.mode };
+      openDialog({
+        payload: {
+          caption: `SQL Edits`,
+          variant: 'warn',
+          component: (
+            <DialogContent note={`${colName} @${cols[colName].type}`}>
+              <EditDataCellRaw
+                type={cols[colName].type}
+                value={valueRef.current!}
+                onChange={(v) => {
+                  valueRef.current = v;
+                }}
+              />
+            </DialogContent>
+          ),
+          actions: dialogActions.enabledConfirmCancel({
+            onConfirm: () => {
+              closeDialog();
+              changeFilter({
+                cols,
+                colName,
+                filter: { value: valueRef.current, mode: modeRef.current },
+              });
+            },
+          }),
+        },
+      });
+    }
   };
 
   const shellHandlers = {
@@ -266,12 +340,11 @@ export const UsersList = () => {
     };
   };
 
-  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
-  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
-
-  const isBusy = isPending || isFetching;
+  const isBusy = isPending;
   if (isBusy) return <ScreenLoader />;
 
+  const activeCols = columnsOrder.filter((c) => !hiddenColumns[c]);
+  const hasHiddenColumns = columnsOrder.some((col) => hiddenColumns[col]);
   const pagingContext = getPagingContext();
   const start = paging.offset + 1;
   const end = paging.offset + rows.length;
@@ -280,7 +353,7 @@ export const UsersList = () => {
     <>
       <PageTableShell
         store={store}
-        title={`Users: ${start}-${end}`}
+        title={`Users List: ${start}-${end} / Logged as: [${username}]`}
         tableRef={tableRef}
         actions={shellHandlers}
         paging={pagingContext}
@@ -300,6 +373,11 @@ export const UsersList = () => {
           outerRef={outerRef}
           tableRef={tableRef}
           resizeLineRef={resizeLineRef}
+          filters={filters}
+          actionOptions={filterUserActionOptions}
+          columnActions={columnsActions}
+          onActionCol={handleColumnAction}
+          selectedRow={uidSelected}
           onEditRow={onEditRow}
         />
       </EffectiveTableWrapper>

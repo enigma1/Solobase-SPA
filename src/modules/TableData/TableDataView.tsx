@@ -70,7 +70,7 @@ export const TableDataView = () => {
 
       return await openUnsavedChangesConfirmation();
     });
-  }, []);
+  }, [hasEdits]);
 
   useUnsavedChangesBlocker({
     hasEdits,

@@ -155,7 +155,7 @@ const AuthMenu = () => {
             <a href='#' onClick={handleCreateUser}>
               Create User
             </a>
-            <Link to={routes.front.listUsers}>List Users</Link>
+            <Link to={routes.front.usersView}>List Users</Link>
           </DropdownMenu>
         </>
       </div>

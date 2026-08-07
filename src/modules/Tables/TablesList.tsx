@@ -1,11 +1,10 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDeleteTablesMutation } from '>/services/queryHooks';
 import {
   useConfigStore,
   useDialogStore,
   messageStoreActions,
-  dialogStoreActions,
   accountStoreActions,
   FactoryTableStore,
   useColumnsStore,
@@ -36,7 +35,6 @@ import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
 import type {
   SqlColumnsShape,
   SqlRow,
-  SqlObject,
   ViewRow,
   PagingContext,
   ActionColumnProps,
@@ -121,13 +119,11 @@ export const TablesList = ({
     [columnsOrder, cols, sortBy, filters],
   );
 
-  const { dialog, openDialog, closeDialog } = useDialogStore(
-    ({ api, state }) => ({
-      dialog: state.dialog,
-      openDialog: api.openDialog,
-      closeDialog: api.closeDialog,
-    }),
-  );
+  const { openDialog, closeDialog } = useDialogStore(({ api, state }) => ({
+    dialog: state.dialog,
+    openDialog: api.openDialog,
+    closeDialog: api.closeDialog,
+  }));
 
   const callbacks = {
     onSuccess: (data: DeleteTablesResponse) => {
@@ -220,7 +216,7 @@ export const TablesList = ({
         databaseFields.comment,
       ],
     });
-    dialogStoreActions.openDialog({
+    openDialog({
       payload: dialogFactories.editTable({
         database: dbSelected,
         table: fields.TABLE_NAME,
@@ -229,7 +225,7 @@ export const TablesList = ({
   };
 
   const handleCreateTable = () => {
-    dialogStoreActions.openDialog({
+    openDialog({
       payload: dialogFactories.createTable(dbSelected),
     });
   };
@@ -251,7 +247,7 @@ export const TablesList = ({
       field: databaseFields.table,
     });
 
-    dialogStoreActions.openDialog({
+    openDialog({
       payload: {
         caption: 'Removal of Tables',
         variant: 'error',
@@ -264,7 +260,7 @@ export const TablesList = ({
         ),
         actions: dialogActions.confirmCancel({
           onConfirm: () => {
-            dialogStoreActions.closeDialog();
+            closeDialog();
             mutate({
               database: dbSelected,
               tables: tableNames,
@@ -304,7 +300,7 @@ export const TablesList = ({
       const row = rowMap.get(id);
       if (row) entries.push(row);
     }
-    dialogStoreActions.openDialog({
+    openDialog({
       payload: {
         caption: 'Export Tables',
         variant: 'info',
@@ -317,7 +313,7 @@ export const TablesList = ({
         ),
         actions: dialogActions.confirmCancel({
           onConfirm: () => {
-            dialogStoreActions.closeDialog();
+            closeDialog();
             confirmSelectedDownloads(entries);
           },
         }),
@@ -345,7 +341,7 @@ export const TablesList = ({
     } else {
       const valueRef = { current: actions.filter.value };
       const modeRef = { current: actions.filter.mode };
-      dialogStoreActions.openDialog({
+      openDialog({
         payload: {
           caption: `SQL Edits`,
           variant: 'warn',
@@ -362,7 +358,7 @@ export const TablesList = ({
           ),
           actions: dialogActions.enabledConfirmCancel({
             onConfirm: () => {
-              dialogStoreActions.closeDialog();
+              closeDialog();
               changeFilter({
                 cols,
                 colName,
