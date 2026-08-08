@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dbApi } from '>/services/api';
+import { filterDatabaseActionOptions } from '>/config';
 import {
   useDeleteDatabasesMutation,
   useSelectDatabaseWrap,
@@ -21,7 +22,6 @@ import {
   makeColumnsActive,
   databaseFields,
   buildColumnActions,
-  filterDatabaseActionOptions,
 } from '>/services/utils';
 import {
   ScreenLoader,

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { extractNameFromRequired } from '>/services/utils';
-import { TableFormShape } from './tableDefs';
+import { TableFormShape } from './defs';
 
 type TableColumnsFormProps = {
   database: string;

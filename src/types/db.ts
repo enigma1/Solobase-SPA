@@ -38,6 +38,7 @@ export type SqlColumn = {
 };
 
 export type SqlRow = SqlTypes[];
+export type SqlRows = SqlRow[];
 export type SqlColumnsShape = Record<string, SqlColumn>;
 
 export type SqlTableData = {

@@ -20,7 +20,7 @@ import {
   normalizeColumnParameter,
 } from '>/services/utils';
 import { TableShape } from '>/types';
-import { TableFormShape } from './tableDefs';
+import { TableFormShape } from './defs';
 
 type TableColumnEntryProps = {
   form: UseFormReturn<TableFormShape>;

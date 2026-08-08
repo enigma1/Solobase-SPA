@@ -1,12 +1,17 @@
+import { NOT_SET } from '>/config';
 import { CheckboxField } from '>/modules';
 import { SqlRow, ViewRow } from '>/types';
 
+type MiniTableOptions = {
+  showNotSet?: boolean;
+};
 type MiniTableProps = {
   rows: ViewRow<SqlRow>[];
   columnsOrder: string[];
   extraClassName?: string;
   selectedRows?: Record<string, boolean>;
   onSelectRow?: (rId: string, selected: boolean) => void;
+  options?: MiniTableOptions;
 };
 
 export const MiniTable = ({
@@ -15,6 +20,7 @@ export const MiniTable = ({
   extraClassName,
   selectedRows,
   onSelectRow,
+  options,
 }: MiniTableProps) => {
   return (
     <table className={`table table-fixed ${extraClassName}`}>
@@ -23,7 +29,7 @@ export const MiniTable = ({
           <th className='w-8' />
           {columnsOrder.map((colName, cidx) => (
             <th key={`mini-th-${colName}-${cidx}`}>
-              <div className='truncate px-2 py-0.5'>{colName}</div>
+              <div className='truncate px-2 py-1'>{colName}</div>
             </th>
           ))}
         </tr>
@@ -71,8 +77,14 @@ export const MiniTable = ({
                   }
                   return String(value);
                 };
+                const value = getValue();
+                const cellClass =
+                  options?.showNotSet && value !== NOT_SET ? 'icon-warn' : '';
                 return (
-                  <td key={`mini-td-${idx}-${cidx}`} className='truncate'>
+                  <td
+                    key={`mini-td-${idx}-${cidx}`}
+                    className={`${cellClass} truncate`}
+                  >
                     {getValue()}
                   </td>
                 );

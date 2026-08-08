@@ -16,15 +16,10 @@ import {
   DialogContent,
   QueryErrorDetails,
 } from '>/modules';
-import {
-  MIN_QUERY_CHARS,
-  sqlStringConvert,
-  groupByModes,
-  cx,
-} from '>/services/utils';
+import { sqlStringConvert, groupByModes, cx } from '>/services/utils';
 import { dbApi } from '>/services/api';
 import type { ImportDataResponse } from '>/services/api/dbApiTypes';
-import { routes } from '>/config';
+import { MIN_QUERY_CHARS, routes } from '>/config';
 import { SqlQueryModes } from '>/contracts';
 import { CommonDialogHandlers } from '>/types';
 import { DatabaseCombo } from './DatabaseCombo';

@@ -2,7 +2,7 @@ import { useFormContext, ControllerFieldState } from 'react-hook-form';
 import { buildRulesFromColumn } from '>/services/utils';
 import { FormCellField, JsonEditor, ComboBox } from '>/modules';
 import { DataEditorType, SqlColumnsShape, AnyControlField } from '>/types';
-import { CreateDataRowsForm, DataRowForm } from './commonTypes';
+import { CreateDataRowsForm, DataRowForm } from './defs';
 
 type RenderEditorProps = {
   id?: string;

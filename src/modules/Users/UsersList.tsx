@@ -1,4 +1,5 @@
 import { useEffect, useRef, useMemo } from 'react';
+import { filterUserActionOptions } from '>/config';
 import { useDeleteUsersMutation } from '>/services/queryHooks';
 import {
   useColumnsStore,
@@ -14,7 +15,6 @@ import {
   dialogActions,
   makeColumnsActive,
   buildColumnActions,
-  filterUserActionOptions,
 } from '>/services/utils';
 import {
   ScreenLoader,

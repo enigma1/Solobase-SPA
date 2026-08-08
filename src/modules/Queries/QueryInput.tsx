@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CircleXIcon, CircleChevronRightIcon } from 'lucide-react';
 import { queriesStoreActions, accountStoreActions } from '>/services/stores';
-import { MIN_QUERY_CHARS } from '>/services/utils';
 import { InputField } from '>/modules';
-import { routes } from '>/config/routes';
+import { MIN_QUERY_CHARS, routes } from '>/config';
 
 export const QueryInput = () => {
   const [query, setQuery] = useState<string>('');

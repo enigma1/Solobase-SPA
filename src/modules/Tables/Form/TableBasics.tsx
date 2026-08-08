@@ -3,7 +3,7 @@ import { useWatch, UseFormReturn } from 'react-hook-form';
 import { SquareActivityIcon, ArchiveRestoreIcon } from 'lucide-react';
 import { FormTextField, FormComboField } from '>/modules';
 import { StorageEngineMeta } from '>/services/api';
-import { TableFormShape } from './tableDefs';
+import { TableFormShape } from './defs';
 
 type TableBasicsFormProps = {
   mode: 'create' | 'edit';

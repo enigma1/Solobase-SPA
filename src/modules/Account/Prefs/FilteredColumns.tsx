@@ -1,9 +1,9 @@
 import cloneDeep from 'lodash-es/cloneDeep';
 import { useEffect } from 'react';
+import { filterDataActionOptions, NOT_SET } from '>/config';
 import { useConfigStore, useColumnsStore } from '>/services/stores';
 import { MiniTable, CheckboxField } from '>/modules';
 import { ItemPreferenceProps, FilterColumnParams } from '>/types';
-import { filterDataActionOptions } from '>/services/utils';
 
 export const FilteredColumns = ({
   modified,
@@ -40,7 +40,7 @@ export const FilteredColumns = ({
 
   const getActionValue = (filter: FilterColumnParams | undefined) => {
     if (!filter) {
-      return 'not set';
+      return NOT_SET;
     }
 
     if (filter.mode === 'distinct' || filter.mode === 'groupBy') {
@@ -59,7 +59,7 @@ export const FilteredColumns = ({
       return filter.value;
     }
 
-    return String(filter.value ?? 'not set');
+    return String(filter.value ?? NOT_SET);
   };
   const actionRows = filteredColumnsList.map((colName) => {
     const columnFilters = filters[colName];
@@ -144,6 +144,7 @@ export const FilteredColumns = ({
           extraClassName='w-fit'
           selectedRows={selectedRows}
           onSelectRow={handleRowSelect}
+          options={{ showNotSet: true }}
         />
         <div className='focus-line px-3 py-2'>
           <CheckboxField

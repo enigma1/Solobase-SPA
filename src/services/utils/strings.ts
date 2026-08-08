@@ -1,4 +1,4 @@
-import { MAX_TEXT_STRING } from './constants';
+import { MAX_TEXT_STRING } from '>/config';
 
 export const isEmptyString = (s: unknown): s is string =>
   typeof s === 'string' && s.length === 0;

@@ -11,7 +11,7 @@ import { emptyDataRow, cx } from '>/services/utils';
 import { WizardHandlers, ButtonStatus } from '>/types';
 import { DataRowsForm } from './DataRowsForm';
 import { DataRowsReview } from './DataRowsReview';
-import { CreateDataRowsForm } from './commonTypes';
+import { CreateDataRowsForm } from './defs';
 
 type ButtonsGroupState = Partial<Record<string, ButtonStatus>>;
 type TableFormStep = 'insert' | 'review';

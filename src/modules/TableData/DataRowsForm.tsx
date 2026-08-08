@@ -6,15 +6,12 @@ import {
   SquarePenIcon,
 } from 'lucide-react';
 import { UseFormReturn, FormProvider, useFieldArray } from 'react-hook-form';
+import { MAX_INSERT_DATA_ROWS } from '>/config';
 import { historyStoreActions } from '>/services/stores';
-import {
-  MAX_INSERT_DATA_ROWS,
-  emptyDataRow,
-  transformColumnsToDefaults,
-} from '>/services/utils';
+import { emptyDataRow, transformColumnsToDefaults } from '>/services/utils';
 import { ComboField } from '>/modules';
 import { SqlColumnsShape } from '>/types';
-import { CreateDataRowsForm } from './commonTypes';
+import { CreateDataRowsForm } from './defs';
 import { DataRowEntry } from './DataRowEntry';
 
 type DataRowsFormProps = {

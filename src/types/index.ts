@@ -6,3 +6,4 @@ export * from './db';
 export * from './dialog';
 export * from './errors';
 export * from './containers';
+export * from './search';

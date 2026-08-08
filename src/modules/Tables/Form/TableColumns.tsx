@@ -5,10 +5,11 @@ import {
   ListPlusIcon,
   ArchiveRestoreIcon,
 } from 'lucide-react';
-import { emptyTableColumn, MAX_TABLE_COLUMNS } from '>/services/utils';
+import { MAX_TABLE_COLUMNS } from '>/config';
+import { emptyTableColumn } from '>/services/utils';
 import { SqlColumn } from '>/types';
 import { TableColumnEntry } from './TableColumnEntry';
-import { TableFormShape } from './tableDefs';
+import { TableFormShape } from './defs';
 
 type ColumnBasics = Pick<SqlColumn, 'field' | 'type'>;
 type TableColumnsFormProps = {

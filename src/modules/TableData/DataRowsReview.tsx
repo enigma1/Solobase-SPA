@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { PreviewTable } from '>/modules';
-import { DataRowForm, CreateDataRowsForm } from './commonTypes';
+import { CreateDataRowsForm } from './defs';
 
 type DataRowsReviewProps = {
   database: string;

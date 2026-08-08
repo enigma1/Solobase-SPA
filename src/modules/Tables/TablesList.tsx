@@ -17,7 +17,6 @@ import {
   makeColumnsActive,
   createFileSaveUrl,
   databaseFields,
-  filterTableActionOptions,
   buildColumnActions,
 } from '>/services/utils';
 import {
@@ -30,7 +29,7 @@ import {
   TablesExportPreview,
   EditDataCellRaw,
 } from '>/modules';
-import { routes } from '>/config';
+import { routes, filterTableActionOptions } from '>/config';
 import type { DeleteTablesResponse } from '>/services/api/dbApiTypes';
 import type {
   SqlColumnsShape,

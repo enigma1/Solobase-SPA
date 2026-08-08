@@ -6,14 +6,10 @@ import {
   ListPlusIcon,
   ArchiveRestoreIcon,
 } from 'lucide-react';
-import {
-  emptyTableColumnKey,
-  tableColumnKeyList,
-  MAX_COLUMNS_PER_KEY,
-  MAX_TABLE_KEYS,
-} from '>/services/utils';
+import { MAX_TABLE_KEYS } from '>/config';
+import { emptyTableColumnKey, tableColumnKeyList } from '>/services/utils';
 import { FormTextField, FormComboField } from '>/modules';
-import { TableFormShape } from './tableDefs';
+import { TableFormShape } from './defs';
 
 type TableKeysFormProps = {
   form: UseFormReturn<TableFormShape>;
@@ -27,7 +23,7 @@ export const TableKeysForm = ({
   originalValues,
 }: TableKeysFormProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const { control, reset, getValues, setValue, clearErrors } = form;
+  const { control, reset, getValues, clearErrors } = form;
 
   const keys = useWatch({
     control,
@@ -39,7 +35,7 @@ export const TableKeysForm = ({
     name: 'cols',
   });
 
-  const { fields, insert, append, remove, update } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'keys',
   });

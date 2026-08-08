@@ -16,7 +16,6 @@ import {
 import {
   dialogActions,
   makeColumnsActive,
-  filterDataActionOptions,
   buildColumnActions,
 } from '>/services/utils';
 import {
@@ -29,7 +28,7 @@ import {
   dialogFactories,
   FiltersAndSortsNotice,
 } from '>/modules';
-import { routes } from '>/config';
+import { routes, filterDataActionOptions } from '>/config';
 import {
   UpdateDataRowsRequest,
   UpdateDataRowsResponse,

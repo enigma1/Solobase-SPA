@@ -1,20 +1,44 @@
 import { makeStore } from '>/services/utils/emitter';
 import {
-  normalizeSql,
-  truncateString,
   MAX_SQL_STRING,
   MAX_COPIED_ROWS,
+  MAX_SNAPSHOTS,
+  SNAPSHOT_TIMEOUT,
+} from '>/config';
+import {
+  normalizeSql,
+  truncateString,
+  findMatchingSnapshot,
+  snapshotRow,
 } from '>/services/utils';
-import { SqlRow, CopiedRow } from '>/types';
+import {
+  SqlRow,
+  CopiedRow,
+  SqlRows,
+  SnapshotEntry,
+  SnapshotMatch,
+} from '>/types';
+
+type TrackingKeys = {
+  database: string;
+  table: string;
+};
+
+type UserTrackingAction = TrackingKeys & {
+  offset: number;
+  row: SqlRow;
+};
 
 type HistoryState = {
   lastImport: string;
-  copiedRows: Record<string, SqlRow[]>;
+  copiedRows: Record<string, SqlRows>;
+  snapshots: Record<string, SnapshotEntry[]>;
 };
 
 const initialState: HistoryState = {
   lastImport: '',
   copiedRows: {},
+  snapshots: {},
 };
 
 export type HistoryActions = {
@@ -23,8 +47,11 @@ export type HistoryActions = {
   addCopiedRow: (row: CopiedRow) => void;
   clearCopiedRows: () => void;
   getCopiedRowsList: (columnsOrder: string[]) => SqlRow[];
-  getCopiedRows: () => Record<string, SqlRow[]>;
-  setCopiedRows: (rows: Record<string, SqlRow[]>) => void;
+  getCopiedRows: () => Record<string, SqlRows>;
+  setCopiedRows: (rows: Record<string, SqlRows>) => void;
+  setUserSnapshot: (action: UserTrackingAction) => void;
+  // getUserSnapshot: (keys: TrackingKeys, idx?: number) => SnapshotEntry | null;
+  findUserSnapshot: (keys: TrackingKeys, rows: SqlRows) => SnapshotMatch | null;
 };
 
 const baseStore = makeStore<HistoryState>(() => {
@@ -72,6 +99,51 @@ export const historyStoreActions: HistoryActions = {
 
   clearCopiedRows: () => {
     setAuto({ copiedRows: {} });
+  },
+
+  setUserSnapshot: (action) => {
+    const key = `${action.database}.${action.table}`;
+    const now = Date.now();
+
+    setAuto((state) => {
+      const existing = state.snapshots[key] ?? [];
+
+      const valid = existing.filter(
+        (snapshot) => now - snapshot.createdAt < SNAPSHOT_TIMEOUT,
+      );
+
+      const previous = valid[0];
+      const row = snapshotRow(action.row);
+      if (
+        previous &&
+        previous.offset === action.offset &&
+        JSON.stringify(previous.row) === JSON.stringify(row)
+      ) {
+        return state;
+      }
+
+      const snapshot: SnapshotEntry = {
+        offset: action.offset,
+        row,
+        createdAt: now,
+      };
+
+      return {
+        snapshots: {
+          ...state.snapshots,
+          [key]: [snapshot, ...valid].slice(0, MAX_SNAPSHOTS),
+        },
+      };
+    });
+  },
+
+  findUserSnapshot: (keys, rows) => {
+    const key = `${keys.database}.${keys.table}`;
+    const snapshots = get().snapshots[key];
+    if (!snapshots?.length) {
+      return null;
+    }
+    return findMatchingSnapshot(snapshots, rows);
   },
 };
 

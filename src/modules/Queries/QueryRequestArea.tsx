@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DeleteIcon, RotateCcwIcon } from 'lucide-react';
+import { MIN_QUERY_CHARS, routes } from '>/config';
 import { queriesStoreActions, useDialogStore } from '>/services/stores';
 import { useModal } from '>/services/hooks';
-import { MIN_QUERY_CHARS, groupByModes, cx } from '>/services/utils';
+import { groupByModes, cx } from '>/services/utils';
 import {
   ComboField,
   CheckboxField,
@@ -13,7 +14,6 @@ import {
   DialogContent,
   QueryErrorDetails,
 } from '>/modules';
-import { routes } from '>/config';
 import { SqlQueryModes } from '>/contracts';
 import { QueryItem, CommonDialogHandlers } from '>/types';
 

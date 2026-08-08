@@ -46,7 +46,7 @@
   --color-error: color-mix(in oklch, var(--error) 80%, var(--color-text) 20%);
   --color-warn: color-mix(in oklch, var(--warn) 80%, var(--color-text) 20%);
   --color-success: color-mix(in oklch, var(--success) 80%, var(--color-text) 20%);
-  --color-info: color-mix(in oklch, var(--info) 80%, var(--color-text) 20%);
+  --color-info: color-mix(in oklch, var(--info) 60%, var(--color-text) 40%);
 
   --color-error-bg:
     color-mix(in oklch, var(--error), transparent 35%);

@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { UserPrefsConfigSchema } from '>/contracts';
 import { messageStoreActions } from '>/services/stores';
 import { userPrefs } from './appSettings';
